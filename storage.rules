@@ -1,0 +1,27 @@
+
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Preschool-centric storage: preschools/{preschoolId}/...
+    match /preschools/{preschoolId}/{allPaths=**} {
+      
+      // Public read access for logos, galleries etc.
+      allow read: if true;
+      
+      // Write access is only granted to the user whose UID matches the 'ownerId'
+      // field in the corresponding Firestore document for the preschool.
+      allow write: if request.auth != null
+                   && get(/databases/(default)/documents/preschools/$(preschoolId)).data.ownerId == request.auth.uid;
+    }
+
+    // Rule for logo animation service uploads.
+    // Any authenticated user can write to a folder matching their own UID.
+    match /logo-animation-requests/{userId}/{allPaths=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
+
+    

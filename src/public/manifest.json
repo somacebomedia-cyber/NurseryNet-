@@ -1,0 +1,21 @@
+{
+  "name": "NurseryNet",
+  "short_name": "NurseryNet",
+  "description": "Find your perfect preschool with NurseryNet. An all-in-one platform for parents and preschool owners.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#E6E0FF",
+  "theme_color": "#9370DB",
+  "icons": [
+    {
+      "src": "https://ik.imagekit.io/wugvdm3ddq/Icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://ik.imagekit.io/wugvdm3ddq/Icon-512x512.png?updatedAt=1763958252886",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

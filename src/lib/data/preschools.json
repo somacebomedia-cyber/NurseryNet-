@@ -1,0 +1,1802 @@
+[
+  {
+    "id": "ChIJdf6odMQEdkgR0XyWkaLD-tQ",
+    "name": "LEYF - House of Commons Nursery & Pre-School",
+    "location": "1 Parliament St, London SW1A, UK",
+    "city": "London",
+    "phone": "020 7219 1592",
+    "website": "https://www.leyf.org.uk/house-of-commons/",
+    "description": "A preschool located in London.",
+    "rating": 4.7,
+    "reviewCount": 7,
+    "coordinates": {
+      "lat": 51.5013996,
+      "lng": -0.1257022
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJd54Q2FcDdkgRiqzogJILC6U",
+    "name": "Little Angels Nursery",
+    "location": "3 Perkins Square, London SE1 9HU, UK",
+    "city": "London",
+    "phone": "020 3576 0144",
+    "website": "https://www.littleangels247.com/",
+    "description": "A preschool located in London.",
+    "rating": 5,
+    "reviewCount": 43,
+    "coordinates": {
+      "lat": 51.506395399999995,
+      "lng": -0.09376989999999999
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJiYh8VJcFdkgRilmjV64Fo8s",
+    "name": "Millies House Nursery and Pre-school, Napier House, Hide Place, Westminster, SW1P 4NJ",
+    "location": "1 Hide Pl, London SW1P 4NJ, UK",
+    "city": "London",
+    "phone": "020 7630 0740",
+    "website": "https://www.millieshouse.net/westminster",
+    "description": "A preschool located in London.",
+    "rating": 4.9,
+    "reviewCount": 27,
+    "coordinates": {
+      "lat": 51.492754999999995,
+      "lng": -0.1332659
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJj41Ng9MEdkgRmtC5YiBVwEc",
+    "name": "LEYF - Soho Nursery & Pre-School",
+    "location": "23 Brewer St, London W1F 0RN, UK",
+    "city": "London",
+    "phone": "020 7439 1578",
+    "website": "https://www.leyf.org.uk/soho/",
+    "description": "A preschool located in London.",
+    "rating": 4.3,
+    "reviewCount": 22,
+    "coordinates": {
+      "lat": 51.512018999999995,
+      "lng": -0.134288
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJmWY6OhIFdkgR0jICtnl5RwI",
+    "name": "Little Agnes Nursery",
+    "location": "1, Spring Mews, Tinworth St, London SE11 5AN, UK",
+    "city": "London",
+    "phone": "020 7820 1932",
+    "website": "https://littleagnes.co.uk/en",
+    "description": "A preschool located in London.",
+    "rating": 4.9,
+    "reviewCount": 34,
+    "coordinates": {
+      "lat": 51.4895121,
+      "lng": -0.12117140000000001
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJEWr939wEdkgRSjObhM9ZDw4",
+    "name": "Hatching Dragons Westminster | Kindergarten and Nursery School in Pimlico",
+    "location": "St James the Less Church School, Moreton St, Lillington and Longmoore Gardens, London SW1V 2QF, UK",
+    "city": "London",
+    "phone": "0330 818 0066",
+    "website": "https://www.hatching-dragons.com/westminster-pimlico-nursery-kindergarten-daycare",
+    "description": "A preschool located in London.",
+    "rating": 4.3,
+    "reviewCount": 29,
+    "coordinates": {
+      "lat": 51.490573,
+      "lng": -0.1348652
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJc3_ZW0QFdkgRAjTWlOucoUM",
+    "name": "Coin Street Nursery",
+    "location": "Floor 1, 108 Stamford St, London SE1 9NH, UK",
+    "city": "London",
+    "phone": "020 7021 1670",
+    "website": "https://coinstreet.org/nursery",
+    "description": "A preschool located in London.",
+    "rating": 5,
+    "reviewCount": 15,
+    "coordinates": {
+      "lat": 51.506189000000006,
+      "lng": -0.110634
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJT_WsCiMFdkgR4hv0V8QCgpY",
+    "name": "The Knightsbridge Kindergarten",
+    "location": "St Peter's Church, 119 Eaton Square, London SW1W 9AL, UK",
+    "city": "London",
+    "phone": "020 4638 4540",
+    "website": "http://www.knightsbridgekindergarten.co.uk/",
+    "description": "A preschool located in London.",
+    "rating": 5,
+    "reviewCount": 5,
+    "coordinates": {
+      "lat": 51.49780270000001,
+      "lng": -0.1491852
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJlQGT_OMEdkgRr1ZXl3M3RGs",
+    "name": "Young England Kindergarten",
+    "location": "St Saviours Hall, St.George's Square, Pimlico, London SW1V 2HP, UK",
+    "city": "London",
+    "phone": "020 7834 3171",
+    "website": "https://www.youngenglandkindergarten.co.uk/",
+    "description": "A preschool located in London.",
+    "rating": 5,
+    "reviewCount": 17,
+    "coordinates": {
+      "lat": 51.4883184,
+      "lng": -0.13521149999999998
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJ8QM1SDMbdkgRInbQEyI-bmc",
+    "name": "Turtles Nursery, Covent Garden",
+    "location": "47, Dudley Court, 36 Endell St, London WC2H 9RF, UK",
+    "city": "London",
+    "phone": "020 7240 8136",
+    "website": "https://www.turtlesnursery.com/",
+    "description": "A preschool located in London.",
+    "rating": 4.8,
+    "reviewCount": 23,
+    "coordinates": {
+      "lat": 51.515415999999995,
+      "lng": -0.12471549999999998
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJvXbGrrAEdkgRqgqS470xeyg",
+    "name": "Kido Waterloo Nursery & Preschool",
+    "location": "91 Cornwall Rd, London SE1 8TH, UK",
+    "city": "London",
+    "phone": "020 3131 3051",
+    "website": "https://www.kidoschools.com/uk/our-nursery-london/waterloo-st-patricks-montessori-international-nursery/",
+    "description": "A preschool located in London.",
+    "rating": 4.7,
+    "reviewCount": 15,
+    "coordinates": {
+      "lat": 51.5047941,
+      "lng": -0.11094870000000001
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJdxRwCegEdkgRxQtqLbfmdvM",
+    "name": "LEYF - Marsham Street Nursery and Pre-School",
+    "location": "121 Marsham St, London SW1P 4LX, UK",
+    "city": "London",
+    "phone": "020 7834 8679",
+    "website": "https://www.leyf.org.uk/nurseries/marsham-street/",
+    "description": "A preschool located in London.",
+    "rating": 3.7,
+    "reviewCount": 29,
+    "coordinates": {
+      "lat": 51.4930476,
+      "lng": -0.1288189
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJBZypVBgFdkgRj-kHGl5ITMU",
+    "name": "Miss Daisy's Nursery School, Belgravia",
+    "location": "28 Eccleston St, London SW1W 9PY, UK",
+    "city": "London",
+    "phone": "020 7730 5797",
+    "website": "https://www.missdaisysnursery.com/our-schools/belgravia/",
+    "description": "A preschool located in London.",
+    "rating": 5,
+    "reviewCount": 3,
+    "coordinates": {
+      "lat": 51.495045399999995,
+      "lng": -0.1485625
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJN-eLjw8bdkgR4i0fZxixZ7Y",
+    "name": "Hatching Dragons City of London | Kindergarten and Nursery School in Barbican",
+    "location": "Third and Ground Floors, Ferroners House Ironmongers Hall Shaftesbury Place Off, Aldersgate St, Barbican, London EC2Y 8AA, UK",
+    "city": "London",
+    "phone": "0330 818 0187",
+    "website": "https://www.hatching-dragons.com/city-of-london-barbican-nursery-kindergarten-daycare",
+    "description": "A preschool located in London.",
+    "rating": 4.6,
+    "reviewCount": 11,
+    "coordinates": {
+      "lat": 51.5181557,
+      "lng": -0.0962618
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJK89_9-EFdkgRhVQ5D4IeO0w",
+    "name": "Maryam's Nursery Great Guildford Street",
+    "location": "47 Great Guildford St, London SE1 0ES, UK",
+    "city": "London",
+    "phone": "020 7459 4922",
+    "website": "http://www.maryamsnursery.co.uk/",
+    "description": "A preschool located in London.",
+    "rating": 4.8,
+    "reviewCount": 24,
+    "coordinates": {
+      "lat": 51.5032626,
+      "lng": -0.0964376
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJx4Ec-MQFdkgRfzp8ctjdYJQ",
+    "name": "Everbloom Wraparound Childcare, LTD",
+    "location": "London EC1N 2SW, UK",
+    "city": "London",
+    "phone": "020 3905 5499",
+    "website": "https://everbloomwraparoundchildcare.co.uk/?utm_campaign=gmb",
+    "description": "A preschool located in London.",
+    "rating": null,
+    "reviewCount": 0,
+    "coordinates": {
+      "lat": 51.5072178,
+      "lng": -0.12758619999999998
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJnzP69dIadkgRJAdKut0b-wY",
+    "name": "Maryam's Nursery Marylebone",
+    "location": "3 Cramer St, London W1U 4EA, UK",
+    "city": "London",
+    "phone": "020 7459 4922",
+    "website": "https://maryamsnursery.co.uk/",
+    "description": "A preschool located in London.",
+    "rating": 4.5,
+    "reviewCount": 6,
+    "coordinates": {
+      "lat": 51.518823999999995,
+      "lng": -0.152249
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJ_WgsnOYEdkgRnBoQUmK3HCo",
+    "name": "LEYF - Bessborough Nursery & Pre-School",
+    "location": "1 Bessborough St, Pimlico, London SW1V 2JD, UK",
+    "city": "London",
+    "phone": "020 7641 6387",
+    "website": "https://www.leyf.org.uk/bessborough/",
+    "description": "A preschool located in London.",
+    "rating": 4.5,
+    "reviewCount": 14,
+    "coordinates": {
+      "lat": 51.48885,
+      "lng": -0.1337466
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJ8SpOmR0FdkgR3WGdnJg7fsQ",
+    "name": "LEYF - Angel Pre-School",
+    "location": "St Gabriel's School, Churchill Gardens, London SW1V 3AG, UK",
+    "city": "London",
+    "phone": "020 7828 1922",
+    "website": "https://www.leyf.org.uk/angel/",
+    "description": "A preschool located in London.",
+    "rating": 5,
+    "reviewCount": 11,
+    "coordinates": {
+      "lat": 51.486505799999996,
+      "lng": -0.1423447
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJWUhdQN0EdkgR34UEBsxmbnY",
+    "name": "Busy Bees at Westminster",
+    "location": "84a Horseferry Rd, London SW1P 2AD, UK",
+    "city": "London",
+    "phone": "020 7222 4459",
+    "website": "https://www.busybeeschildcare.co.uk/nursery/westminster?utm_source=google&utm_medium=Yext&y_source=1_MTUxNTg3NDUtNzE1LWxvY2F0aW9uLndlYnNpdGU%3D",
+    "description": "A preschool located in London.",
+    "rating": 3.4,
+    "reviewCount": 5,
+    "coordinates": {
+      "lat": 51.49498810000001,
+      "lng": -0.1306004
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJIWTalNmze0gRTsp6ht9EgIc",
+    "name": "Early Inspirations Day Nursery and Preschool Manchester",
+    "location": "Cayton Street / Stockport Road Opposite Crowcroft Park/ bordering Levenshulme &, Longsight, Manchester M12 4GJ, UK",
+    "city": "Manchester",
+    "phone": "0161 225 2529",
+    "website": "http://www.earlyinspirations.co.uk/",
+    "description": "A preschool located in Manchester.",
+    "rating": 4.9,
+    "reviewCount": 71,
+    "coordinates": {
+      "lat": 53.4527548,
+      "lng": -2.1954369
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJc2dGhdWze0gR0G0m4OYH32A",
+    "name": "Tiny Steps Nursery Manchester",
+    "location": "76 Greville St, Longsight, Manchester M13 0YG, UK",
+    "city": "Manchester",
+    "phone": "0161 248 7300",
+    "website": "https://tinystepsnursery.co.uk/",
+    "description": "A preschool located in Manchester.",
+    "rating": 4.4,
+    "reviewCount": 79,
+    "coordinates": {
+      "lat": 53.4560098,
+      "lng": -2.2061625
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJn1X-t-Wze0gRGVC7ROaN7BU",
+    "name": "Manchester Learning Zone",
+    "location": "Second Floor, Midway Business Centre, 703 Stockport Rd, Longsight, Manchester M12 4QN, UK",
+    "city": "Manchester",
+    "phone": "07448 245179",
+    "website": "https://manchesterlearningzone.com/",
+    "description": "A preschool located in Manchester.",
+    "rating": 4.9,
+    "reviewCount": 104,
+    "coordinates": {
+      "lat": 53.4491671,
+      "lng": -2.1918517
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJe5dP0LWxe0gRAfJDOhrHqeA",
+    "name": "Early Days Day Nursery",
+    "location": "61 Upper Chorlton Rd, Whalley Range, Manchester M16 7RQ, UK",
+    "city": "Manchester",
+    "phone": "0161 264 4268",
+    "website": "https://www.eddn.co.uk/?utm_source=google&amp;amp;utm_medium=wix_google_business_profile&amp;amp;utm_campaign=1034733411696156024",
+    "description": "A preschool located in Manchester.",
+    "rating": 4.9,
+    "reviewCount": 59,
+    "coordinates": {
+      "lat": 53.4572127,
+      "lng": -2.2604628
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJI9v9YVixe0gR_ZvxKlkXan8",
+    "name": "Tiny Turtles Daycare Ltd",
+    "location": "38 Kingfisher Cl, Longsight, Manchester M12 4PW, UK",
+    "city": "Manchester",
+    "phone": "0161 273 7228",
+    "website": "http://www.tinyturtlesdaycare.co.uk/",
+    "description": "A preschool located in Manchester.",
+    "rating": 4.8,
+    "reviewCount": 63,
+    "coordinates": {
+      "lat": 53.4607944,
+      "lng": -2.2059705
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJ6w6v2_Kze0gRqJ4aeLJNNGw",
+    "name": "WMB Born2Reign Day Nursery",
+    "location": "Claremont Sure Start, Claremont Rd, Moss Side, Manchester M14 7NA, UK",
+    "city": "Manchester",
+    "phone": "0161 470 0444",
+    "website": "http://www.wmbchildcare.co.uk/",
+    "description": "A preschool located in Manchester.",
+    "rating": 4.9,
+    "reviewCount": 118,
+    "coordinates": {
+      "lat": 53.452784699999995,
+      "lng": -2.2345764999999997
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJlXVxoduze0gReXXDs_mAq6s",
+    "name": "Lemon Tree Manchester Ltd.",
+    "location": "703 Stockport Rd, Longsight, Manchester M12 4QN, UK",
+    "city": "Manchester",
+    "phone": "0161 971 9657",
+    "website": "https://www.lemontreepreschool.co.uk/",
+    "description": "A preschool located in Manchester.",
+    "rating": 5,
+    "reviewCount": 26,
+    "coordinates": {
+      "lat": 53.4491506,
+      "lng": -2.1918371999999997
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJycrG3-6we0gRWQ7ttkDqgbU",
+    "name": "Precious Kids Day Nursery",
+    "location": "322 Moston Ln, Manchester M40 9WB, UK",
+    "city": "Manchester",
+    "phone": "0161 637 2660",
+    "website": "https://www.preciouskidsnursery.co.uk/",
+    "description": "A preschool located in Manchester.",
+    "rating": 4.9,
+    "reviewCount": 47,
+    "coordinates": {
+      "lat": 53.513779799999995,
+      "lng": -2.1966769
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJFUQ4x6Oxe0gRqEjnV5xGRNc",
+    "name": "Little Learning Ladder",
+    "location": "The Chip, 2 Lampwick Ln, Manchester M4 6BU, UK",
+    "city": "Manchester",
+    "phone": "0161 205 6096",
+    "website": "http://www.littlelearningladder.co.uk/",
+    "description": "A preschool located in Manchester.",
+    "rating": 3.9,
+    "reviewCount": 22,
+    "coordinates": {
+      "lat": 53.4813275,
+      "lng": -2.2209187
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJDWjtOeuxe0gRyZ_wfptzW64",
+    "name": "Paint Pots Manchester Day Nursery",
+    "location": "Ground Floor, Bracken House, Charles St, Manchester M1 7BD, UK",
+    "city": "Manchester",
+    "phone": "0161 273 3211",
+    "website": "http://www.paintpotsnurseries.co.uk/",
+    "description": "A preschool located in Manchester.",
+    "rating": 4.9,
+    "reviewCount": 19,
+    "coordinates": {
+      "lat": 53.4738433,
+      "lng": -2.2386719
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJtfvK2JWxe0gRq1pG9UfERxQ",
+    "name": "Echoes Day Nursery",
+    "location": "63 Charles St, Manchester M1 7DQ, UK",
+    "city": "Manchester",
+    "phone": "0800 307 0155",
+    "website": "https://www.daynurseries.co.uk/daynursery.cfm/searchazref/50003503ECHA",
+    "description": "A preschool located in Manchester.",
+    "rating": 4.3,
+    "reviewCount": 39,
+    "coordinates": {
+      "lat": 53.474093599999996,
+      "lng": -2.2361492
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJM_I3Nxuye0gROvQDpG8dHSQ",
+    "name": "Alexandra Park Creative Nursery School",
+    "location": "80 Demesne Rd, Manchester M16 8PH, UK",
+    "city": "Manchester",
+    "phone": "0161 226 8080",
+    "website": "https://www.storal.com/nursery-school/alexandra-park-childrens-learning-community",
+    "description": "A preschool located in Manchester.",
+    "rating": 5,
+    "reviewCount": 7,
+    "coordinates": {
+      "lat": 53.448273,
+      "lng": -2.2481776
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJ90SD4FWze0gRc0U3TJTMRfI",
+    "name": "Manchester Bees Forest School and Online Tuition.",
+    "location": "Platt Fields Market Garden Platt Fields Park, Fallowfield, Manchester M14 6LT, UK",
+    "city": "Manchester",
+    "phone": "07506 342945",
+    "website": "https://www.facebook.com/ManchesterBeesForestSchool",
+    "description": "A preschool located in Manchester.",
+    "rating": 4.9,
+    "reviewCount": 55,
+    "coordinates": {
+      "lat": 53.445525599999996,
+      "lng": -2.222353
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJd7bp3pyxe0gRA7XOfETUyGk",
+    "name": "Ardwick Day Nursery (Former Early Explorers Day Nursery)",
+    "location": "116 Hyde Rd, Manchester M12 5AR, UK",
+    "city": "Manchester",
+    "phone": "0161 222 0557",
+    "website": "https://www.ardwickdaynursery.co.uk/",
+    "description": "A preschool located in Manchester.",
+    "rating": 4.4,
+    "reviewCount": 13,
+    "coordinates": {
+      "lat": 53.468473499999995,
+      "lng": -2.214728
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJr6hpOP-xe0gR_nn7LkTNMzw",
+    "name": "Little Leaders Pre-School",
+    "location": "40 Sedgeborough Rd, Manchester M16 7EU, UK",
+    "city": "Manchester",
+    "phone": "0161 226 8562",
+    "website": "https://littleleaders.co.uk/",
+    "description": "A preschool located in Manchester.",
+    "rating": 4.6,
+    "reviewCount": 9,
+    "coordinates": {
+      "lat": 53.4562122,
+      "lng": -2.2575852
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJOYDvSKKze0gRN2oajYaZT7w",
+    "name": "Little Hamza's Nursery",
+    "location": "197 Claremont Rd, Manchester M14 4JF, UK",
+    "city": "Manchester",
+    "phone": "0161 258 8954",
+    "website": "https://littlehamzasnursery.com/",
+    "description": "A preschool located in Manchester.",
+    "rating": 4.1,
+    "reviewCount": 84,
+    "coordinates": {
+      "lat": 53.4535275,
+      "lng": -2.2393365
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJGcRAjzWwe0gR6eH8XRSAlow",
+    "name": "WMB Hillcity Day Nursery",
+    "location": "Tamerton Dr, Cheetham Hill, Manchester M8 0DH, UK",
+    "city": "Manchester",
+    "phone": "0161 705 0851",
+    "website": "http://wmbchildcare.co.uk/",
+    "description": "A preschool located in Manchester.",
+    "rating": 4.9,
+    "reviewCount": 106,
+    "coordinates": {
+      "lat": 53.5034528,
+      "lng": -2.2417368
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJ3YfpcUGxe0gR2s_G2ySmJ28",
+    "name": "Your Nursery Ltd, (National Award winning best nursery)",
+    "location": "St. Vincents School House, Greenside St, Openshaw, Manchester M11 2EX, UK",
+    "city": "Manchester",
+    "phone": "0161 220 7662",
+    "website": "https://yournurseryltd.co.uk/",
+    "description": "A preschool located in Manchester.",
+    "rating": 5,
+    "reviewCount": 66,
+    "coordinates": {
+      "lat": 53.474721599999995,
+      "lng": -2.1817233
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJQ20YWNmxe0gR0SOJElePtm8",
+    "name": "Early Learning Childcare Chapel Street",
+    "location": "212 Chapel St, Salford M3 6BY, UK",
+    "city": "Manchester",
+    "phone": "0161 831 9831",
+    "website": "https://elcdaynursery.co.uk/",
+    "description": "A preschool located in Manchester.",
+    "rating": 4.3,
+    "reviewCount": 17,
+    "coordinates": {
+      "lat": 53.483452799999995,
+      "lng": -2.2586149
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJgWacw8Wxe0gRuAM6at3haIs",
+    "name": "Tiny Steps Nursery Gorton",
+    "location": "Gorton Sure, Start Children's Centre, Glencastle Rd, Manchester M18 7NE, UK",
+    "city": "Manchester",
+    "phone": "0161 317 0174",
+    "website": "https://tinystepsnursery.co.uk/",
+    "description": "A preschool located in Manchester.",
+    "rating": 4.4,
+    "reviewCount": 26,
+    "coordinates": {
+      "lat": 53.457701099999994,
+      "lng": -2.1745673
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJIbPfEqC7cEgRTOgqekK_Plw",
+    "name": "Happy Kids Nursery Ltd",
+    "location": "280-284 Green Ln, Small Heath, Birmingham B9 5DN, UK",
+    "city": "Birmingham",
+    "phone": "0121 689 0484",
+    "website": "https://www.happykidsnursery.co.uk/",
+    "description": "A preschool located in Birmingham.",
+    "rating": 4.9,
+    "reviewCount": 39,
+    "coordinates": {
+      "lat": 52.473884399999996,
+      "lng": -1.8534499999999998
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJk_zI04e8cEgReiugawFMquQ",
+    "name": "Smart Kids Nursery City Centre",
+    "location": "Oxford St, High St, Birmingham B5 6DY, UK",
+    "city": "Birmingham",
+    "phone": "0121 448 8688",
+    "website": "https://www.smartkidsnursery.co.uk/",
+    "description": "A preschool located in Birmingham.",
+    "rating": 4.8,
+    "reviewCount": 44,
+    "coordinates": {
+      "lat": 52.476107799999994,
+      "lng": -1.8889652999999997
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJC5GGzI67cEgRzyEcpwz3SB8",
+    "name": "Greencoat Nursery",
+    "location": "Greencoat House, 259 Stratford Rd, Sparkbrook, Birmingham B11 1QS, UK",
+    "city": "Birmingham",
+    "phone": "07858 100777",
+    "website": "http://www.greencoatnursery.co.uk/",
+    "description": "A preschool located in Birmingham.",
+    "rating": 4.9,
+    "reviewCount": 91,
+    "coordinates": {
+      "lat": 52.4601099,
+      "lng": -1.8728032
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJAWvI_vG7cEgRUS3LbP5zqP8",
+    "name": "Little Smurfs Nursery",
+    "location": "25 Whitmore Rd, Birmingham B10 0NR, UK",
+    "city": "Birmingham",
+    "phone": "0121 582 4123",
+    "website": "https://reports.ofsted.gov.uk/provider/16/2589582",
+    "description": "A preschool located in Birmingham.",
+    "rating": 5,
+    "reviewCount": 24,
+    "coordinates": {
+      "lat": 52.4705374,
+      "lng": -1.8628198
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJa820gbikcEgR4BKNl7_JqOk",
+    "name": "Sunshine Kidz Day Nursery",
+    "location": "202 Streetly Rd, Birmingham B23 7AL, UK",
+    "city": "Birmingham",
+    "phone": "0121 382 1773",
+    "website": "http://www.sunshinekidz.co.uk/?utm_source=GMB&utm_medium=social&utm_campaign=promotion",
+    "description": "A preschool located in Birmingham.",
+    "rating": 5,
+    "reviewCount": 38,
+    "coordinates": {
+      "lat": 52.5308064,
+      "lng": -1.8588695
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJ03q211a8cEgR_e3lbmS_KtI",
+    "name": "Edgbaston Nursery School",
+    "location": "41 Calthorpe Rd, Birmingham B15 1TS, UK",
+    "city": "Birmingham",
+    "phone": "0121 455 7887",
+    "website": "https://www.storal.com/nursery-school/edgbaston-nursery-school",
+    "description": "A preschool located in Birmingham.",
+    "rating": 4.4,
+    "reviewCount": 37,
+    "coordinates": {
+      "lat": 52.469066,
+      "lng": -1.921033
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJ-UjvurC9cEgRgkAcJdzMqiE",
+    "name": "Early Nurture Pre-School",
+    "location": "inside Anglesey Primary School, Early Nurture Playschool, Lozells, Birmingham B19 2YA, UK",
+    "city": "Birmingham",
+    "phone": "0121 464 4382",
+    "website": "https://www.earlynurturepreschool.co.uk/",
+    "description": "A preschool located in Birmingham.",
+    "rating": 5,
+    "reviewCount": 26,
+    "coordinates": {
+      "lat": 52.498208999999996,
+      "lng": -1.9096556000000002
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJy0wsDQq9cEgROI6u1yaFnG4",
+    "name": "Ashbourne Day Nurseries at Birmingham Central",
+    "location": "1 Woodcock St, Birmingham B7 4BL, UK",
+    "city": "Birmingham",
+    "phone": "0121 204 4562",
+    "website": "https://ashbournedaynurseries.com/locations/birmingham-central/",
+    "description": "A preschool located in Birmingham.",
+    "rating": 5,
+    "reviewCount": 3,
+    "coordinates": {
+      "lat": 52.4854906,
+      "lng": -1.8856912
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJeQnGzWC7cEgR_lHLOc3O3tc",
+    "name": "Smart Start Childcare",
+    "location": "Poachers Pocket, Cole Hall Ln, Birmingham B34 6HE, UK",
+    "city": "Birmingham",
+    "phone": "0121 582 1400",
+    "website": "http://www.smartstartchildcare.co.uk/",
+    "description": "A preschool located in Birmingham.",
+    "rating": 4.9,
+    "reviewCount": 29,
+    "coordinates": {
+      "lat": 52.491419799999996,
+      "lng": -1.7851499
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJ_f70M8y9cEgRzs53Vgn-N9Y",
+    "name": "Selly Oak Nursery School",
+    "location": "26 Tiverton Rd, Birmingham B29 6BP, UK",
+    "city": "Birmingham",
+    "phone": "0121 472 1700",
+    "website": "https://www.sellyoak-nur.bham.sch.uk/",
+    "description": "A preschool located in Birmingham.",
+    "rating": 4.7,
+    "reviewCount": 50,
+    "coordinates": {
+      "lat": 52.444416499999996,
+      "lng": -1.9337654
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJuy7-y-y8cEgRMz3i5MmOI60",
+    "name": "Kinder Day Nursery",
+    "location": "122-123 Livery St, Birmingham B3 1RS, UK",
+    "city": "Birmingham",
+    "phone": "0121 236 5959",
+    "website": "https://kinderdaynursery.co.uk/",
+    "description": "A preschool located in Birmingham.",
+    "rating": 4.4,
+    "reviewCount": 16,
+    "coordinates": {
+      "lat": 52.4881629,
+      "lng": -1.9067412000000001
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJFQcx06e9cEgRsJlDx4MR7IQ",
+    "name": "Norfolk House Nursery",
+    "location": "3 Norfolk Rd, Birmingham B15 3PS, UK",
+    "city": "Birmingham",
+    "phone": "0121 452 1485",
+    "website": "http://www.norfolkhouseschool.co.uk/",
+    "description": "A preschool located in Birmingham.",
+    "rating": 4.9,
+    "reviewCount": 15,
+    "coordinates": {
+      "lat": 52.4708183,
+      "lng": -1.9434400999999997
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJFTiRnmy8cEgRWua-SCH4sOI",
+    "name": "Kids Planet George Perkins",
+    "location": "94 Edgbaston Rd, Balsall Heath, Birmingham B12 9QA, UK",
+    "city": "Birmingham",
+    "phone": "0121 446 4143",
+    "website": "https://www.kidsplanetdaynurseries.co.uk/find-a-nursery/george-perkins/",
+    "description": "A preschool located in Birmingham.",
+    "rating": 4.7,
+    "reviewCount": 15,
+    "coordinates": {
+      "lat": 52.454299,
+      "lng": -1.8973935
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJlyDWCNmicEgR4yPrdC0aH9k",
+    "name": "Tiny Tots Academy",
+    "location": "27A Acfold Rd, Birmingham B20 1HD, UK",
+    "city": "Birmingham",
+    "phone": "0121 339 5077",
+    "website": "http://www.tinytotsbirmingham.com/",
+    "description": "A preschool located in Birmingham.",
+    "rating": 4.7,
+    "reviewCount": 54,
+    "coordinates": {
+      "lat": 52.5296746,
+      "lng": -1.9386160999999997
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJjT3c51C9cEgRCfDgi__aAbc",
+    "name": "N Family Club - Moseley Nursery",
+    "location": "23 Wake Green Rd, Moseley, Birmingham B13 9HB, UK",
+    "city": "Birmingham",
+    "phone": "0121 449 5599",
+    "website": "https://nfamilyclub.com/n-moseley/",
+    "description": "A preschool located in Birmingham.",
+    "rating": 4.9,
+    "reviewCount": 46,
+    "coordinates": {
+      "lat": 52.4449751,
+      "lng": -1.881591
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJc2G7vNy8cEgRYwoHYLF9oGI",
+    "name": "LEARNING STEPS DAY NURSERY LTD",
+    "location": "117 Soho Hill, Hockley, Birmingham B19 1AY, UK",
+    "city": "Birmingham",
+    "phone": "0121 523 0088",
+    "website": "http://www.learningstepsdaynursery.co.uk/",
+    "description": "A preschool located in Birmingham.",
+    "rating": 4.3,
+    "reviewCount": 12,
+    "coordinates": {
+      "lat": 52.4995628,
+      "lng": -1.9209719
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJR_LH8Ha8cEgRStlxK1K44t4",
+    "name": "Our Kids Nursery",
+    "location": "17-21 Ombersley Rd, Balsall Heath, Birmingham B12 8UR, UK",
+    "city": "Birmingham",
+    "phone": "0121 440 3306",
+    "website": "http://www.ourkidsnursery.co.uk/",
+    "description": "A preschool located in Birmingham.",
+    "rating": 4.9,
+    "reviewCount": 36,
+    "coordinates": {
+      "lat": 52.460650799999996,
+      "lng": -1.8825843999999996
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJ7Xzm6tC7cEgR1V2Z2s49FpQ",
+    "name": "Stepping Stones Nursery",
+    "location": "6 Braithwaite Rd, Birmingham B11 1LB, UK",
+    "city": "Birmingham",
+    "phone": "07886 820514",
+    "website": "",
+    "description": "A preschool located in Birmingham.",
+    "rating": 5,
+    "reviewCount": 3,
+    "coordinates": {
+      "lat": 52.4646915,
+      "lng": -1.8765564000000001
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJHce-1w69cEgRbyOHG2yHtb8",
+    "name": "The Nest Nursery Lime Tree",
+    "location": "300 Gillott Rd, Edgbaston, Birmingham B16 0RR, UK",
+    "city": "Birmingham",
+    "phone": "0121 455 6026",
+    "website": "http://www.thenestnursery.co.uk/",
+    "description": "A preschool located in Birmingham.",
+    "rating": 4.8,
+    "reviewCount": 15,
+    "coordinates": {
+      "lat": 52.4787556,
+      "lng": -1.9470929999999997
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJx662e567cEgR1w5gN7dVixI",
+    "name": "Harvey Road PreSchool",
+    "location": "Harvey Road PreSchool, 60 Yew Tree Ln, Birmingham B26 1AP, UK",
+    "city": "Birmingham",
+    "phone": "07976 165582",
+    "website": "https://www.funatharveyroad.org/",
+    "description": "A preschool located in Birmingham.",
+    "rating": 5,
+    "reviewCount": 1,
+    "coordinates": {
+      "lat": 52.4636357,
+      "lng": -1.8073962000000001
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJNXz9psleeUgRQZfmNDvfMGs",
+    "name": "Bright Horizons Leeds Day Nursery and Preschool",
+    "location": "338, 340 Kirkstall Rd, Burley, Leeds LS4 2DS, UK",
+    "city": "Leeds",
+    "phone": "0113 887 7558",
+    "website": "https://www.brighthorizons.co.uk/our-nurseries/leeds-day-nursery-and-preschool?utm_source=googlemybusiness&utm_medium=Referral&utm_campaign=Leeds-",
+    "description": "A preschool located in Leeds.",
+    "rating": 4.8,
+    "reviewCount": 23,
+    "coordinates": {
+      "lat": 53.8061083,
+      "lng": -1.5812007
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJw203coddeUgR8TeSkVGd3Zg",
+    "name": "Laugh and Learn Day Nursery",
+    "location": "Laugh and Learn Day Nursery, Great Eastern House, Junction 7 Business Park, Wakefield Rd, Leeds LS10 3DQ, UK",
+    "city": "Leeds",
+    "phone": "0113 824 4377",
+    "website": "http://www.laughandlearnchildcare.co.uk/",
+    "description": "A preschool located in Leeds.",
+    "rating": 4.6,
+    "reviewCount": 10,
+    "coordinates": {
+      "lat": 53.7716107,
+      "lng": -1.5172717
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJa1DDe1NZeUgRBf7oXQoop_M",
+    "name": "Kids Planet Headingley",
+    "location": "Sycamore Lodge, 7A Woodhouse Cliff, Woodhouse, Leeds LS6 2HF, UK",
+    "city": "Leeds",
+    "phone": "0113 278 4362",
+    "website": "https://www.kidsplanetdaynurseries.co.uk/find-a-nursery/headingley/",
+    "description": "A preschool located in Leeds.",
+    "rating": 4.8,
+    "reviewCount": 43,
+    "coordinates": {
+      "lat": 53.815750699999995,
+      "lng": -1.5588754
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJMUIFxWxZeUgRTBkpVfK5gkI",
+    "name": "The Tots Team Nursery",
+    "location": "Off Station Approach, Kirkstall Ln, Kirkstall, Leeds LS5 3LD, UK",
+    "city": "Leeds",
+    "phone": "0113 513 8569",
+    "website": "https://www.thetotsteam.com/",
+    "description": "A preschool located in Leeds.",
+    "rating": 5,
+    "reviewCount": 35,
+    "coordinates": {
+      "lat": 53.8177175,
+      "lng": -1.5937432999999999
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJeWrU0q5eeUgRpZrzy60I6io",
+    "name": "Bright Beginnings Childcare Centre",
+    "location": "Mount Preston St, Woodhouse, Leeds LS2 9NQ, UK",
+    "city": "Leeds",
+    "phone": "0113 343 1818",
+    "website": "http://www.brightbeginningschildcare.co.uk/",
+    "description": "A preschool located in Leeds.",
+    "rating": 4.7,
+    "reviewCount": 10,
+    "coordinates": {
+      "lat": 53.8058963,
+      "lng": -1.5584137
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJxfZt63FbeUgReQ9eVJ1Q6Hg",
+    "name": "Leeds Montessori School and Day Nursery",
+    "location": "Wetherby Rd, Roundhay, Leeds LS8 2LE, UK",
+    "city": "Leeds",
+    "phone": "0113 232 3363",
+    "website": "http://www.leedsmontessori.co.uk/",
+    "description": "A preschool located in Leeds.",
+    "rating": 4.1,
+    "reviewCount": 16,
+    "coordinates": {
+      "lat": 53.8297783,
+      "lng": -1.489142
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJ_1OVdh1ceUgRN9Vg1EHnH0I",
+    "name": "Kids Planet Leeds Oxford Place",
+    "location": "5-6 Oxford Pl, Leeds LS1 3AX, UK",
+    "city": "Leeds",
+    "phone": "0113 827 0103",
+    "website": "https://www.kidsplanetdaynurseries.co.uk/find-a-nursery/leeds-oxford-place/",
+    "description": "A preschool located in Leeds.",
+    "rating": 4.3,
+    "reviewCount": 11,
+    "coordinates": {
+      "lat": 53.8003478,
+      "lng": -1.5505137
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJfTRC8MteeUgR94bgbqNx9iw",
+    "name": "Domi Domingo Day Nursery",
+    "location": "Haddon Hall, 2 Bankfield Rd, Burley, Leeds LS4 2JT, UK",
+    "city": "Leeds",
+    "phone": "0113 278 3104",
+    "website": "http://www.domidomingo.co.uk/",
+    "description": "A preschool located in Leeds.",
+    "rating": 4.8,
+    "reviewCount": 41,
+    "coordinates": {
+      "lat": 53.8085709,
+      "lng": -1.5840896000000002
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJqXzuM_JbeUgRAYCPbrq_BXo",
+    "name": "Precious Ones Nursery",
+    "location": "196 Chapeltown Rd, Potternewton, Leeds LS7 4HZ, UK",
+    "city": "Leeds",
+    "phone": "0113 237 4079",
+    "website": "https://preciousones.org.uk/",
+    "description": "A preschool located in Leeds.",
+    "rating": 5,
+    "reviewCount": 3,
+    "coordinates": {
+      "lat": 53.8207731,
+      "lng": -1.5317365
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJ9XRluihZeUgRkJcsGC9tWoY",
+    "name": "Meanwood Preschool",
+    "location": "Holy Trinity Community Hall, Memorial Dr, Meanwood, Leeds LS6 4LF, UK",
+    "city": "Leeds",
+    "phone": "07535 000084",
+    "website": "",
+    "description": "A preschool located in Leeds.",
+    "rating": 5,
+    "reviewCount": 18,
+    "coordinates": {
+      "lat": 53.831131799999994,
+      "lng": -1.5673789999999999
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJOfapB_ZbeUgRpsIzcuLK5QA",
+    "name": "Best Childcare",
+    "location": "138 Chapeltown Rd, Leeds LS7 4EE, UK",
+    "city": "Leeds",
+    "phone": "0113 262 6054",
+    "website": "https://bestchildcare.org.uk/",
+    "description": "A preschool located in Leeds.",
+    "rating": 4.1,
+    "reviewCount": 13,
+    "coordinates": {
+      "lat": 53.8159237,
+      "lng": -1.5315192
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJObNTu75ceUgR9ZMBCUVMbjA",
+    "name": "Chapel Street Pre School",
+    "location": "Chapel St, Halton, Leeds, Christchurch LS15 7RW, UK",
+    "city": "Leeds",
+    "phone": "0113 264 0093",
+    "website": "https://reports.ofsted.gov.uk/provider/16/512718",
+    "description": "A preschool located in Leeds.",
+    "rating": 4.7,
+    "reviewCount": 3,
+    "coordinates": {
+      "lat": 53.796841199999996,
+      "lng": -1.4680815999999999
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJd0oZeZFeeUgRIdfYYXFXE-Y",
+    "name": "Little Clovers Nursery",
+    "location": "New Craven Gate, Leeds LS11 5NF, UK",
+    "city": "Leeds",
+    "phone": "0113 345 0958",
+    "website": "http://www.littlecloversnursery.co.uk/",
+    "description": "A preschool located in Leeds.",
+    "rating": 4.9,
+    "reviewCount": 13,
+    "coordinates": {
+      "lat": 53.7823267,
+      "lng": -1.5396367
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJ88Aswi9ZeUgRaGR5d8P5KmU",
+    "name": "North Leeds Community Nursery",
+    "location": "Foxcroft Cl, Kirkstall, Leeds LS6 3NT, UK",
+    "city": "Leeds",
+    "phone": "0113 274 1579",
+    "website": "http://nlcnursery.org.uk/",
+    "description": "A preschool located in Leeds.",
+    "rating": 4.8,
+    "reviewCount": 22,
+    "coordinates": {
+      "lat": 53.822692,
+      "lng": -1.5933623
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJ__-PdDdceUgRprZ5NdacSbc",
+    "name": "Amazing Grace Early Years Childcare Ltd",
+    "location": "63 Whitfield Gardens, Hunslet, Leeds LS10 2QD, UK",
+    "city": "Leeds",
+    "phone": "0113 345 4340",
+    "website": "http://www.amazinggracenursery.co.uk/",
+    "description": "A preschool located in Leeds.",
+    "rating": 4.9,
+    "reviewCount": 31,
+    "coordinates": {
+      "lat": 53.7803638,
+      "lng": -1.5275394000000002
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJd6508ohceUgRSiQnynduQTE",
+    "name": "Little Gems",
+    "location": "577 York Rd, Leeds LS9 6NH, UK",
+    "city": "Leeds",
+    "phone": "0113 249 4222",
+    "website": "https://littlegemnursery.co.uk/",
+    "description": "A preschool located in Leeds.",
+    "rating": 5,
+    "reviewCount": 10,
+    "coordinates": {
+      "lat": 53.801978,
+      "lng": -1.4951694000000002
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJrTFotgVZeUgRgSzUd3vUo3Y",
+    "name": "Little Owls Nursery Quarry Mount",
+    "location": "Quarry St, Woodhouse, Leeds LS6 2JU, UK",
+    "city": "Leeds",
+    "phone": "0113 378 2555",
+    "website": "https://www.littleowlsleeds.co.uk/places/little-owls-quarry-mount/",
+    "description": "A preschool located in Leeds.",
+    "rating": 5,
+    "reviewCount": 7,
+    "coordinates": {
+      "lat": 53.8158453,
+      "lng": -1.5541256
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJzx4cLbdEeUgRQxxhTitBif4",
+    "name": "Lesley's Private Day Nursery",
+    "location": "Unit 3 & 7, Mortec Office Park, York Rd, Leeds LS15 4TA, UK",
+    "city": "Leeds",
+    "phone": "0113 348 6888",
+    "website": "http://www.lesleysnursery.co.uk/",
+    "description": "A preschool located in Leeds.",
+    "rating": 4.6,
+    "reviewCount": 14,
+    "coordinates": {
+      "lat": 53.8314342,
+      "lng": -1.4376202
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJ93heUAhZeUgRqaLM7zbZzno",
+    "name": "Partou Acorns in Adel Day Nursery & Pre-school",
+    "location": "469 Otley Rd, Adel, Leeds LS16 7NR, UK",
+    "city": "Leeds",
+    "phone": "0113 267 3946",
+    "website": "https://partou.co.uk/nurseries/acorns-in-adel-day-nursery-pre-school?utm_source=GMB&utm_medium=organic&utm_campaign=listing",
+    "description": "A preschool located in Leeds.",
+    "rating": 5,
+    "reviewCount": 43,
+    "coordinates": {
+      "lat": 53.8544943,
+      "lng": -1.5916679999999999
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJbQiHwq1ceUgRJf5ljTZZfq8",
+    "name": "Little Rascals Private Day Nursery & Pre school (Station Road)",
+    "location": "Station Rd, Cross Gates, Leeds LS15 7JY, UK",
+    "city": "Leeds",
+    "phone": "0113 232 6757",
+    "website": "http://www.littlerascalsnurseries.com/",
+    "description": "A preschool located in Leeds.",
+    "rating": 4.8,
+    "reviewCount": 26,
+    "coordinates": {
+      "lat": 53.806287399999995,
+      "lng": -1.4528664
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJ8VUGAwBEiEgRqj1hMvPj2os",
+    "name": "Primrose City Nursery",
+    "location": "368, City Park Bldg Alexandra Parade, 368 Alexandra Parade, Glasgow G31 3AU, UK",
+    "city": "Glasgow",
+    "phone": "0141 554 3220",
+    "website": "http://www.primrosecitynurseryglasgow.co.uk/",
+    "description": "A preschool located in Glasgow.",
+    "rating": 5,
+    "reviewCount": 47,
+    "coordinates": {
+      "lat": 55.8638714,
+      "lng": -4.2237355999999995
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJC_jEhm1FiEgRlq02qKMLGMA",
+    "name": "Bright Starts Nursery Glasgow",
+    "location": "Balmore Industrial Estate, 47 Glentanar Rd, Glasgow G22 7XS, UK",
+    "city": "Glasgow",
+    "phone": "0141 573 0554",
+    "website": "https://brightstarts.co/glasgow",
+    "description": "A preschool located in Glasgow.",
+    "rating": 5,
+    "reviewCount": 20,
+    "coordinates": {
+      "lat": 55.8944015,
+      "lng": -4.2589263
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJk2VNQ8VFiEgRlxk97tgbtbE",
+    "name": "Headstart Nursery",
+    "location": "Skypark, 1 10 Elliot St, Glasgow G3 8EP, UK",
+    "city": "Glasgow",
+    "phone": "0141 248 5779",
+    "website": "http://www.headstartglasgow.co.uk/",
+    "description": "A preschool located in Glasgow.",
+    "rating": 5,
+    "reviewCount": 26,
+    "coordinates": {
+      "lat": 55.860833299999996,
+      "lng": -4.2785741
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJM3J1tEpEiEgRqvFuxqTfoKc",
+    "name": "West End Nursery",
+    "location": "10 Malloch St, Glasgow G20 8TP, UK",
+    "city": "Glasgow",
+    "phone": "0141 945 5179",
+    "website": "https://west-end-nursery.co.uk/",
+    "description": "A preschool located in Glasgow.",
+    "rating": 5,
+    "reviewCount": 9,
+    "coordinates": {
+      "lat": 55.885276399999995,
+      "lng": -4.2846575
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJT1DMGHRBiEgReMd9xLxFXT0",
+    "name": "Ivy In the Park",
+    "location": "345 Carntyne Rd, Glasgow G32 6JP, UK",
+    "city": "Glasgow",
+    "phone": "0141 266 0428",
+    "website": "http://www.ivyintheparkglasgow.co.uk/",
+    "description": "A preschool located in Glasgow.",
+    "rating": 5,
+    "reviewCount": 44,
+    "coordinates": {
+      "lat": 55.8595719,
+      "lng": -4.1942391
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJuwQUNXJGiEgRpRmTnUI1kDg",
+    "name": "Smiley Stars Nursery - Ibrox",
+    "location": "38 Ibrox Ter, Glasgow G51 2TB, UK",
+    "city": "Glasgow",
+    "phone": "0141 427 0122",
+    "website": "https://www.smileystarsnursery.co.uk/ibrox-nursery.html",
+    "description": "A preschool located in Glasgow.",
+    "rating": 5,
+    "reviewCount": 34,
+    "coordinates": {
+      "lat": 55.852453700000005,
+      "lng": -4.303604
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJ30j4eexGiEgRiOot68WGcfE",
+    "name": "Little wonder nursery",
+    "location": "311 Calder St, Glasgow G42 7NQ, UK",
+    "city": "Glasgow",
+    "phone": "0141 370 0365",
+    "website": "http://littlewondersnursery.co.uk/",
+    "description": "A preschool located in Glasgow.",
+    "rating": 4.4,
+    "reviewCount": 23,
+    "coordinates": {
+      "lat": 55.836672199999995,
+      "lng": -4.2555663
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJryddOjtEiEgRhNWd-9Jp2x8",
+    "name": "Woodside Nursery School",
+    "location": "445 St George's Rd, Glasgow G3 6JX, UK",
+    "city": "Glasgow",
+    "phone": "0141 332 7661",
+    "website": "",
+    "description": "A preschool located in Glasgow.",
+    "rating": 4.7,
+    "reviewCount": 7,
+    "coordinates": {
+      "lat": 55.87376750000001,
+      "lng": -4.2649652
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJPyhPzXxGiEgR0IJdX8usxAc",
+    "name": "Hyde N Seek Nurseries Ltd",
+    "location": "Kinning Park Business Centre, 544 Scotland St W, Kinning Park, Glasgow G41 1BZ, UK",
+    "city": "Glasgow",
+    "phone": "0141 429 6238",
+    "website": "https://www.hydenseeknurseries.co.uk/",
+    "description": "A preschool located in Glasgow.",
+    "rating": 5,
+    "reviewCount": 2,
+    "coordinates": {
+      "lat": 55.8505968,
+      "lng": -4.2837097
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJMbI5wLNFiEgR4OboKYrUHqs",
+    "name": "Primrose Day Nursery",
+    "location": "24 Gairbraid Ave, Glasgow G20 8YE, UK",
+    "city": "Glasgow",
+    "phone": "0141 946 6966",
+    "website": "http://www.primrosedaynurseryglasgow.co.uk/",
+    "description": "A preschool located in Glasgow.",
+    "rating": 4.8,
+    "reviewCount": 47,
+    "coordinates": {
+      "lat": 55.890716399999995,
+      "lng": -4.2912877
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJ_epyeixEiEgRUhPHZ1ZEmZw",
+    "name": "Acorn Park Nursery & Kindergarten",
+    "location": "Beresford House, 6 Claremont Terrace, Glasgow G3 7XR, UK",
+    "city": "Glasgow",
+    "phone": "0141 332 2461",
+    "website": "http://www.acornparknursery.co.uk/",
+    "description": "A preschool located in Glasgow.",
+    "rating": 4.3,
+    "reviewCount": 16,
+    "coordinates": {
+      "lat": 55.867713099999996,
+      "lng": -4.2779069
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJuZ8fJR1EiEgRQrZ8VehExkM",
+    "name": "St Mungo's Nursery Class",
+    "location": "45 Parson St, Glasgow G4 0PX, UK",
+    "city": "Glasgow",
+    "phone": "0141 552 2484",
+    "website": "",
+    "description": "A preschool located in Glasgow.",
+    "rating": 5,
+    "reviewCount": 2,
+    "coordinates": {
+      "lat": 55.8656127,
+      "lng": -4.2375393
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJSZ1WOnFGiEgR_dYsx9loYUc",
+    "name": "Little Stars Nursery",
+    "location": "3 Brand Pl, Glasgow G51 1DR, UK",
+    "city": "Glasgow",
+    "phone": "0141 427 0020",
+    "website": "http://www.littlestarsnurseries.co.uk/",
+    "description": "A preschool located in Glasgow.",
+    "rating": 4.4,
+    "reviewCount": 13,
+    "coordinates": {
+      "lat": 55.853978899999994,
+      "lng": -4.3003183
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJq2TSq1pGiEgRJGLA2gTZr2w",
+    "name": "Pied Piper Nursery",
+    "location": "25 Hector Rd, Shawlands, Glasgow G41 3RJ, UK",
+    "city": "Glasgow",
+    "phone": "0141 649 2715",
+    "website": "https://piedpipernursery.co.uk/",
+    "description": "A preschool located in Glasgow.",
+    "rating": 4.9,
+    "reviewCount": 12,
+    "coordinates": {
+      "lat": 55.827678299999995,
+      "lng": -4.2894225
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJ3UPqu9JFiEgRPBlMhYe10FQ",
+    "name": "Kelvin Park Early Years Centre",
+    "location": "Hillhead Primary School, 110 Otago St, Glasgow G12 8NS, UK",
+    "city": "Glasgow",
+    "phone": "0141 339 7513",
+    "website": "http://www.kelvinpark-nursery.glasgow.sch.uk/",
+    "description": "A preschool located in Glasgow.",
+    "rating": 4.6,
+    "reviewCount": 7,
+    "coordinates": {
+      "lat": 55.871276800000004,
+      "lng": -4.2846015
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJ9aXYaKhGiEgRSago7LhlZW8",
+    "name": "Puddleduck Nursery",
+    "location": "18 Cathedral Square, Glasgow G4 0XA, UK",
+    "city": "Glasgow",
+    "phone": "0141 552 7569",
+    "website": "http://www.puddleducknursery.co.uk/",
+    "description": "A preschool located in Glasgow.",
+    "rating": 3.9,
+    "reviewCount": 11,
+    "coordinates": {
+      "lat": 55.8613511,
+      "lng": -4.2350207
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJq7Bo5vZFiEgRM7seC7dQG9s",
+    "name": "The Learning Zone Nursery",
+    "location": "1211 Dumbarton Rd, Glasgow G14 9UP, UK",
+    "city": "Glasgow",
+    "phone": "0141 959 8088",
+    "website": "http://www.thelearningzonenursery.co.uk/",
+    "description": "A preschool located in Glasgow.",
+    "rating": 5,
+    "reviewCount": 5,
+    "coordinates": {
+      "lat": 55.8739742,
+      "lng": -4.3377042999999995
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJHdaVPexGiEgRQrSo961TRlo",
+    "name": "Govanhill Nursery School",
+    "location": "335 Allison St, Glasgow G42 8HH, UK",
+    "city": "Glasgow",
+    "phone": "0141 433 0100",
+    "website": "https://govanhillnursery.co.uk/",
+    "description": "A preschool located in Glasgow.",
+    "rating": 4.9,
+    "reviewCount": 16,
+    "coordinates": {
+      "lat": 55.8354826,
+      "lng": -4.2568548999999996
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJw6q0pChEiEgRdbiinMGav1E",
+    "name": "Renfrew Street Nursery School",
+    "location": "256 Renfrew St, Glasgow G3 6TT, UK",
+    "city": "Glasgow",
+    "phone": "0141 332 3236",
+    "website": "http://www.renfrewstreet-nursery.glasgow.sch.uk/",
+    "description": "A preschool located in Glasgow.",
+    "rating": 5,
+    "reviewCount": 6,
+    "coordinates": {
+      "lat": 55.866811299999995,
+      "lng": -4.2676663
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  },
+  {
+    "id": "ChIJddBkEoJGiEgRr9fNASuETA0",
+    "name": "Sandyford Day Nursery",
+    "location": "Perth St, Glasgow G3 8UQ, UK",
+    "city": "Glasgow",
+    "phone": "0141 221 5502",
+    "website": "",
+    "description": "A preschool located in Glasgow.",
+    "rating": 4.9,
+    "reviewCount": 13,
+    "coordinates": {
+      "lat": 55.861464399999996,
+      "lng": -4.2714193
+    },
+    "images": [],
+    "features": [],
+    "status": "unclaimed"
+  }
+]

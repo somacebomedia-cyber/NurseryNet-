@@ -1,0 +1,167 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root, body[data-brand='nurserynet'] {
+    --background: 251 100% 97%; /* #F3F0FF - Light Purple-ish White */
+    --foreground: 250 33% 26%; /* #32285C - Dark Purple */
+    
+    --card: 0 0% 100%; /* #FFFFFF - White */
+    --card-foreground: 250 33% 26%; /* #32285C - Dark Purple */
+    
+    --popover: 0 0% 100%; /* #FFFFFF - White */
+    --popover-foreground: 250 33% 26%; /* #32285C - Dark Purple */
+    
+    --primary: 257 79% 65%; /* #8A5CEE - Medium Purple */
+    --primary-foreground: 0 0% 100%; /* White for text on primary */
+    
+    --secondary: 259 83% 80%; /* #BBA1F7 - Light Purple (HTML --primary-light) */
+    --secondary-foreground: 250 33% 26%; /* #32285C - Dark Purple */
+    
+    --muted: 257 79% 90%; /* #D3C0F9 - Lighter Purple */
+    --muted-foreground: 248 15% 46%; /* #6B6487 - Greyish Purple */
+    
+    --accent: 15 100% 63%; /* #FF6E40 - Orange (HTML --secondary) */
+    --accent-foreground: 0 0% 100%; /* White for text on accent */
+    
+    --accent-blue-hsl: 197 66% 58%; /* #51B5D9 (HTML --info) */
+    --accent-blue-foreground-hsl: 0 0% 100%; /* White for text on this blue */
+
+    --destructive: 346 76% 58%; /* #E5446D (HTML --danger) */
+    --destructive-foreground: 0 0% 98%; /* White */
+    
+    --border: 257 79% 85%; /* #C4B1F8 - Light Purple Border */
+    --input: 251 100% 98%; /* #F7F5FF - Very Light Purple Input BG */
+    --ring: 257 79% 65%; /* #8A5CEE (Primary) */
+    
+    --radius: 0.8rem; /* Slightly more rounded as per original PRD */
+
+    --chart-1: 257 79% 65%; /* Primary */
+    --chart-2: 15 100% 63%; /* Accent (Orange) */
+    --chart-3: 289 63% 42%; /* #9C27B0 (HTML --purple) */
+    --chart-4: 197 66% 58%; /* Accent Blue (#51B5D9 from HTML --info) */
+    --chart-5: 43 100% 67%; /* #FFC857 (HTML --warning) */
+
+    --sidebar-background: 251 90% 96%;
+    --sidebar-foreground: 250 50% 30%;
+    --sidebar-primary: 257 79% 65%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 15 100% 90%; /* Light Orange for sidebar accent */
+    --sidebar-accent-foreground: 250 50% 30%;
+    --sidebar-border: 257 79% 88%;
+    --sidebar-ring: 257 79% 65%;
+
+    --font-heading: var(--font-fredoka);
+    --font-body: var(--font-nunito);
+  }
+
+  body[data-brand='primarynet'] {
+    --background: 210 100% 98%; /* Light Blue */
+    --foreground: 214 46% 25%; /* Dark Blue */
+    --primary: 217 91% 60%; /* Bright Blue */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 45 100% 75%; /* Soft Yellow */
+    --secondary-foreground: 214 46% 25%;
+    --accent: 14 100% 59%; /* Bright Orange-Red */
+    --accent-foreground: 0 0% 100%;
+    --border: 217 91% 85%;
+    --input: 210 100% 99%;
+    --ring: 217 91% 60%;
+
+    --font-heading: var(--font-poppins);
+    --font-body: var(--font-lato);
+  }
+
+  body[data-brand='highschoolnet'] {
+    --background: 220 15% 96%; /* Light Gray */
+    --foreground: 220 20% 15%; /* Dark Slate Gray */
+    --primary: 220 90% 55%; /* Strong Blue */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 190 60% 75%; /* Muted Teal */
+    --secondary-foreground: 220 20% 15%;
+    --accent: 350 80% 60%; /* Bold Red */
+    --accent-foreground: 0 0% 100%;
+    --border: 220 15% 88%;
+    --input: 0 0% 100%;
+    --ring: 220 90% 55%;
+
+    --font-heading: var(--font-roboto);
+    --font-body: var(--font-inter);
+  }
+  
+  body[data-brand='tertiarynet'] {
+    --background: 210 20% 98%; /* Off-white */
+    --foreground: 215 28% 17%; /* Very Dark Blue */
+    --primary: 215 30% 30%; /* Dark Slate Blue */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 35 70% 85%; /* Light Gold */
+    --secondary-foreground: 215 28% 17%;
+    --accent: 0 60% 45%; /* Deep Red / Burgundy */
+    --accent-foreground: 0 0% 100%;
+    --border: 210 20% 85%;
+    --input: 0 0% 100%;
+    --ring: 215 30% 30%;
+
+    --font-heading: var(--font-lora);
+    --font-body: var(--font-merriweather);
+  }
+
+  .dark {
+    /* Basic dark mode conversion, can be refined */
+    --background: 250 33% 10%; /* Darker Purple */
+    --foreground: 251 100% 92%; /* Lighter Purple-ish White */
+    
+    --card: 250 33% 15%; 
+    --card-foreground: 251 100% 92%;
+    
+    --popover: 250 33% 15%;
+    --popover-foreground: 251 100% 92%;
+    
+    --primary: 257 79% 65%; /* Keep primary vibrant */
+    --primary-foreground: 0 0% 10%; /* Dark text on primary for dark mode if primary is light enough */
+    
+    --secondary: 259 83% 70%; /* Darker shade of light purple */
+    --secondary-foreground: 251 100% 92%;
+    
+    --muted: 257 79% 25%;
+    --muted-foreground: 248 15% 60%;
+    
+    --accent: 15 100% 63%; /* Keep accent vibrant */
+    --accent-foreground: 0 0% 10%;
+    
+    --accent-blue-hsl: 197 66% 48%;
+    --accent-blue-foreground-hsl: 0 0% 100%;
+
+    --destructive: 346 76% 48%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 257 79% 30%;
+    --input: 251 100% 12%;
+    --ring: 257 79% 65%;
+
+    --chart-1: 257 79% 70%;
+    --chart-2: 15 100% 70%;
+    --chart-3: 289 63% 55%;
+    --chart-4: 197 66% 65%;
+    --chart-5: 43 100% 75%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground bg-grainy-texture font-body;
+    min-height: 100vh;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+
+  .glassmorphism {
+    @apply bg-card/50 backdrop-blur-lg border border-card/60 shadow-xl;
+  }
+}

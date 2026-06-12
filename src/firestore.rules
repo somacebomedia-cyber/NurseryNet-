@@ -1,0 +1,71 @@
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isSameUser(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+    
+    function getRole() {
+        return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function isRole(role) {
+        return isSignedIn() && getRole() == role;
+    }
+
+    function isAdmin() {
+      return isRole('admin');
+    }
+    
+    function isOwner(preschoolId) {
+        // Handle cases where the preschoolId might be a user's UID for older profiles
+        // A more robust way would be to query, but rules don't support that well.
+        // This relies on the 'ownerId' field being present.
+        return get(/databases/$(database)/documents/preschools/$(preschoolId)).data.ownerId == request.auth.uid;
+    }
+
+    // Preschools can be read by anyone.
+    // Create/Update/Delete can only be done by the owner of the document or an admin.
+    match /preschools/{preschoolId} {
+      allow read: if true;
+      allow create: if isSameUser(request.resource.data.ownerId) || isAdmin();
+      allow update, delete: if isSameUser(resource.data.ownerId) || isAdmin();
+    }
+
+    // Users can read their own doc. Admins can read any doc.
+    // Users can create their own doc.
+    // Users can update their own name, whatsappNumber, but only admins can change role, planId, etc.
+    match /users/{uid} {
+      allow read: if isSameUser(uid) || isAdmin();
+      allow create: if isSameUser(uid);
+      allow update: if isSameUser(uid) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'whatsappNumber', 'updatedAt'])
+                    || isAdmin();
+    }
+
+    // Inquiries can be created by anyone.
+    // They can only be read/updated/deleted by an admin or the owner of the preschool they are for.
+    match /inquiries/{inquiryId} {
+      allow create: if true;
+      // The `isOwner` function needs a preschoolId, but the inquiry document isn't created yet on a `list` call.
+      // A truly secure list requires querying from the client with a `where` clause.
+      // Here, we secure individual reads/updates/deletes.
+      allow read, update, delete: if isSignedIn() && (isOwner(get(/databases/$(database)/documents/inquiries/$(inquiryId)).data.preschoolId) || isAdmin());
+    }
+
+    // Logo Animation Requests
+    match /logoAnimationRequests/{requestId} {
+        // Users can create their own requests.
+        allow create: if isSameUser(request.resource.data.userId);
+        // Only admins can read, update (e.g., status), or delete requests.
+        allow read, update, delete: if isAdmin();
+    }
+  }
+}
+
+    
