@@ -82,7 +82,7 @@ export default function ContactPage() {
             </Card>
             <Card className="shadow-xl glassmorphism overflow-hidden">
                 <Image 
-                    src="https://images.unsplash.com/photo-1594398932026-640f469a5ebe"
+                    src="https://images.unsplash.com/photo-1524661135-423995f22d0b?w=600&h=400&fit=crop"
                     data-ai-hint="city map"
                     alt="Map showing office location"
                     width={600}

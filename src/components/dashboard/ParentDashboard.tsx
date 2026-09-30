@@ -65,7 +65,7 @@ export default function ParentDashboard() {
             <CardContent className="text-center space-y-4">
                 <div className="relative aspect-video w-full max-w-lg mx-auto rounded-lg overflow-hidden bg-gray-900 flex items-center justify-center text-gray-400">
                     <Image 
-                        src="https://images.unsplash.com/photo-1518542568098-b1224de5b359?w=800&h=450&fit=crop" 
+                        src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&h=450&fit=crop" 
                         alt="Live feed placeholder"
                         data-ai-hint="teacher children"
                         width={800}

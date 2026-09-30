@@ -252,7 +252,7 @@ export default function HomePage() {
                     </Button>
                 </div>
                 <div className="flex justify-center items-center">
-                    <Image src="https://images.unsplash.com/photo-1604881988758-f76ad2f78c8f" alt="Free resources preview" data-ai-hint="documents forms" width={500} height={400} className="rounded-xl shadow-lg" />
+                    <Image src="https://images.unsplash.com/photo-1588072432836-e10032774350?auto=format&fit=crop&w=800&q=80" alt="Free resources preview" data-ai-hint="documents forms" width={500} height={400} className="rounded-xl shadow-lg" />
                 </div>
             </div>
         </div>
@@ -271,7 +271,7 @@ export default function HomePage() {
               {content.splashDescription}
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-              <Image src="https://images.unsplash.com/photo-1516627145400-ef898d973216" alt="Children playing" data-ai-hint="children playing" width={600} height={400} className="rounded-xl shadow-lg" />
+              <Image src="https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=800&q=80" alt="Children playing" data-ai-hint="children playing" width={600} height={400} className="rounded-xl shadow-lg" />
               <div className="text-left p-6 bg-card/70 backdrop-blur-md rounded-xl shadow-lg">
                 <h3 className="font-headline text-2xl font-semibold text-primary mb-3">Vibrant Community</h3>
                 <p className="text-muted-foreground mb-2">Join a network of passionate educators and parents.</p>

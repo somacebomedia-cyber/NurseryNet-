@@ -9,7 +9,7 @@ import Link from "next/link";
 const hardwareProducts = [
   {
     name: "NurseryNet Smart Overhead Scanner",
-    image: "https://images.unsplash.com/photo-1629161141935-5cab66395eee",
+    image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&h=600&fit=crop",
     imageHint: "overhead document scanner",
     price: "R 2,899",
     badge: "Wi-Fi Connected",
@@ -26,7 +26,7 @@ const hardwareProducts = [
   },
   {
     name: "NurseryNet Document Stand",
-    image: "https://images.unsplash.com/photo-1589792942289-8d3b84054a36",
+    image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=800&h=600&fit=crop",
     imageHint: "document scanning stand smartphone",
     price: "R 549",
     badge: "Most Accessible",

@@ -41,7 +41,7 @@ const testimonialsData = {
     {
       name: "The Naidoo Family",
       role: "Parents",
-      avatar: "https://images.unsplash.com/photo-1555952494-035d833b7653?w=100&h=100&fit=crop",
+      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop",
       dataAiHint: "family smiling",
       text: "Being able to track homework and see our son's grades in real-time through the parent portal has been fantastic. It makes supporting his learning journey so much easier. A huge step up in school communication."
     },
@@ -71,7 +71,7 @@ const testimonialsData = {
     {
       name: "Sarah Daniels",
       role: "Parent of a Matric Student",
-      avatar: "https://images.unsplash.com/photo-1544717297-fa95b9ee9643?w=100&h=100&fit=crop",
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
       dataAiHint: "parent concerned",
       text: "Navigating the university application process was daunting. HighschoolNet gave my daughter the tools and confidence she needed. The AI essay feedback was particularly impressive and helpful."
     }
@@ -94,7 +94,7 @@ const testimonialsData = {
     {
       name: "Lerato Mokoena",
       role: "Final Year B.Com Student",
-      avatar: "https://images.unsplash.com/photo-1610474232328-56836f43e46e?w=100&h=100&fit=crop",
+      avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop",
       dataAiHint: "young student",
       text: "I built my entire CV using the AI builder and practiced for interviews with the prep tool. I landed a fantastic internship through a connection on the platform. TertiaryNet was crucial for my job search."
     }

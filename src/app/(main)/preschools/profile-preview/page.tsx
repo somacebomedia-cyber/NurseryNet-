@@ -65,8 +65,8 @@ export default function ProfilePreviewPage() {
             features: ['Play-based learning', 'Large outdoor play area', 'Nutritious daily meals', 'Qualified ECD practitioners', 'Art & Music program', 'Small class sizes'],
             logo: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&h=100&fit=crop',
             images: [
-                { url: 'https://images.unsplash.com/photo-1576572879633-5c8a3c5a7192?w=800&h=500&fit=crop', alt: 'Preschool classroom', dataAiHint: 'classroom children' },
-                { url: 'https://images.unsplash.com/photo-1550355191-aa7583f090e5?w=200&h=150&fit=crop', alt: 'Playground', dataAiHint: 'playground kids' },
+                { url: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&h=500&fit=crop', alt: 'Preschool classroom', dataAiHint: 'classroom children' },
+                { url: 'https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?w=800&h=500&fit=crop', alt: 'Playground', dataAiHint: 'playground kids' },
                 { url: 'https://images.unsplash.com/photo-1509305717900-84f40e786d82?w=200&h=150&fit=crop', alt: 'Art class', dataAiHint: 'children painting' },
                 { url: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?w=200&h=150&fit=crop', alt: 'Reading corner', dataAiHint: 'children reading' },
             ],
