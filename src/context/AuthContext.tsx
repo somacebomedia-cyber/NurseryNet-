@@ -3,7 +3,6 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { 
-  getAuth, 
   onAuthStateChanged, 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
@@ -15,12 +14,10 @@ import {
   type ConfirmationResult,
   UserCredential
 } from 'firebase/auth';
-import { app, db } from '@/lib/firebase';
+import { app, auth, db } from '@/lib/firebase';
 import { doc, setDoc, serverTimestamp, getDoc } from "firebase/firestore";
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
-
-const auth = getAuth(app);
 
 export type UserRole = 'Parent' | 'Preschool Owner' | 'Job Seeker';
 

@@ -4,6 +4,8 @@ import * as crypto from 'crypto';
 import { db } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: NextRequest) {
   const webhookSecret = process.env.PAYSTACK_WEBHOOK_SECRET;
 

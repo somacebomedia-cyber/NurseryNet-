@@ -2,6 +2,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
 
+export const dynamic = 'force-dynamic';
+
 // --- PAYPAL CONFIG ---
 const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
 const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;

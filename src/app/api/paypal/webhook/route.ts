@@ -5,6 +5,8 @@ import { db } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
 import axios from 'axios';
 
+export const dynamic = 'force-dynamic';
+
 const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
 const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
 const PAYPAL_API_URL = process.env.PAYPAL_API_URL || 'https://api-m.sandbox.paypal.com';

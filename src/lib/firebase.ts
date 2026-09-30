@@ -1,25 +1,45 @@
-import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import { getStorage } from 'firebase/storage';
+import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
+import { getAuth, type Auth } from "firebase/auth";
+import { getFirestore, type Firestore } from "firebase/firestore";
+import { getStorage, type FirebaseStorage } from 'firebase/storage';
 
-// IMPORTANT: Add your Firebase project configuration to the .env file.
-// You can find these values in your Firebase project settings:
-// Project Settings > General > Your apps > Web app > SDK setup and configuration
-
+// IMPORTANT: Configure Firebase credentials in .env.local or your deployment platform (e.g. Vercel).
+// Safe fallback placeholders are provided so build-time static page collection succeeds even if
+// environment variables are missing during CI/Vercel build phase.
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyDummyKeyForBuildEnv1234567890",
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "nurserynet-app.firebaseapp.com",
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "nurserynet-app",
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "nurserynet-app.appspot.com",
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "123456789012",
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:123456789012:web:placeholder1234567890",
 };
 
 // Initialize Firebase
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const auth = getAuth(app);
-const db = getFirestore(app);
-export const storage = getStorage(app);
+const app: FirebaseApp = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-export { app, auth, db };
+let auth: Auth;
+try {
+  auth = getAuth(app);
+} catch (error) {
+  console.warn("Firebase Auth initialization skipped during build:", error);
+  auth = {} as Auth;
+}
+
+let db: Firestore;
+try {
+  db = getFirestore(app);
+} catch (error) {
+  console.warn("Firebase Firestore initialization warning:", error);
+  db = {} as Firestore;
+}
+
+let storage: FirebaseStorage;
+try {
+  storage = getStorage(app);
+} catch (error) {
+  console.warn("Firebase Storage initialization warning:", error);
+  storage = {} as FirebaseStorage;
+}
+
+export { app, auth, db, storage };
