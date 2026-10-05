@@ -1,12 +1,6 @@
 
 'use client';
-import { useState } from 'react';
-import ProfileForm from './profile/ProfileForm';
-import GalleryForm from './gallery/GalleryForm';
-import DocumentsForm from './documents/DocumentsForm';
-import SettingsForm from './settings/SettingsForm';
-import { RequireRole } from '@/lib/authGuard';
-import { Info, Shield } from 'lucide-react';
+import { Shield } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import InstitutionDashboard from './InstitutionDashboard';

@@ -33,10 +33,60 @@ export default function DirectoryProfileClient({ id }: { id: string }) {
           if (!cancelled) setData({ id: d.id, ...(d.data() as PreschoolData) });
           return;
         }
-        // If neither found, set error.
+        // If neither found in Firestore, check fallback local dataset
+        const fallbackModule = await import('@/lib/data/preschools.json');
+        const fallbackList = (fallbackModule.default || fallbackModule) as any[];
+        const localSchool = fallbackList.find((s: any) => s.id === id || s.slug === id);
+        if (localSchool) {
+          if (!cancelled) {
+            setData({
+              id: localSchool.id,
+              name: localSchool.name,
+              location: localSchool.location,
+              description: localSchool.description,
+              contact: {
+                phone: localSchool.phone,
+                website: localSchool.website,
+              },
+              images: localSchool.images || [],
+              ownerId: 'preschool-sample',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              ...(localSchool as any),
+            });
+          }
+          return;
+        }
+
         if (!cancelled) setError("Preschool not found.");
       } catch (e) {
         console.error("Error fetching profile client-side: ", e);
+        // Also check fallback in catch block
+        try {
+          const fallbackModule = await import('@/lib/data/preschools.json');
+          const fallbackList = (fallbackModule.default || fallbackModule) as any[];
+          const localSchool = fallbackList.find((s: any) => s.id === id || s.slug === id);
+          if (localSchool && !cancelled) {
+            setData({
+              id: localSchool.id,
+              name: localSchool.name,
+              location: localSchool.location,
+              description: localSchool.description,
+              contact: {
+                phone: localSchool.phone,
+                website: localSchool.website,
+              },
+              images: localSchool.images || [],
+              ownerId: 'preschool-sample',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              ...(localSchool as any),
+            });
+            return;
+          }
+        } catch {
+          // ignore
+        }
         if (!cancelled) setError("An error occurred while fetching the preschool data.");
       } finally {
         if (!cancelled) setLoading(false);

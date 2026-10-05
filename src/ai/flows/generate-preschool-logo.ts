@@ -54,7 +54,7 @@ const generatePreschoolLogoFlow = ai.defineFlow(
     const descriptionGenerationPrompt = `You are a creative branding assistant. Write a short, one-sentence description for a logo you just created for a preschool named "${input.businessName}".`;
 
     const { text } = await ai.generate({
-        model: googleAI.model('gemini-pro'),
+        model: googleAI.model('gemini-1.5-flash'),
         prompt: descriptionGenerationPrompt,
     });
     

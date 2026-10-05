@@ -74,17 +74,17 @@ export default function PricingCard({
         <Button 
             asChild={!!ctaLink} 
             size="lg" 
-            className={cn("w-full text-lg py-3", isPopular ? "bg-accent text-accent-foreground hover:bg-accent/90" : "bg-primary hover:bg-primary/90")}
+            className={cn("w-full h-auto min-h-12 text-base sm:text-lg py-3 px-4 whitespace-normal text-center leading-snug", isPopular ? "bg-accent text-accent-foreground hover:bg-accent/90" : "bg-primary hover:bg-primary/90")}
             onClick={ctaAction}
             disabled={isLoading}
         >
           {ctaLink ? (
-             <Link href={ctaLink}>{ctaText}</Link>
+             <Link href={ctaLink} className="w-full text-center">{ctaText}</Link>
           ) : (
-            <>
-              {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
-              {ctaText}
-            </>
+            <span className="flex items-center justify-center gap-2 w-full text-center">
+              {isLoading && <Loader2 className="h-5 w-5 animate-spin shrink-0" />}
+              <span>{ctaText}</span>
+            </span>
           )}
         </Button>
       </CardFooter>

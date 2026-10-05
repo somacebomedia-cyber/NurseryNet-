@@ -1,5 +1,6 @@
 {
-  "name": "ORIGINAL NurseryNet",
-  "description": "App imported from Firebase Studio",
-  "requestFramePermissions": []
+  "name": "NurseryNet",
+  "description": "NurseryNet is the ultimate platform for early childhood education, connecting parents with amazing preschools and empowering owners with AI-powered marketing tools, funding finders, and growth resources.",
+  "requestFramePermissions": [],
+  "capabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

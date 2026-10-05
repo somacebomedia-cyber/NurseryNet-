@@ -24,18 +24,36 @@ const premiumResources = [
 ];
 
 const ResourceButton = ({ title }: { title: string }) => (
-    <Button variant="outline" className="w-full justify-start" asChild>
-        <a href="#" download>
-            <Download className="mr-2 h-4 w-4" />
-            {title}
+    <Button 
+        variant="outline" 
+        className="w-full justify-start items-center text-left h-auto min-h-[46px] py-2.5 px-3.5 whitespace-normal break-words leading-snug group hover:bg-primary/5 hover:border-primary/40 transition-colors" 
+        asChild
+    >
+        <a href="#" download className="flex items-center gap-2.5 w-full text-left">
+            <span className="p-1 rounded bg-primary/10 text-primary shrink-0 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                <Download className="h-4 w-4 shrink-0" />
+            </span>
+            <span className="flex-1 text-sm font-medium leading-snug break-words text-foreground">
+                {title}
+            </span>
         </a>
     </Button>
 );
 
 const LockedResourceButton = ({ title }: { title: string }) => (
-     <Button variant="outline" className="w-full justify-start text-muted-foreground" disabled>
-        <Lock className="mr-2 h-4 w-4" />
-        {title}
+    <Button 
+        variant="outline" 
+        className="w-full justify-start items-center text-left h-auto min-h-[46px] py-2.5 px-3.5 whitespace-normal break-words leading-snug text-muted-foreground/80 hover:bg-muted/40 border-dashed" 
+        disabled
+    >
+        <div className="flex items-center gap-2.5 w-full text-left">
+            <span className="p-1 rounded bg-muted text-muted-foreground shrink-0">
+                <Lock className="h-4 w-4 shrink-0" />
+            </span>
+            <span className="flex-1 text-sm font-medium leading-snug break-words text-muted-foreground">
+                {title}
+            </span>
+        </div>
     </Button>
 );
 
@@ -71,7 +89,7 @@ export default function GrowthKitPage() {
                      <CardDescription>Subscribe to a paid plan to get access to all premium worksheets, branding tools, and advanced AI features.</CardDescription>
                 </CardHeader>
                 <CardContent className="text-center">
-                    <Button asChild size="lg">
+                    <Button asChild size="lg" className="w-full max-w-xs h-auto min-h-11 py-3 px-6 whitespace-normal text-center leading-snug">
                         <Link href="/pricing">View Pricing Plans</Link>
                     </Button>
                 </CardContent>
@@ -79,7 +97,7 @@ export default function GrowthKitPage() {
 
             <Card className="lg:col-span-1 shadow-xl glassmorphism">
                 <CardHeader>
-                    <CardTitle className="text-2xl font-headline text-primary flex items-center gap-3"><BookHeart className="w-7 h-7"/>Planning & Curriculum</CardTitle>
+                    <CardTitle className="text-2xl font-headline text-primary flex items-center gap-3"><BookHeart className="w-7 h-7 shrink-0"/>Planning & Curriculum</CardTitle>
                     <CardDescription>Plan engaging lessons and track readiness with ease.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -90,7 +108,7 @@ export default function GrowthKitPage() {
 
              <Card className="lg:col-span-1 shadow-xl glassmorphism">
                 <CardHeader>
-                    <CardTitle className="text-2xl font-headline text-primary flex items-center gap-3"><Handshake className="w-7 h-7"/>Parent Engagement</CardTitle>
+                    <CardTitle className="text-2xl font-headline text-primary flex items-center gap-3"><Handshake className="w-7 h-7 shrink-0"/>Parent Engagement</CardTitle>
                     <CardDescription>Build trust and strong relationships with your families.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -100,10 +118,10 @@ export default function GrowthKitPage() {
 
             <Card className="lg:col-span-3 shadow-xl glassmorphism">
                 <CardHeader>
-                     <CardTitle className="text-2xl font-headline text-primary flex items-center gap-3"><Lock className="w-7 h-7"/>Premium Curriculum Worksheets</CardTitle>
+                     <CardTitle className="text-2xl font-headline text-primary flex items-center gap-3"><Lock className="w-7 h-7 shrink-0"/>Premium Curriculum Worksheets</CardTitle>
                      <CardDescription>High-quality, curriculum-aligned worksheets. Subscribers to the Growth plan can add their own branding.</CardDescription>
                 </CardHeader>
-                 <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                 <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                      {premiumResources.filter(r => r.category === "Premium Worksheets").map(res => <LockedResourceButton key={res.title} title={res.title} />)}
                  </CardContent>
             </Card>

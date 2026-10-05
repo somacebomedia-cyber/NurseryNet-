@@ -1,52 +1,17 @@
-
 // src/app/(main)/directory/page.tsx
 import { getSchools } from '@/lib/data/get-schools';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Search, Frown, ChevronRight } from 'lucide-react';
+import { Search, Frown, ChevronRight, School } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { PreschoolData } from '@/lib/schemas/preschool';
 import DirectorySearch from '@/components/directory/DirectorySearch';
+import PreschoolCardsGrid, { type SchoolWithId } from '@/components/directory/PreschoolCardsGrid';
 import { Button } from '@/components/ui/button';
 import { Suspense } from 'react';
-
-interface SchoolWithId extends PreschoolData {
-  id: string;
-}
-
-function SchoolCard({ school }: { school: SchoolWithId }) {
-  const placeholderImg = "https://picsum.photos/seed/placeholder/400/200";
-  const mainImage = school.images?.[0]?.url || placeholderImg;
-
-  return (
-    <Link href={`/directory/${school.id}`} passHref>
-      <Card className="h-full overflow-hidden transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-1">
-        <Image
-          src={mainImage}
-          alt={school.name || 'Preschool Image'}
-          width={400}
-          height={200}
-          className="w-full h-40 object-cover"
-        />
-        <CardHeader>
-          <CardTitle className="text-xl text-primary">{school.name}</CardTitle>
-          <CardDescription>{school.location}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground line-clamp-3">
-            {school.description}
-          </p>
-        </CardContent>
-      </Card>
-    </Link>
-  );
-}
 
 export default async function DirectoryPage({
   searchParams,
 }: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const params = await searchParams;
   const city = typeof params.city === 'string' ? params.city : undefined;
@@ -58,16 +23,18 @@ export default async function DirectoryPage({
     <div className="bg-gradient-to-br from-background to-secondary/20 py-12 md:py-20 min-h-screen">
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <header className="text-center mb-8">
-          <Search className="h-16 w-16 text-primary mx-auto mb-4" />
-          <h1 className="font-headline text-4xl font-extrabold tracking-tight text-primary sm:text-5xl md:text-6xl">
+          <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-primary/10 text-primary mb-4">
+            <School className="h-10 w-10" />
+          </div>
+          <h1 className="font-headline text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl md:text-6xl">
             Preschool Directory
           </h1>
-          <p className="mt-6 max-w-3xl mx-auto text-lg text-muted-foreground sm:text-xl">
-            Find the perfect start for your little one. Browse our curated list of local preschools.
+          <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground sm:text-xl">
+            Find the perfect start for your child. Browse verified early learning centers and preschools.
           </p>
         </header>
 
-        <Suspense fallback={<div className="h-10 w-full max-w-md mx-auto mb-12 animate-pulse bg-muted rounded-md" />}>
+        <Suspense fallback={<div className="h-11 w-full max-w-2xl mx-auto mb-10 animate-pulse bg-muted rounded-md" />}>
           <DirectorySearch />
         </Suspense>
 
@@ -76,22 +43,32 @@ export default async function DirectoryPage({
             <Frown className="h-4 w-4" />
             <AlertTitle>Error Loading Directory</AlertTitle>
             <AlertDescription>
-              {error} Please ensure the Firestore Index is created as per the README instructions.
+              {error} Please ensure the Firestore Index is created or reload the page.
             </AlertDescription>
           </Alert>
         )}
 
         {!error && schools.length > 0 && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-              {schools.map(school => <SchoolCard key={school.id} school={school as SchoolWithId} />)}
+            <div className="flex items-center justify-between mb-6 px-1">
+              <p className="text-sm font-medium text-muted-foreground">
+                Showing <span className="font-semibold text-foreground">{schools.length}</span> preschool{schools.length === 1 ? '' : 's'}
+                {city ? (
+                  <span> matching &ldquo;<span className="text-primary font-semibold">{city}</span>&rdquo;</span>
+                ) : (
+                  <span> across all regions</span>
+                )}
+              </p>
             </div>
+
+            {/* Staggered Animated Cards Grid */}
+            <PreschoolCardsGrid schools={schools as SchoolWithId[]} cityQuery={city} />
             
             {lastVisibleId && schools.length === 20 && (
-              <div className="flex justify-center">
+              <div className="flex justify-center mt-8">
                 <Link href={`/directory?${city ? `city=${encodeURIComponent(city)}&` : ''}lastDocId=${lastVisibleId}`}>
-                  <Button variant="outline" size="lg">
-                    Next Page <ChevronRight className="ml-2 h-4 w-4" />
+                  <Button variant="outline" size="lg" className="gap-2">
+                    Next Page <ChevronRight className="h-4 w-4" />
                   </Button>
                 </Link>
               </div>
@@ -100,9 +77,25 @@ export default async function DirectoryPage({
         )}
 
         {!error && schools.length === 0 && (
-          <div className="text-center py-10">
-            <p className="text-lg text-muted-foreground">No preschools found {city ? `in ${city}` : ''}.</p>
-            <p className="text-sm text-muted-foreground mt-2">Try searching for a different city or check back later.</p>
+          <div className="text-center py-16 px-4 bg-muted/30 rounded-2xl border border-dashed border-border/80 max-w-xl mx-auto">
+            <div className="p-4 rounded-full bg-primary/10 w-16 h-16 mx-auto flex items-center justify-center text-primary mb-4">
+              <Search className="h-8 w-8" />
+            </div>
+            <h3 className="text-xl font-bold text-foreground">No preschools found</h3>
+            <p className="text-muted-foreground mt-2 text-sm max-w-md mx-auto">
+              {city 
+                ? `We couldn't find any preschools matching "${city}". Try searching for another city like London, Westminster, or Pimlico.`
+                : 'No preschools are currently available in the directory. Please check back later.'}
+            </p>
+            {city && (
+              <div className="mt-6">
+                <Link href="/directory">
+                  <Button variant="outline" size="sm">
+                    Clear Search Filters
+                  </Button>
+                </Link>
+              </div>
+            )}
           </div>
         )}
       </div>

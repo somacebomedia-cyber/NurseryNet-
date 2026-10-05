@@ -45,6 +45,7 @@
     "firebase-admin": "^12.3.0",
     "genkit": "^1.8.0",
     "lucide-react": "^0.475.0",
+    "motion": "^13.5.0",
     "next": "15.3.8",
     "node-fetch": "^2.7.0",
     "opener": "^1.5.2",
