@@ -8,10 +8,11 @@ import { Search, X, Loader2 } from 'lucide-react';
 
 const POPULAR_LOCATIONS = [
   { label: 'All Preschools', value: '' },
-  { label: 'London', value: 'London' },
-  { label: 'Westminster', value: 'Westminster' },
-  { label: 'Pimlico', value: 'Pimlico' },
-  { label: 'Kensington', value: 'Kensington' },
+  { label: 'Bloemfontein', value: 'Bloemfontein' },
+  { label: 'Welkom', value: 'Welkom' },
+  { label: 'Port Elizabeth', value: 'Port Elizabeth' },
+  { label: 'Benoni', value: 'Benoni' },
+  { label: 'Kempton Park', value: 'Kempton Park' },
 ];
 
 export default function DirectorySearch() {

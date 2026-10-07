@@ -29,7 +29,7 @@ export async function getSchools(city?: string, lastDocId?: string, limitCount: 
       const snapshot = await getDocs(q);
       
       if (!snapshot.empty) {
-        const schools = snapshot.docs.map(docSnap => {
+        const firestoreSchools = snapshot.docs.map(docSnap => {
           const data = docSnap.data();
           return {
             id: docSnap.id,
@@ -39,10 +39,27 @@ export async function getSchools(city?: string, lastDocId?: string, limitCount: 
           };
         });
 
+        const firestoreIds = new Set(firestoreSchools.map(s => s.id));
+        const firestoreNames = new Set(firestoreSchools.map(s => ((s as any).name || '').toLowerCase()));
+        
+        let filteredLocal = (fallbackPreschools as any[]) || [];
+        if (city && city.trim()) {
+          const queryLower = city.trim().toLowerCase();
+          filteredLocal = filteredLocal.filter(school => 
+            (school.city && school.city.toLowerCase().includes(queryLower)) ||
+            (school.location && school.location.toLowerCase().includes(queryLower)) ||
+            (school.province && school.province.toLowerCase().includes(queryLower)) ||
+            (school.name && school.name.toLowerCase().includes(queryLower))
+          );
+        }
+
+        const additionalLocal = filteredLocal.filter(s => !firestoreIds.has(s.id) && !firestoreNames.has((s.name || '').toLowerCase()));
+        const combined = [...firestoreSchools, ...additionalLocal];
+
         const lastVisibleId = snapshot.docs.length > 0 ? snapshot.docs[snapshot.docs.length - 1].id : null;
 
         return {
-          schools,
+          schools: combined.slice(0, limitCount),
           lastVisibleId,
           error: null,
         };
@@ -60,6 +77,7 @@ export async function getSchools(city?: string, lastDocId?: string, limitCount: 
       filtered = filtered.filter(school => 
         (school.city && school.city.toLowerCase().includes(queryLower)) ||
         (school.location && school.location.toLowerCase().includes(queryLower)) ||
+        (school.province && school.province.toLowerCase().includes(queryLower)) ||
         (school.name && school.name.toLowerCase().includes(queryLower))
       );
     }
