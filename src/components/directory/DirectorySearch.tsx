@@ -8,11 +8,13 @@ import { Search, X, Loader2 } from 'lucide-react';
 
 const POPULAR_LOCATIONS = [
   { label: 'All Preschools', value: '' },
+  { label: 'Johannesburg', value: 'Johannesburg' },
+  { label: 'Pretoria', value: 'Pretoria' },
+  { label: 'Ekurhuleni', value: 'Ekurhuleni' },
+  { label: 'Polokwane', value: 'Polokwane' },
   { label: 'Bloemfontein', value: 'Bloemfontein' },
+  { label: 'eThekwini / Durban', value: 'eThekwini' },
   { label: 'Welkom', value: 'Welkom' },
-  { label: 'Port Elizabeth', value: 'Port Elizabeth' },
-  { label: 'Benoni', value: 'Benoni' },
-  { label: 'Kempton Park', value: 'Kempton Park' },
 ];
 
 export default function DirectorySearch() {

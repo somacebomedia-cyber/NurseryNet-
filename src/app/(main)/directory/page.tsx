@@ -84,7 +84,7 @@ export default async function DirectoryPage({
             <h3 className="text-xl font-bold text-foreground">No preschools found</h3>
             <p className="text-muted-foreground mt-2 text-sm max-w-md mx-auto">
               {city 
-                ? `We couldn't find any preschools matching "${city}". Try searching for another city like London, Westminster, or Pimlico.`
+                ? `We couldn't find any preschools matching "${city}". Try searching for another city like Johannesburg, Pretoria, Ekurhuleni, or Polokwane.`
                 : 'No preschools are currently available in the directory. Please check back later.'}
             </p>
             {city && (

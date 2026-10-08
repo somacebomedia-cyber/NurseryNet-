@@ -12,6 +12,69 @@ PROVINCE_MAP = {
     'WC': 'Western Cape'
 }
 
+KNOWN_PLACES = [
+    'Johannesburg', 'Cape Town', 'Durban', 'Pretoria', 'Soweto', 'Port Elizabeth',
+    'East London', 'Bloemfontein', 'Polokwane', 'Nelspruit', 'Kimberley', 'Rustenburg',
+    'Pietermaritzburg', 'Benoni', 'Boksburg', 'Germiston', 'Kempton Park', 'Alberton',
+    'Edenvale', 'Springs', 'Brakpan', 'Centurion', 'Randburg', 'Roodepoort', 'Krugersdorp',
+    'Cradock', 'Graaff-Reinet', 'Grahamstown', 'Uitenhage', 'Sasolburg', 'Kroonstad',
+    'Parys', 'Welkom', 'Bothaville', 'Virginia', 'Bethlehem', 'Harrismith', 'Ficksburg',
+    'Senekal', 'Ladybrand', 'Phuthaditjhaba', 'Jagersfontein', 'Koffiefontein', 'Ballito',
+    'Stanger', 'Westville', 'Kloof', 'Hillcrest', 'Pinetown', 'Newcastle', 'Dundee',
+    'Tzaneen', 'Phalaborwa', 'Giyani', 'Mokopane', 'Bochum', 'Lebowakgomo', 'Jane Furse',
+    'Burgersfort', 'Groblersdal', 'Thohoyandou', 'Makhado', 'Musina', 'Bela-Bela',
+    'Modimolle', 'Thabazimbi', 'Lephalale', 'Witbank', 'Middelburg', 'Ermelo', 'Standerton',
+    'Piet Retief', 'White River', 'Barberton', 'Kuruman', 'Kathu', 'Springbok', 'Upington',
+    'Brits', 'Potchefstroom', 'Klerksdorp', 'Lichtenburg', 'Mafikeng', 'Mmabatho', 'Vryburg',
+    'Stellenbosch', 'Paarl', 'Worcester', 'Ceres', 'George', 'Knysna', 'Oudtshoorn',
+    'Mossel Bay', 'Beaufort West', 'Hermanus', 'Caledon', 'Grabouw', 'Swellendam',
+    'Malmesbury', 'Vredenburg', 'Saldanha', 'Clanwilliam', 'Vredendal', 'Katlehong',
+    'Vosloorus', 'Tembisa', 'Midrand', 'Sandton', 'Lenasia', 'Diepsloot', 'Alexandra',
+    'Ekurhuleni', 'Tshwane', 'Mangaung', 'eThekwini', 'Chatsworth', 'Phoenix', 'Umlazi',
+    'Mitchells Plain', 'Khayelitsha', 'Athlone', 'Bellville', 'Somerset West', 'Soshanguve',
+    'Mamelodi', 'Atteridgeville', 'Centurion', 'Hammanskraal', 'Mabopane', 'Ga-Rankuwa',
+    'Daveyton', 'Tsakane', 'Duduza', 'KwaThema', 'Kwathema', 'Heidelberg', 'Nigel',
+    'Vanderbijlpark', 'Vereeniging', 'Meyerton', 'Sebokeng', 'Sharpeville', 'Evaton',
+    'Carletonville', 'Westonaria', 'Randfontein', 'Kagiso', 'Mohlakeng', 'Bekkersdal',
+    'Botshabelo', 'Thaba Nchu', 'Odendaalsrus', 'Allanridge', 'Hennenman', 'Ventersburg',
+    'Viljoenskroon', 'Wesselsbron', 'Hoopstad', 'Bultfontein', 'Theunissen', 'Brandfort',
+    'Winburg', 'Marquard', 'Clocolan', 'Excelsior', 'Tweespruit', 'Hobhouse', 'Wepener',
+    'Zastron', 'Rouxville', 'Smithfield', 'Edenburg', 'Trompsburg', 'Springfontein',
+    'Philippolis', 'Bethulie', 'Richards Bay', 'Ladysmith', 'Empangeni', 'Port Shepstone',
+    'Utrecht', 'Ulundi', 'Vryheid', 'Eshowe', 'Hluhluwe', 'Mtubatuba', 'Kokstad', 'Scottburgh',
+    'Edendale'
+]
+
+MUNI_MAPPINGS = [
+    ('CITY OF JOHANNESBURG', 'Johannesburg'),
+    ('CITY OF TSHWANE', 'Pretoria'),
+    ('EKURHULENI', 'Ekurhuleni'),
+    ('MANGAUNG', 'Bloemfontein'),
+    ('ETHEKWINI', 'Durban'),
+    ('BUFFALO CITY', 'East London'),
+    ('NELSON MANDELA BAY', 'Port Elizabeth'),
+    ('NEWCASTLE', 'Newcastle'),
+    ('POLOKWANE', 'Polokwane'),
+    ('MOGALAKWENA', 'Mokopane'),
+    ('AMAJUBA', 'Newcastle'),
+    ('UMGUNGUNDLOVU', 'Pietermaritzburg'),
+    ('UTHUNGULU', 'Richards Bay'),
+    ('KING CETSHWAYO', 'Richards Bay'),
+    ('ILEMBE', 'Ballito'),
+    ('UGU', 'Port Shepstone'),
+    ('UTHUKELA', 'Ladysmith'),
+    ('UMZINYATHI', 'Dundee'),
+    ('ZULULAND', 'Ulundi'),
+    ('UMKHANYAKUDE', 'Mkuze'),
+    ('CAPRICORN', 'Polokwane'),
+    ('SEKGOSESE', 'Sekgosese'),
+    ('LEPELLE', 'Lebowakgomo'),
+    ('VHEMBE', 'Thohoyandou'),
+    ('MOPANI', 'Giyani'),
+    ('SEKHUKHUNE', 'Burgersfort'),
+    ('WATERBERG', 'Modimolle')
+]
+
 def clean_title(s):
     if not s or s.strip() == '99' or s.strip().upper() == 'UNKOWN':
         return ''
@@ -25,11 +88,21 @@ def clean_title(s):
             cleaned.append(w.capitalize())
     return ' '.join(cleaned)
 
+def preprocess_line(line):
+    line = re.sub(r'OPENARLY\b', 'OPEN EARLY', line)
+    line = re.sub(r'([A-Za-z0-9/\'\-]+)PEN\s+EARLY\b', r'\1 OPEN EARLY', line)
+    line = re.sub(r'([A-Za-z0-9/\'\-]+)(OPEN|OPN|OEN)\b', r'\1 OPEN', line)
+    line = re.sub(r'\b(OPN|OEN)\b', 'OPEN', line)
+    line = re.sub(r'([A-Za-z0-9/\'\-]+)(PENDING)\b', r'\1 PENDING', line)
+    line = re.sub(r'([A-Za-z0-9/\'\-]+)(CLOSEEARLY)\b', r'\1 PENDING CLOSE EARLY', line)
+    return line
+
 def parse_line(line):
     line = line.strip()
     if not line or line.startswith('NatEmis'):
         return None
     
+    line = preprocess_line(line)
     parts = line.split()
     if len(parts) < 8:
         return None
@@ -44,8 +117,8 @@ def parse_line(line):
     # Locate status
     status = 'OPEN'
     status_idx = -1
-    for i, p in enumerate(parts[2:20], start=2):
-        if p == 'OPEN' or p == 'PENDING' or (p == 'CLOSEEARLY'):
+    for i, p in enumerate(parts[2:25], start=2):
+        if p in ('OPEN', 'PENDING', 'CLOSEEARLY') or p.startswith('CLOSE'):
             status_idx = i
             if p == 'OPEN':
                 status = 'OPEN'
@@ -80,7 +153,7 @@ def parse_line(line):
             try:
                 val1 = float(parts[i])
                 val2 = float(parts[i+1])
-                # Longitude in SA: roughly 16 to 33, Latitude: roughly -35 to -22
+                # Longitude in SA: roughly 16 to 34, Latitude: roughly -35 to -21
                 if 16.0 <= val1 <= 34.0 and -35.5 <= val2 <= -21.0:
                     lng = round(val1, 5)
                     lat = round(val2, 5)
@@ -109,44 +182,27 @@ def parse_line(line):
     street = ''
     city = ''
     
-    known_cities = [
-        'Johannesburg', 'Cape Town', 'Durban', 'Pretoria', 'Soweto', 'Port Elizabeth',
-        'East London', 'Bloemfontein', 'Polokwane', 'Nelspruit', 'Kimberley', 'Rustenburg',
-        'Pietermaritzburg', 'Benoni', 'Boksburg', 'Germiston', 'Kempton Park', 'Alberton',
-        'Edenvale', 'Springs', 'Brakpan', 'Centurion', 'Randburg', 'Roodepoort', 'Krugersdorp',
-        'Cradock', 'Graaff-Reinet', 'Grahamstown', 'Uitenhage', 'Sasolburg', 'Kroonstad',
-        'Parys', 'Welkom', 'Bothaville', 'Virginia', 'Bethlehem', 'Harrismith', 'Ficksburg',
-        'Senekal', 'Ladybrand', 'Phuthaditjhaba', 'Jagersfontein', 'Koffiefontein', 'Ballito',
-        'Stanger', 'Westville', 'Kloof', 'Hillcrest', 'Pinetown', 'Newcastle', 'Dundee',
-        'Tzaneen', 'Phalaborwa', 'Giyani', 'Mokopane', 'Bochum', 'Lebowakgomo', 'Jane Furse',
-        'Burgersfort', 'Groblersdal', 'Thohoyandou', 'Makhado', 'Musina', 'Bela-Bela',
-        'Modimolle', 'Thabazimbi', 'Lephalale', 'Witbank', 'Middelburg', 'Ermelo', 'Standerton',
-        'Piet Retief', 'White River', 'Barberton', 'Kuruman', 'Kathu', 'Springbok', 'Upington',
-        'Brits', 'Potchefstroom', 'Klerksdorp', 'Lichtenburg', 'Mafikeng', 'Mmabatho', 'Vryburg',
-        'Stellenbosch', 'Paarl', 'Worcester', 'Ceres', 'George', 'Knysna', 'Oudtshoorn',
-        'Mossel Bay', 'Beaufort West', 'Hermanus', 'Caledon', 'Grabouw', 'Swellendam',
-        'Malmesbury', 'Vredenburg', 'Saldanha', 'Clanwilliam', 'Vredendal'
-    ]
-
-    for c in known_cities:
-        if re.search(r'\b' + re.escape(c) + r'\b', line, re.IGNORECASE):
-            city = c
+    # 1. Match known places in line
+    for p in KNOWN_PLACES:
+        if re.search(r'\b' + re.escape(p) + r'\b', line, re.IGNORECASE):
+            city = p
             break
+            
+    # 2. Match municipality mappings
+    if not city:
+        for muni, mapped_city in MUNI_MAPPINGS:
+            if muni in line.upper():
+                city = mapped_city
+                break
+                
+    # 3. Fallback to province name
+    if not city:
+        city = province_name
 
     tokens = [t for t in parts if ',' in t or any(kw in t.upper() for kw in ['STREET', 'STR', 'ROAD', 'RD', 'AVENUE', 'AVE', 'CRESCENT', 'SECTION', 'VILLAGE', 'DRIVE', 'LANE'])]
     if tokens:
         street = ' '.join(tokens[:5]).replace('"', '').strip(', ')
     
-    if not city:
-        for p in parts[basic_edu_idx:]:
-            clean_p = p.strip(',').strip()
-            if len(clean_p) > 3 and clean_p.isalpha() and clean_p.upper() not in ['OPEN', 'PENDING', 'CLOSE', 'EARLY', 'CHILDHOOD', 'DEVELOPMENT', 'CENTRE', 'PRE-PRIMARY', 'SCHOOL', 'BASIC', 'EDUCATION', 'PUBLIC', 'INDEPENDENT', 'UNKOWN', 'UNKNOWN', 'NOT', 'APPLICABLE', 'NONE', 'MUNICIPALITY', 'LOCAL', 'DISTRICT', 'CIRCUIT', 'POST', 'OFFICE', 'BOX']:
-                city = clean_p.capitalize()
-                break
-
-    if not city:
-        city = province_name
-
     location = f"{street}, {city}, {province_name}".strip(', ') if street else f"{city}, {province_name}"
 
     features = [
