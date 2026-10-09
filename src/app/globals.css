@@ -1,167 +1,145 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root, body[data-brand='nurserynet'] {
-    --background: 251 100% 97%; /* #F3F0FF - Light Purple-ish White */
-    --foreground: 250 33% 26%; /* #32285C - Dark Purple */
-    
-    --card: 0 0% 100%; /* #FFFFFF - White */
-    --card-foreground: 250 33% 26%; /* #32285C - Dark Purple */
-    
-    --popover: 0 0% 100%; /* #FFFFFF - White */
-    --popover-foreground: 250 33% 26%; /* #32285C - Dark Purple */
-    
-    --primary: 257 79% 65%; /* #8A5CEE - Medium Purple */
-    --primary-foreground: 0 0% 100%; /* White for text on primary */
-    
-    --secondary: 259 83% 80%; /* #BBA1F7 - Light Purple (HTML --primary-light) */
-    --secondary-foreground: 250 33% 26%; /* #32285C - Dark Purple */
-    
-    --muted: 257 79% 90%; /* #D3C0F9 - Lighter Purple */
-    --muted-foreground: 248 15% 46%; /* #6B6487 - Greyish Purple */
-    
-    --accent: 15 100% 63%; /* #FF6E40 - Orange (HTML --secondary) */
-    --accent-foreground: 0 0% 100%; /* White for text on accent */
-    
-    --accent-blue-hsl: 197 66% 58%; /* #51B5D9 (HTML --info) */
-    --accent-blue-foreground-hsl: 0 0% 100%; /* White for text on this blue */
-
-    --destructive: 346 76% 58%; /* #E5446D (HTML --danger) */
-    --destructive-foreground: 0 0% 98%; /* White */
-    
-    --border: 257 79% 85%; /* #C4B1F8 - Light Purple Border */
-    --input: 251 100% 98%; /* #F7F5FF - Very Light Purple Input BG */
-    --ring: 257 79% 65%; /* #8A5CEE (Primary) */
-    
-    --radius: 0.8rem; /* Slightly more rounded as per original PRD */
-
-    --chart-1: 257 79% 65%; /* Primary */
-    --chart-2: 15 100% 63%; /* Accent (Orange) */
-    --chart-3: 289 63% 42%; /* #9C27B0 (HTML --purple) */
-    --chart-4: 197 66% 58%; /* Accent Blue (#51B5D9 from HTML --info) */
-    --chart-5: 43 100% 67%; /* #FFC857 (HTML --warning) */
-
+    --background: 251 100% 97%;
+    --foreground: 250 33% 26%;
+    --card: 0 0% 100%;
+    --card-foreground: 250 33% 26%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 250 33% 26%;
+    --primary: 257 79% 65%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 259 83% 80%;
+    --secondary-foreground: 250 33% 26%;
+    --muted: 257 79% 90%;
+    --muted-foreground: 248 15% 46%;
+    --accent: 15 100% 63%;
+    --accent-foreground: 0 0% 100%;
+    --accent-blue-hsl: 197 66% 58%;
+    --accent-blue-foreground-hsl: 0 0% 100%;
+    --destructive: 346 76% 58%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 257 79% 85%;
+    --input: 251 100% 98%;
+    --ring: 257 79% 65%;
+    --radius: 0.8rem;
+    --chart-1: 257 79% 65%;
+    --chart-2: 15 100% 63%;
+    --chart-3: 289 63% 42%;
+    --chart-4: 197 66% 58%;
+    --chart-5: 43 100% 67%;
     --sidebar-background: 251 90% 96%;
     --sidebar-foreground: 250 50% 30%;
     --sidebar-primary: 257 79% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 15 100% 90%; /* Light Orange for sidebar accent */
+    --sidebar-accent: 15 100% 90%;
     --sidebar-accent-foreground: 250 50% 30%;
     --sidebar-border: 257 79% 88%;
     --sidebar-ring: 257 79% 65%;
-
     --font-heading: var(--font-fredoka);
     --font-body: var(--font-nunito);
   }
 
   body[data-brand='primarynet'] {
-    --background: 210 100% 98%; /* Light Blue */
-    --foreground: 214 46% 25%; /* Dark Blue */
-    --primary: 217 91% 60%; /* Bright Blue */
+    --background: 210 100% 98%;
+    --foreground: 214 46% 25%;
+    --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 45 100% 75%; /* Soft Yellow */
+    --secondary: 45 100% 75%;
     --secondary-foreground: 214 46% 25%;
-    --accent: 14 100% 59%; /* Bright Orange-Red */
+    --accent: 14 100% 59%;
     --accent-foreground: 0 0% 100%;
     --border: 217 91% 85%;
     --input: 210 100% 99%;
     --ring: 217 91% 60%;
-
     --font-heading: var(--font-poppins);
     --font-body: var(--font-lato);
   }
 
   body[data-brand='highschoolnet'] {
-    --background: 220 15% 96%; /* Light Gray */
-    --foreground: 220 20% 15%; /* Dark Slate Gray */
-    --primary: 220 90% 55%; /* Strong Blue */
+    --background: 220 15% 96%;
+    --foreground: 220 20% 15%;
+    --primary: 220 90% 55%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 190 60% 75%; /* Muted Teal */
+    --secondary: 190 60% 75%;
     --secondary-foreground: 220 20% 15%;
-    --accent: 350 80% 60%; /* Bold Red */
+    --accent: 350 80% 60%;
     --accent-foreground: 0 0% 100%;
     --border: 220 15% 88%;
     --input: 0 0% 100%;
     --ring: 220 90% 55%;
-
     --font-heading: var(--font-roboto);
     --font-body: var(--font-inter);
   }
-  
+
   body[data-brand='tertiarynet'] {
-    --background: 210 20% 98%; /* Off-white */
-    --foreground: 215 28% 17%; /* Very Dark Blue */
-    --primary: 215 30% 30%; /* Dark Slate Blue */
+    --background: 210 20% 98%;
+    --foreground: 215 28% 17%;
+    --primary: 215 30% 30%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 35 70% 85%; /* Light Gold */
+    --secondary: 35 70% 85%;
     --secondary-foreground: 215 28% 17%;
-    --accent: 0 60% 45%; /* Deep Red / Burgundy */
+    --accent: 0 60% 45%;
     --accent-foreground: 0 0% 100%;
     --border: 210 20% 85%;
     --input: 0 0% 100%;
     --ring: 215 30% 30%;
-
     --font-heading: var(--font-lora);
     --font-body: var(--font-merriweather);
   }
 
   .dark {
-    /* Basic dark mode conversion, can be refined */
-    --background: 250 33% 10%; /* Darker Purple */
-    --foreground: 251 100% 92%; /* Lighter Purple-ish White */
-    
-    --card: 250 33% 15%; 
+    --background: 250 33% 10%;
+    --foreground: 251 100% 92%;
+    --card: 250 33% 15%;
     --card-foreground: 251 100% 92%;
-    
     --popover: 250 33% 15%;
     --popover-foreground: 251 100% 92%;
-    
-    --primary: 257 79% 65%; /* Keep primary vibrant */
-    --primary-foreground: 0 0% 10%; /* Dark text on primary for dark mode if primary is light enough */
-    
-    --secondary: 259 83% 70%; /* Darker shade of light purple */
+    --primary: 257 79% 65%;
+    --primary-foreground: 0 0% 10%;
+    --secondary: 259 83% 70%;
     --secondary-foreground: 251 100% 92%;
-    
     --muted: 257 79% 25%;
     --muted-foreground: 248 15% 60%;
-    
-    --accent: 15 100% 63%; /* Keep accent vibrant */
+    --accent: 15 100% 63%;
     --accent-foreground: 0 0% 10%;
-    
     --accent-blue-hsl: 197 66% 48%;
     --accent-blue-foreground-hsl: 0 0% 100%;
-
     --destructive: 346 76% 48%;
     --destructive-foreground: 0 0% 98%;
-    
     --border: 257 79% 30%;
     --input: 251 100% 12%;
     --ring: 257 79% 65%;
-
     --chart-1: 257 79% 70%;
     --chart-2: 15 100% 70%;
     --chart-3: 289 63% 55%;
     --chart-4: 197 66% 65%;
     --chart-5: 43 100% 75%;
   }
-}
 
-@layer base {
   * {
-    @apply border-border;
+    border-color: hsl(var(--border));
   }
   body {
-    @apply bg-background text-foreground bg-grainy-texture font-body;
+    background-color: hsl(var(--background));
+    background-image: url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5 0h1L0 6V5zM6 5v1H5z'/%3E%3C/g%3E%3C/svg%3E");
+    font-family: var(--font-body), sans-serif;
+    color: hsl(var(--foreground));
     min-height: 100vh;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-heading;
+    font-family: var(--font-heading), sans-serif;
   }
+}
 
-  .glassmorphism {
-    @apply bg-card/50 backdrop-blur-lg border border-card/60 shadow-xl;
-  }
+.glassmorphism {
+  border-width: 1px;
+  border-color: hsl(var(--card) / 0.6);
+  background-color: hsl(var(--card) / 0.5);
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }

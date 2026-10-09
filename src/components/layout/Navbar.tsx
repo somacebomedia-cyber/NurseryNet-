@@ -154,7 +154,7 @@ export default function Navbar() {
 
   const renderNavLinks = (isMobile = false) => (
     mainNavLinks.map((link, index) => {
-      const subLinks = 'subLinks' in link ? link.subLinks : undefined;
+      const subLinks = 'subLinks' in link && Array.isArray((link as any).subLinks) ? ((link as any).subLinks as any[]) : undefined;
 
       const key = `${link.label}-${index}`;
 
