@@ -126,7 +126,7 @@ export default function HomePage() {
         return (
           <>
             <FloatingElements count={15} elementTypes={['star', 'heart']} colorClasses={['text-yellow-300', 'text-pink-300']} />
-            <div className="absolute top-1/2 left-1/4 -translate-y-1/2 opacity-50 md:opacity-100">
+            <div className="absolute inset-x-0 top-3 sm:top-6 md:top-8 h-32 pointer-events-none z-20 overflow-hidden">
                <AnimatedBird />
             </div>
           </>
@@ -145,9 +145,9 @@ export default function HomePage() {
   const getHeroBgClass = () => {
     switch(brand) {
       case 'NurseryNet': return 'bg-purple-blue-gradient';
-      case 'PrimaryNet': return 'bg-gradient-to-br from-blue-500 to-cyan-400';
-      case 'HighschoolNet': return 'bg-gradient-to-br from-slate-800 to-slate-600';
-      case 'TertiaryNet': return 'bg-gradient-to-br from-gray-800 to-gray-900';
+      case 'PrimaryNet': return 'bg-gradient-to-br from-blue-600 via-indigo-600 to-cyan-500';
+      case 'HighschoolNet': return 'bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-800';
+      case 'TertiaryNet': return 'bg-gradient-to-br from-slate-900 via-blue-950 to-gray-900';
       default: return 'bg-purple-blue-gradient';
     }
   }
@@ -155,26 +155,32 @@ export default function HomePage() {
   return (
     <div className="flex flex-col items-center">
       {/* Hero Section */}
-      <section className={cn("relative w-full py-20 md:py-32 text-primary-foreground overflow-hidden", getHeroBgClass())}>
+      <section className={cn("relative w-full py-20 md:py-32 text-white overflow-hidden shadow-inner", getHeroBgClass())}>
+        {/* Subtle decorative mesh / radiant highlights */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white/20 via-transparent to-black/25 pointer-events-none" />
+        <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-white/10 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-cyan-400/15 blur-3xl pointer-events-none" />
+
         {getHeroSection()}
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <h1 className="font-heading text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl animate-slide-in-up">
-            {content.heroTitle} <span className="text-yellow-300">{brand}</span>
+          <h1 className="font-heading text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl text-white drop-shadow-md animate-slide-in-up">
+            {content.heroTitle}{" "}
+            <span className="text-yellow-300 drop-shadow-lg inline-block font-extrabold">{brand}</span>
           </h1>
-          <p className="mt-6 max-w-2xl mx-auto text-lg sm:text-xl animate-slide-in-up" style={{ animationDelay: '0.2s' }}>
+          <p className="mt-6 max-w-2xl mx-auto text-lg sm:text-xl text-white/95 font-medium leading-relaxed drop-shadow-sm animate-slide-in-up" style={{ animationDelay: '0.2s' }}>
             {content.heroSubtitle}
           </p>
-          <div className="mt-10 flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4 animate-slide-in-up" style={{ animationDelay: '0.4s' }}>
-            <Button asChild size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 shadow-lg">
+          <div className="mt-10 flex flex-col sm:flex-row justify-center items-center gap-4 animate-slide-in-up" style={{ animationDelay: '0.4s' }}>
+            <Button asChild size="lg" className="w-full sm:w-auto bg-accent text-accent-foreground hover:bg-accent/90 shadow-xl shadow-orange-600/30 font-bold px-8 py-6 rounded-full text-base transition-all duration-300 hover:scale-105 hover:shadow-2xl">
               <Link href="/directory">{content.cta1}</Link>
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="lg" className="bg-background text-primary hover:bg-background/80 shadow-lg">
+                <Button variant="outline" size="lg" className="w-full sm:w-auto bg-white/95 hover:bg-white text-primary border-white/60 shadow-xl font-bold px-7 py-6 rounded-full text-base transition-all duration-300 hover:scale-105 hover:shadow-2xl">
                   {content.cta2} <ChevronDown className="ml-2 h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-64 bg-background border-border text-foreground">
+              <DropdownMenuContent className="w-64 bg-background border-border text-foreground shadow-2xl">
                 <DropdownMenuItem asChild>
                   <Link href="/preschools" className="flex items-center w-full font-semibold text-foreground hover:bg-accent/10">
                     <Briefcase className="mr-2 h-4 w-4 text-primary" /> Tools Overview

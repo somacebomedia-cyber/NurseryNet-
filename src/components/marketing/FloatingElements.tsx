@@ -44,38 +44,40 @@ const FloatingElements: React.FC<FloatingElementsContainerProps> = ({
   colorClasses = ['text-accent', 'text-accent-blue-DEFAULT', 'text-primary/70'] 
 }) => {
   const [elements, setElements] = useState<FloatingElementProps[]>([]);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const generateElements = () => {
-      const newElements: FloatingElementProps[] = [];
-      for (let i = 0; i < count; i++) {
-        const type = elementTypes[Math.floor(Math.random() * elementTypes.length)];
-        const colorClass = colorClasses[Math.floor(Math.random() * colorClasses.length)];
-        const size = type === 'line' ? Math.random() * 80 + 40 : Math.random() * 20 + 10; // Longer lines
-        newElements.push({
-          type,
-          colorClass,
-          sizeClass: `w-[${Math.round(size)}px] h-[${Math.round(size)}px]`, // This won't work directly with Tailwind JIT. Use fixed sizes or inline styles.
-                                                                           // Let's use Tailwind size classes.
-          style: {
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-            transform: type === 'line' ? `rotate(${Math.random() * 180}deg)` : '',
-            width: `${size}px`,
-            height: type === 'line' ? `2px` : `${size}px`,
-          },
-          animationDelay: `${Math.random() * 5}s`,
-          animationDuration: `${Math.random() * 5 + 5}s`, // 5 to 10 seconds duration
-        });
-      }
-      setElements(newElements);
-    };
-    generateElements();
+    setMounted(true);
+    const newElements: FloatingElementProps[] = [];
+    for (let i = 0; i < count; i++) {
+      const type = elementTypes[Math.floor(Math.random() * elementTypes.length)];
+      const colorClass = colorClasses[Math.floor(Math.random() * colorClasses.length)];
+      const size = type === 'line' ? Math.random() * 80 + 40 : Math.random() * 20 + 12;
+      newElements.push({
+        type,
+        colorClass,
+        sizeClass: '',
+        style: {
+          left: `${(i / count) * 90 + Math.random() * 10}%`,
+          top: `${Math.random() * 85 + 5}%`,
+          transform: type === 'line' ? `rotate(${Math.random() * 180}deg)` : undefined,
+          width: `${Math.round(size)}px`,
+          height: type === 'line' ? '2px' : `${Math.round(size)}px`,
+        },
+        animationDelay: `${(Math.random() * 4).toFixed(1)}s`,
+        animationDuration: `${(Math.random() * 4 + 4).toFixed(1)}s`,
+      });
+    }
+    setElements(newElements);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [count, JSON.stringify(elementTypes), JSON.stringify(colorClasses)]);
+  }, [count]);
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
       {elements.map((el, index) => (
         <ElementComponent key={index} {...el} />
       ))}
