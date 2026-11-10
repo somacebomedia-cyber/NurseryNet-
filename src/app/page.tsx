@@ -3,11 +3,12 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Sparkles, TrendingUp, Users, Briefcase, Wand2, Search, Gift, Eye, ChevronDown, BrainCircuit, Zap, School, BookOpenCheck, GraduationCap, DollarSign, Book } from 'lucide-react';
+import { CheckCircle, Sparkles, TrendingUp, Users, Briefcase, Wand2, Search, Gift, Eye, ChevronDown, BrainCircuit, Zap, School, BookOpenCheck, GraduationCap, DollarSign, Book, BadgeCheck } from 'lucide-react';
 import AnimatedBird from '@/components/marketing/AnimatedBird';
 import FloatingElements from '@/components/marketing/FloatingElements';
 import ColorfulStripes from '@/components/marketing/ColorfulStripes';
 import ThreeDElements from '@/components/marketing/ThreeDElements';
+import EcdCensusBanner from '@/components/marketing/EcdCensusBanner';
 import Image from 'next/image';
 import Testimonials from '@/components/marketing/Testimonials';
 import {
@@ -108,6 +109,7 @@ export default function HomePage() {
       case 'NurseryNet':
       default:
         return [
+          { href: '/directory', label: 'Claim Your Preschool (Free)', icon: BadgeCheck },
           { href: '/preschools/logo-generator', label: 'AI Logo Generator', icon: Wand2 },
           { href: '/funding', label: 'AI Funding Hub', icon: Search },
           { href: '/preschools/roi-calculator', label: 'ROI Calculator', icon: TrendingUp },
@@ -200,6 +202,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* National ECD Census Trust & Benchmark Banner */}
+      <EcdCensusBanner />
 
       {/* Features Section */}
       <section className="w-full py-16 md:py-24 bg-background">

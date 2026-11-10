@@ -1,0 +1,131 @@
+{
+  "censusMetadata": {
+    "source": "DBE ECD Census 2021 (Department of Basic Education South Africa)",
+    "totalCentresSurveyed": 42420,
+    "doi": "10.25828/KBNX-MA29"
+  },
+  "nationalInfrastructure": {
+    "perimeterFencing": {
+      "percentage": 88.6,
+      "count": 37577,
+      "total": 42420,
+      "label": "Premises with Secure Perimeter Fence"
+    },
+    "lockableSecurityGate": {
+      "percentage": 83.6,
+      "count": 35465,
+      "total": 42420,
+      "label": "Lockable Gate for Access Control"
+    },
+    "outdoorPlayArea": {
+      "percentage": 81.0,
+      "count": 32388,
+      "total": 42420,
+      "label": "Dedicated Outdoor Play Area"
+    },
+    "permanentBuilding": {
+      "percentage": 85.8,
+      "count": 34339,
+      "total": 42420,
+      "label": "Brick / Permanent Masonry Building"
+    },
+    "onSiteTapWater": {
+      "percentage": 74.0,
+      "count": 29583,
+      "total": 42420,
+      "label": "Piped Clean Tap Water On-Site"
+    },
+    "flushToilets": {
+      "percentage": 60.1,
+      "count": 25449,
+      "total": 42420,
+      "label": "Connected Flush Sanitation System"
+    },
+    "dsdSubsidised": {
+      "percentage": 32.5,
+      "count": 12803,
+      "total": 42420,
+      "label": "DSD Child Care Subsidy Beneficiary"
+    },
+    "separateStaffLearnerToilets": {
+      "percentage": 68.8,
+      "count": 27122,
+      "total": 42420,
+      "label": "Separate Facilities for Staff & Children"
+    }
+  },
+  "outdoorPlayEquipment": {
+    "swings": {
+      "percentage": 53.8,
+      "count": 22814,
+      "label": "Swings"
+    },
+    "slides": {
+      "percentage": 47.0,
+      "count": 19941,
+      "label": "Slides"
+    },
+    "jungleGyms": {
+      "percentage": 41.2,
+      "count": 17494,
+      "label": "Jungle Gyms"
+    },
+    "sandPits": {
+      "percentage": 24.3,
+      "count": 10302,
+      "label": "Sensory Sand Pit / Trays"
+    },
+    "seesaws": {
+      "percentage": 11.3,
+      "count": 4804,
+      "label": "Seesaw / Rocking Apparatus"
+    }
+  },
+  "provincialDistribution": [
+    {
+      "province": "Gauteng",
+      "count": 10376,
+      "percentage": 24.5
+    },
+    {
+      "province": "KwaZulu-Natal",
+      "count": 8089,
+      "percentage": 19.1
+    },
+    {
+      "province": "Eastern Cape",
+      "count": 5426,
+      "percentage": 12.8
+    },
+    {
+      "province": "Limpopo",
+      "count": 5368,
+      "percentage": 12.7
+    },
+    {
+      "province": "Western Cape",
+      "count": 4715,
+      "percentage": 11.1
+    },
+    {
+      "province": "Mpumalanga",
+      "count": 2951,
+      "percentage": 7.0
+    },
+    {
+      "province": "North West",
+      "count": 2494,
+      "percentage": 5.9
+    },
+    {
+      "province": "Free State",
+      "count": 2076,
+      "percentage": 4.9
+    },
+    {
+      "province": "Northern Cape",
+      "count": 925,
+      "percentage": 2.2
+    }
+  ]
+}
