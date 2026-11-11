@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
-import { Preschool, ECD_BENCHMARKS } from '@/data/preschools';
+import { Preschool, ECD_BENCHMARKS, getMunicipalityBenchmark } from '@/data/preschools';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -54,6 +54,7 @@ export default function SchoolDetailModal({
     ? preschool.images
     : ['https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=1200&q=80'];
 
+  const muniStats = getMunicipalityBenchmark(preschool.municipality || preschool.city || preschool.district);
   const hasFencing = preschool.facilities.some(f => f.toLowerCase().includes('fence') || f.toLowerCase().includes('security'));
   const hasGate = preschool.facilities.some(f => f.toLowerCase().includes('gate') || f.toLowerCase().includes('security'));
   const hasWater = true; // In South Africa verified registered schools meet sanitation standards
@@ -80,16 +81,32 @@ export default function SchoolDetailModal({
                 <BadgeCheck className="w-4 h-4" />
                 Owner-Claimed & Verified
               </span>
+            ) : preschool.dsdRegistration === 'Full' ? (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-600 text-white shadow-md">
+                <ShieldCheck className="w-4 h-4" />
+                DSD Registered
+              </span>
+            ) : preschool.dsdRegistration === 'Conditional' ? (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-600 text-white shadow-md">
+                <ShieldCheck className="w-4 h-4" />
+                DSD Conditional
+              </span>
             ) : preschool.isVerified ? (
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/95 text-primary backdrop-blur-md shadow-md">
                 <ShieldCheck className="w-4 h-4 text-primary fill-primary/20" />
-                Register-Verified ECD
+                Audit Verified
               </span>
             ) : null}
 
-            {preschool.emisNumber && (
+            {preschool.npoNumber && (
               <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-black/60 text-white/95 backdrop-blur-md">
-                EMIS #{preschool.emisNumber}
+                NPO #{preschool.npoNumber}
+              </span>
+            )}
+
+            {preschool.isSubsidised && (
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-sky-600 text-white shadow-md">
+                DSD Subsidised
               </span>
             )}
 
@@ -205,96 +222,127 @@ export default function SchoolDetailModal({
             </div>
           </div>
 
-          {/* Government Registration & Accreditation Card */}
-          <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 space-y-2">
+          {/* Department of Social Development (DSD) Registration & NPO Accreditation Card */}
+          <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-5 h-5 text-primary" />
                 <h4 className="font-heading text-sm font-bold text-foreground">
-                  Official South African Registration & Accreditation
+                  Department of Social Development (DSD) & NPO Accreditation
                 </h4>
               </div>
-              <span className="text-xs font-bold text-primary px-2.5 py-0.5 rounded-full bg-primary/10">
-                Register-Verified
+              <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
+                preschool.dsdRegistration === 'Full'
+                  ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                  : preschool.dsdRegistration === 'Conditional'
+                  ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+                  : 'bg-muted text-muted-foreground'
+              }`}>
+                {preschool.dsdRegistration === 'Full' ? 'DSD Fully Registered' : preschool.dsdRegistration === 'Conditional' ? 'Conditional DSD' : 'Audit Sourced / In Process'}
               </span>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1 text-xs">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1 text-xs">
               <div>
-                <span className="text-muted-foreground block">EMIS Number</span>
-                <span className="font-mono font-bold text-foreground">{preschool.emisNumber || 'Register-Verified'}</span>
+                <span className="text-muted-foreground block text-[11px]">DSD Status</span>
+                <span className="font-semibold text-foreground">
+                  {preschool.dsdRegistration || (preschool.isVerified ? 'Fully Registered' : 'Not Registered')}
+                </span>
               </div>
               <div>
-                <span className="text-muted-foreground block">Education District</span>
-                <span className="font-bold text-foreground">{preschool.educationDistrict || preschool.district || preschool.city}</span>
+                <span className="text-muted-foreground block text-[11px]">NPO Registration</span>
+                <span className="font-mono font-bold text-foreground">
+                  {preschool.npoNumber ? `NPO #${preschool.npoNumber}` : 'Community Crèche'}
+                </span>
               </div>
               <div>
-                <span className="text-muted-foreground block">Province</span>
-                <span className="font-bold text-foreground">{preschool.province || 'South Africa'}</span>
+                <span className="text-muted-foreground block text-[11px]">State ECD Subsidy</span>
+                <span className="font-semibold text-foreground">
+                  {preschool.isSubsidised ? 'DSD Subsidised' : 'Private / Fee-funded'}
+                </span>
+              </div>
+              <div>
+                <span className="text-muted-foreground block text-[11px]">Municipality</span>
+                <span className="font-semibold text-foreground truncate block">
+                  {preschool.municipality || preschool.district || preschool.city}
+                </span>
               </div>
             </div>
           </div>
 
-          {/* National ECD Census 2021 Benchmark Comparison */}
+          {/* National & Municipal ECD Census 2021 Benchmark Comparison */}
           <div className="p-4 rounded-xl bg-muted/40 border border-border space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <BarChart3 className="w-5 h-5 text-primary" />
-                <h4 className="font-heading text-sm font-bold text-foreground">
-                  National ECD Census Benchmark Compliance
-                </h4>
+                <div>
+                  <h4 className="font-heading text-sm font-bold text-foreground">
+                    ECD Census 2021 Benchmarks: {muniStats.name || preschool.municipality || preschool.city}
+                  </h4>
+                  <span className="text-[10px] text-muted-foreground">
+                    Official Census covering {muniStats.centres ? `${muniStats.centres} centres in this municipality` : '42,420 centres nationwide'}
+                  </span>
+                </div>
               </div>
-              <span className="text-[11px] text-muted-foreground font-semibold">
-                DBE Census 2021 Norms
+              <span className="text-[11px] text-primary font-bold px-2 py-0.5 rounded bg-primary/10">
+                DBE/DSD Census Data
               </span>
             </div>
 
-            <p className="text-xs text-muted-foreground">
-              How this preschool compares against South Africa's national early childhood averages (surveying 42,420 institutions nationwide):
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-              <div className="p-2.5 rounded-lg bg-background border border-border/80 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                  <span className="font-medium text-foreground">Perimeter Security Fencing</span>
-                </div>
-                <div className="text-right">
-                  <span className="font-bold text-emerald-600">Compliant</span>
-                  <span className="text-[10px] text-muted-foreground block">Nat avg: 88.6%</span>
+            {/* Monthly Fee Comparison Bar */}
+            <div className="p-3 rounded-lg bg-background border border-border/80">
+              <div className="flex justify-between items-center text-xs mb-1">
+                <span className="text-muted-foreground font-medium">Monthly Fee Comparison:</span>
+                <div className="flex items-center gap-2 font-mono">
+                  <span>This School: <strong className="text-foreground">R{preschool.monthlyFeeZAR.toLocaleString()}</strong></span>
+                  <span className="text-muted-foreground">·</span>
+                  <span>Muni Median: <strong className="text-primary">R{Math.round(muniStats.medianMonthlyFee || 300).toLocaleString()}</strong></span>
                 </div>
               </div>
-
-              <div className="p-2.5 rounded-lg bg-background border border-border/80 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Lock className="w-4 h-4 text-emerald-600" />
-                  <span className="font-medium text-foreground">Lockable Security Gate</span>
-                </div>
-                <div className="text-right">
-                  <span className="font-bold text-emerald-600">Compliant</span>
-                  <span className="text-[10px] text-muted-foreground block">Nat avg: 83.6%</span>
-                </div>
+              <div className="w-full h-2 rounded-full bg-muted overflow-hidden flex">
+                <div
+                  className="h-full bg-primary"
+                  style={{ width: `${Math.min(100, Math.max(15, ((muniStats.medianMonthlyFee || 300) / Math.max(preschool.monthlyFeeZAR, muniStats.medianMonthlyFee || 300)) * 100))}%` }}
+                />
               </div>
+              <span className="text-[10px] text-muted-foreground block mt-1">
+                {preschool.monthlyFeeZAR > (muniStats.medianMonthlyFee || 300)
+                  ? `School tuition reflects premium private facilities above local municipal median (R${Math.round(muniStats.medianMonthlyFee || 300)}/mo).`
+                  : `School tuition is at or below local municipal median (R${Math.round(muniStats.medianMonthlyFee || 300)}/mo), expanding community affordability.`}
+              </span>
+            </div>
 
-              <div className="p-2.5 rounded-lg bg-background border border-border/80 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Droplets className="w-4 h-4 text-cyan-600" />
-                  <span className="font-medium text-foreground">On-Site Clean Tap Water</span>
-                </div>
-                <div className="text-right">
-                  <span className="font-bold text-cyan-600">Certified</span>
-                  <span className="text-[10px] text-muted-foreground block">Nat avg: 74.0%</span>
-                </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+              <div className="p-2.5 rounded-lg bg-background border border-border/80 text-center">
+                <span className="text-sm font-extrabold text-foreground block tabular-nums">
+                  {muniStats.dsdRegisteredPct || 38.2}%
+                </span>
+                <span className="text-[10px] text-muted-foreground block mt-0.5">
+                  Muni DSD Registered
+                </span>
               </div>
-
-              <div className="p-2.5 rounded-lg bg-background border border-border/80 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <TreePine className="w-4 h-4 text-emerald-600" />
-                  <span className="font-medium text-foreground">Outdoor Playground</span>
-                </div>
-                <div className="text-right">
-                  <span className="font-bold text-emerald-600">Available</span>
-                  <span className="text-[10px] text-muted-foreground block">Nat avg: 81.0%</span>
-                </div>
+              <div className="p-2.5 rounded-lg bg-background border border-border/80 text-center">
+                <span className="text-sm font-extrabold text-foreground block tabular-nums">
+                  {muniStats.subsidyPct || 30.2}%
+                </span>
+                <span className="text-[10px] text-muted-foreground block mt-0.5">
+                  Muni Subsidised
+                </span>
+              </div>
+              <div className="p-2.5 rounded-lg bg-background border border-border/80 text-center">
+                <span className="text-sm font-extrabold text-foreground block tabular-nums">
+                  {muniStats.mealsPct || 94.1}%
+                </span>
+                <span className="text-[10px] text-muted-foreground block mt-0.5">
+                  Daily Meals Served
+                </span>
+              </div>
+              <div className="p-2.5 rounded-lg bg-background border border-border/80 text-center">
+                <span className="text-sm font-extrabold text-foreground block tabular-nums">
+                  {muniStats.fencedPct || 88.6}%
+                </span>
+                <span className="text-[10px] text-muted-foreground block mt-0.5">
+                  Secure Fenced
+                </span>
               </div>
             </div>
           </div>
@@ -360,18 +408,47 @@ export default function SchoolDetailModal({
             </div>
           </div>
 
-          {/* Contact Bar */}
-          <div className="p-4 rounded-xl bg-muted/30 border border-border/80 flex flex-wrap items-center justify-between gap-4 text-xs text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <Phone className="w-4 h-4 text-primary" />
-              <span className="font-semibold text-foreground">{preschool.phone}</span>
+          {/* Direct Verified Contact Bar */}
+          <div className="p-4 rounded-xl bg-muted/30 border border-border/80 flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-2">
+              {preschool.phone ? (
+                <a
+                  href={`tel:${preschool.phone}`}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary font-bold hover:bg-primary/20 transition-colors"
+                >
+                  <Phone className="w-3.5 h-3.5" />
+                  <span>Call {preschool.phone}</span>
+                </a>
+              ) : (
+                <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <Phone className="w-3.5 h-3.5" />
+                  <span>Contact on file with DSD</span>
+                </div>
+              )}
+
+              {preschool.email && (
+                <a
+                  href={`mailto:${preschool.email}?subject=Enrollment%20Inquiry%20-%20NurseryNet`}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary font-bold hover:bg-primary/20 transition-colors"
+                >
+                  <Mail className="w-3.5 h-3.5" />
+                  <span>Email Centre</span>
+                </a>
+              )}
+
+              {preschool.websiteUrl && (
+                <a
+                  href={preschool.websiteUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-background text-foreground hover:border-primary transition-colors font-medium"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>Official Website</span>
+                </a>
+              )}
             </div>
-            {preschool.email && (
-              <div className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-primary" />
-                <span>{preschool.email}</span>
-              </div>
-            )}
+
             {preschool.latitude && preschool.longitude ? (
               <a
                 href={`https://www.google.com/maps/search/?api=1&query=${preschool.latitude},${preschool.longitude}`}

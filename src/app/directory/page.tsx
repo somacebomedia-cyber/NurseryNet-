@@ -54,12 +54,22 @@ export default function DirectoryPage() {
   const [selectedCity, setSelectedCity] = useState<City | 'All'>('All');
   const [selectedCurriculum, setSelectedCurriculum] = useState<Curriculum | 'All'>('All');
   const [selectedAgeBracket, setSelectedAgeBracket] = useState<'All' | 'infants' | 'toddlers' | 'preprimary'>('All');
-  const [maxMonthlyFee, setMaxMonthlyFee] = useState<number>(7500);
+  const [selectedDsd, setSelectedDsd] = useState<'All' | 'Full' | 'Conditional' | 'Not Registered'>('All');
+  const [onlySubsidised, setOnlySubsidised] = useState(false);
+  const [maxMonthlyFee, setMaxMonthlyFee] = useState<number>(8500);
   const [selectedFacilities, setSelectedFacilities] = useState<string[]>([]);
   const [onlyVerified, setOnlyVerified] = useState(false);
   const [onlyClaimed, setOnlyClaimed] = useState(false);
   const [sortBy, setSortBy] = useState<'rating' | 'fee-asc' | 'fee-desc' | 'reviews' | 'name'>('rating');
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Full 20,291 National Database State
+  const [preschools, setPreschools] = useState<Preschool[]>(() => PRESCHOOLS.slice(0, 24));
+  const [totalCount, setTotalCount] = useState<number>(20291);
+  const [totalPages, setTotalPages] = useState<number>(Math.ceil(20291 / ITEMS_PER_PAGE));
+  const [provinceCounts, setProvinceCounts] = useState<Record<string, number>>({});
+  const [availableCities, setAvailableCities] = useState<{ name: string; count: number }[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Claimed Slugs tracking in localStorage
   const [claimedSlugs, setClaimedSlugs] = useState<string[]>([]);
@@ -84,125 +94,7 @@ export default function DirectoryPage() {
   const [benchmarksModalOpen, setBenchmarksModalOpen] = useState(false);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
-  // Map claimed state onto PRESCHOOLS
-  const allSchoolsWithClaimed = useMemo(() => {
-    if (claimedSlugs.length === 0) return PRESCHOOLS;
-    return PRESCHOOLS.map((s) => {
-      const slug = s.slug || s.id;
-      if (claimedSlugs.includes(slug)) {
-        return { ...s, isClaimed: true };
-      }
-      return s;
-    });
-  }, [claimedSlugs]);
-
-  // Dynamic Cities based on selected province
-  const availableCities = useMemo(() => {
-    const pool = selectedProvince === 'All'
-      ? allSchoolsWithClaimed
-      : allSchoolsWithClaimed.filter((s) => s.province === selectedProvince);
-    
-    const cityCounts = new Map<string, number>();
-    for (const s of pool) {
-      if (s.city) {
-        cityCounts.set(s.city, (cityCounts.get(s.city) || 0) + 1);
-      }
-    }
-    return Array.from(cityCounts.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 16)
-      .map(([name, count]) => ({ name, count }));
-  }, [allSchoolsWithClaimed, selectedProvince]);
-
-  // Filter Logic
-  const filteredPreschools = useMemo(() => {
-    return allSchoolsWithClaimed.filter((school) => {
-      // Keyword search
-      if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase().trim();
-        const matchesName = school.name.toLowerCase().includes(query);
-        const matchesSuburb = school.suburb.toLowerCase().includes(query);
-        const matchesCity = school.city.toLowerCase().includes(query);
-        const matchesProvince = school.province ? school.province.toLowerCase().includes(query) : false;
-        const matchesCurriculum = school.curriculum.toLowerCase().includes(query);
-        const matchesEmis = school.emisNumber ? school.emisNumber.includes(query) : false;
-        const matchesLang = school.primaryLanguage ? school.primaryLanguage.toLowerCase().includes(query) : false;
-        if (!matchesName && !matchesSuburb && !matchesCity && !matchesProvince && !matchesCurriculum && !matchesEmis && !matchesLang) {
-          return false;
-        }
-      }
-
-      // Province filter
-      if (selectedProvince !== 'All' && school.province !== selectedProvince) {
-        return false;
-      }
-
-      // City filter
-      if (selectedCity !== 'All' && school.city !== selectedCity) {
-        return false;
-      }
-
-      // Curriculum filter
-      if (selectedCurriculum !== 'All' && school.curriculum !== selectedCurriculum) {
-        return false;
-      }
-
-      // Age Bracket filter
-      if (selectedAgeBracket === 'infants' && school.minAgeMonths > 12) {
-        return false;
-      }
-      if (selectedAgeBracket === 'toddlers' && (school.minAgeMonths > 24 || school.maxAgeMonths < 24)) {
-        return false;
-      }
-      if (selectedAgeBracket === 'preprimary' && school.maxAgeMonths < 60) {
-        return false;
-      }
-
-      // Fee filter
-      if (school.monthlyFeeZAR > maxMonthlyFee) {
-        return false;
-      }
-
-      // Verified toggle
-      if (onlyVerified && !school.isVerified) {
-        return false;
-      }
-
-      // Claimed toggle
-      if (onlyClaimed && !school.isClaimed) {
-        return false;
-      }
-
-      // Facilities filter
-      if (selectedFacilities.length > 0) {
-        const hasAllFacilities = selectedFacilities.every((fac) => school.facilities.includes(fac));
-        if (!hasAllFacilities) return false;
-      }
-
-      return true;
-    }).sort((a, b) => {
-      if (sortBy === 'rating') return b.rating - a.rating;
-      if (sortBy === 'fee-asc') return a.monthlyFeeZAR - b.monthlyFeeZAR;
-      if (sortBy === 'fee-desc') return b.monthlyFeeZAR - a.monthlyFeeZAR;
-      if (sortBy === 'reviews') return b.reviewCount - a.reviewCount;
-      if (sortBy === 'name') return a.name.localeCompare(b.name);
-      return 0;
-    });
-  }, [
-    allSchoolsWithClaimed,
-    searchQuery,
-    selectedProvince,
-    selectedCity,
-    selectedCurriculum,
-    selectedAgeBracket,
-    maxMonthlyFee,
-    onlyVerified,
-    onlyClaimed,
-    selectedFacilities,
-    sortBy,
-  ]);
-
-  // Reset page when filters change
+  // Reset page when any filter criteria changes
   useEffect(() => {
     setCurrentPage(1);
   }, [
@@ -211,19 +103,84 @@ export default function DirectoryPage() {
     selectedCity,
     selectedCurriculum,
     selectedAgeBracket,
+    selectedDsd,
+    onlySubsidised,
     maxMonthlyFee,
     onlyVerified,
-    onlyClaimed,
     selectedFacilities,
     sortBy,
   ]);
 
-  // Paginated Slice
-  const totalPages = Math.ceil(filteredPreschools.length / ITEMS_PER_PAGE);
-  const paginatedPreschools = useMemo(() => {
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredPreschools.slice(start, start + ITEMS_PER_PAGE);
-  }, [filteredPreschools, currentPage]);
+  // Query Server API across all 20,291 records for page & active filters
+  useEffect(() => {
+    let isMounted = true;
+    setIsLoading(true);
+
+    const timer = setTimeout(async () => {
+      try {
+        const params = new URLSearchParams();
+        if (searchQuery.trim()) params.set('q', searchQuery.trim());
+        if (selectedProvince !== 'All') params.set('province', selectedProvince);
+        if (selectedCity !== 'All') params.set('municipality', selectedCity);
+        if (selectedDsd !== 'All') params.set('dsd', selectedDsd);
+        if (onlySubsidised) params.set('subsidised', 'true');
+        if (selectedCurriculum !== 'All') params.set('curriculum', selectedCurriculum);
+        if (selectedAgeBracket !== 'All') params.set('ageBracket', selectedAgeBracket);
+        if (maxMonthlyFee < 8500) params.set('maxFee', maxMonthlyFee.toString());
+        if (onlyVerified) params.set('verified', 'true');
+        if (selectedFacilities.length > 0) params.set('facilities', selectedFacilities.join(','));
+        params.set('sort', sortBy);
+        params.set('page', currentPage.toString());
+        params.set('limit', ITEMS_PER_PAGE.toString());
+
+        const res = await fetch(`/api/directory?${params.toString()}`);
+        if (res.ok && isMounted) {
+          const data = await res.json();
+          setPreschools(data.results || []);
+          setTotalCount(typeof data.total === 'number' ? data.total : 20291);
+          setTotalPages(typeof data.totalPages === 'number' ? data.totalPages : Math.ceil(20291 / ITEMS_PER_PAGE));
+          if (data.provinceCounts) setProvinceCounts(data.provinceCounts);
+          if (Array.isArray(data.availableCities)) setAvailableCities(data.availableCities);
+        }
+      } catch (err) {
+        console.error('National directory search error:', err);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }, 180);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
+  }, [
+    searchQuery,
+    selectedProvince,
+    selectedCity,
+    selectedDsd,
+    onlySubsidised,
+    selectedCurriculum,
+    selectedAgeBracket,
+    maxMonthlyFee,
+    onlyVerified,
+    selectedFacilities,
+    sortBy,
+    currentPage,
+  ]);
+
+  // Map claimed state onto the currently loaded page of preschools
+  const displayedSchools = useMemo(() => {
+    if (claimedSlugs.length === 0) return preschools;
+    return preschools.map((s) => {
+      const slug = s.slug || s.id;
+      if (claimedSlugs.includes(slug)) {
+        return { ...s, isClaimed: true };
+      }
+      return s;
+    });
+  }, [preschools, claimedSlugs]);
 
   const toggleFacility = (facility: string) => {
     setSelectedFacilities((prev) =>
@@ -237,7 +194,9 @@ export default function DirectoryPage() {
     setSelectedCity('All');
     setSelectedCurriculum('All');
     setSelectedAgeBracket('All');
-    setMaxMonthlyFee(7500);
+    setSelectedDsd('All');
+    setOnlySubsidised(false);
+    setMaxMonthlyFee(8500);
     setSelectedFacilities([]);
     setOnlyVerified(false);
     setOnlyClaimed(false);
@@ -246,12 +205,14 @@ export default function DirectoryPage() {
   };
 
   const hasActiveFilters =
-    searchQuery ||
+    searchQuery.trim() !== '' ||
     selectedProvince !== 'All' ||
     selectedCity !== 'All' ||
     selectedCurriculum !== 'All' ||
     selectedAgeBracket !== 'All' ||
-    maxMonthlyFee < 7500 ||
+    selectedDsd !== 'All' ||
+    onlySubsidised ||
+    maxMonthlyFee < 8500 ||
     selectedFacilities.length > 0 ||
     onlyVerified ||
     onlyClaimed;
@@ -304,19 +265,19 @@ export default function DirectoryPage() {
           }}
           className="w-full text-xs font-semibold py-2.5 px-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
         >
-          <option value="All">All 9 Provinces (1,180+ Preschools)</option>
+          <option value="All">All 9 Provinces (20,291 Preschools)</option>
           {PROVINCES.map((p) => {
-            const count = allSchoolsWithClaimed.filter((s) => s.province === p).length;
+            const count = provinceCounts[p];
             return (
               <option key={p} value={p}>
-                {p} ({count} schools)
+                {p} {count ? `(${count.toLocaleString()} preschools)` : ''}
               </option>
             );
           })}
         </select>
       </div>
 
-      {/* City Filter */}
+      {/* City / Hub Filter */}
       <div>
         <div className="flex items-center justify-between mb-2">
           <label className="text-xs font-bold text-foreground uppercase tracking-wider block">
@@ -354,6 +315,34 @@ export default function DirectoryPage() {
             >
               <span className="truncate">{c.name}</span>
               <span className="text-[10px] opacity-75 ml-1">({c.count})</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* DSD Registration Status Filter */}
+      <div>
+        <label className="text-xs font-bold text-foreground uppercase tracking-wider block mb-2">
+          DSD Registration Status
+        </label>
+        <div className="space-y-1">
+          {[
+            { id: 'All', label: 'All DSD Statuses' },
+            { id: 'Full', label: 'DSD Fully Registered' },
+            { id: 'Conditional', label: 'Conditional Registration' },
+            { id: 'Not Registered', label: 'In Process / Community' },
+          ].map((status) => (
+            <button
+              key={status.id}
+              onClick={() => setSelectedDsd(status.id as any)}
+              className={`w-full text-xs font-semibold py-2 px-3 rounded-lg border transition-all flex items-center justify-between ${
+                selectedDsd === status.id
+                  ? 'bg-primary/10 text-primary border-primary/50'
+                  : 'bg-background hover:bg-muted text-foreground border-border'
+              }`}
+            >
+              <span>{status.label}</span>
+              {selectedDsd === status.id && <Check className="w-3.5 h-3.5" />}
             </button>
           ))}
         </div>
@@ -433,23 +422,38 @@ export default function DirectoryPage() {
         </div>
         <input
           type="range"
-          min={3000}
-          max={7500}
-          step={250}
+          min={250}
+          max={8500}
+          step={150}
           value={maxMonthlyFee}
           onChange={(e) => setMaxMonthlyFee(Number(e.target.value))}
           className="w-full accent-primary cursor-pointer"
         />
         <div className="flex justify-between text-[10px] text-muted-foreground mt-1 tabular-nums">
-          <span>R3,000</span>
-          <span>R5,250</span>
-          <span>R7,500+</span>
+          <span>R250</span>
+          <span>R300 (Census Median)</span>
+          <span>R8,500+</span>
         </div>
       </div>
 
-      {/* Verified & Claimed Toggles */}
+      {/* Verified, Claimed & Subsidy Toggles */}
       <div className="space-y-2 p-3 rounded-xl bg-background border border-border">
-        <label className="flex items-center justify-between cursor-pointer">
+
+        {/* DSD Subsidised Toggle */}
+        <label className="flex items-center justify-between cursor-pointer pt-2 border-t border-border/60">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-sky-600" />
+            <span className="text-xs font-bold text-foreground">DSD Subsidised Only</span>
+          </div>
+          <input
+            type="checkbox"
+            checked={onlySubsidised}
+            onChange={(e) => setOnlySubsidised(e.target.checked)}
+            className="w-4 h-4 rounded text-sky-600 accent-sky-600 cursor-pointer"
+          />
+        </label>
+
+        <label className="flex items-center justify-between cursor-pointer pt-2 border-t border-border/60">
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-primary" />
             <span className="text-xs font-bold text-foreground">Verified Accredited Only</span>
@@ -531,14 +535,14 @@ export default function DirectoryPage() {
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-bold text-yellow-300 mb-3 border border-white/30">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>1,180+ Accredited ECD Centres · South Africa</span>
+            <span>20,291 Real Named Preschools · All 9 Provinces</span>
           </div>
 
           <h1 className="font-heading text-3xl sm:text-5xl font-extrabold tracking-tight text-white drop-shadow-md">
-            Discover Verified South African Preschools
+            Discover 20,291 Real South African Preschools
           </h1>
           <p className="mt-3 max-w-2xl mx-auto text-sm sm:text-base text-white/95 font-medium leading-relaxed drop-shadow-sm">
-            Search 1,180+ real government-registered preschools with official EMIS numbers, curriculum matching, and direct tour scheduling across all 9 provinces.
+            Search 20,291 real named early childhood development centres across all 9 provinces with verified DSD registration audits, NPO certificates, and Census 2021 municipal fee benchmarks.
           </p>
 
           {/* Quick Stats & National Benchmarks CTA Bar */}
@@ -554,7 +558,11 @@ export default function DirectoryPage() {
             <span className="text-white/70 text-xs hidden sm:inline">|</span>
 
             <span className="text-xs font-medium text-white/90">
-              {filteredPreschools.length} schools matching your search
+              {isLoading ? (
+                'Searching 20,291 national records...'
+              ) : (
+                `${totalCount.toLocaleString()} schools matching your search`
+              )}
             </span>
           </div>
         </div>
@@ -569,7 +577,7 @@ export default function DirectoryPage() {
             <Search className="w-4 h-4 text-muted-foreground absolute left-3.5 top-3.5" />
             <input
               type="text"
-              placeholder="Search by school name, EMIS #, suburb (e.g. Durbanville, Sandton), or language..."
+              placeholder="Search by school name, NPO #, suburb (e.g. Soweto, Sandton, Centurion), or town..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-10 py-2.5 text-sm rounded-xl border border-border bg-card shadow-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -629,10 +637,10 @@ export default function DirectoryPage() {
         <div className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-6 border-b border-border/60 text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
             Showing <strong className="text-foreground font-bold">
-              {filteredPreschools.length === 0 ? 0 : (currentPage - 1) * ITEMS_PER_PAGE + 1}–
-              {Math.min(currentPage * ITEMS_PER_PAGE, filteredPreschools.length)}
+              {totalCount === 0 ? 0 : (currentPage - 1) * ITEMS_PER_PAGE + 1}–
+              {Math.min(currentPage * ITEMS_PER_PAGE, totalCount)}
             </strong> of{' '}
-            <strong className="text-foreground font-bold">{filteredPreschools.length}</strong> verified preschools
+            <strong className="text-foreground font-bold">{totalCount.toLocaleString()}</strong> verified preschools
             {selectedProvince !== 'All' && <span> in {selectedProvince}</span>}
             {selectedCity !== 'All' && <span> ({selectedCity})</span>}
           </div>
@@ -681,7 +689,7 @@ export default function DirectoryPage() {
 
           {/* Preschool Cards Grid */}
           <div className="lg:col-span-3">
-            {filteredPreschools.length === 0 ? (
+            {displayedSchools.length === 0 && !isLoading ? (
               <div className="text-center py-16 px-4 rounded-2xl bg-card border border-dashed border-border/80 space-y-4">
                 <div className="w-16 h-16 rounded-full bg-muted mx-auto flex items-center justify-center text-muted-foreground">
                   <Search className="w-8 h-8" />
@@ -703,8 +711,12 @@ export default function DirectoryPage() {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {paginatedPreschools.map((school) => (
+                <div
+                  className={`grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 transition-opacity duration-200 ${
+                    isLoading ? 'opacity-60 pointer-events-none' : 'opacity-100'
+                  }`}
+                >
+                  {displayedSchools.map((school) => (
                     <PreschoolCard
                       key={school.id}
                       preschool={school}
@@ -720,7 +732,7 @@ export default function DirectoryPage() {
                   <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-card border border-border/80">
                     <div className="text-xs text-muted-foreground">
                       Page <strong className="text-foreground">{currentPage}</strong> of{' '}
-                      <strong className="text-foreground">{totalPages}</strong> ({filteredPreschools.length} preschools)
+                      <strong className="text-foreground">{totalPages}</strong> ({totalCount.toLocaleString()} preschools)
                     </div>
 
                     <div className="flex items-center gap-1.5">

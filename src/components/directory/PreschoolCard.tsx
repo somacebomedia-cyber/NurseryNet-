@@ -42,20 +42,36 @@ export default function PreschoolCard({ preschool, onSelect, onBookTour, onClaim
         <div className="absolute top-3 left-3 right-3 flex justify-between items-center gap-1 z-10">
           <div className="flex flex-wrap gap-1.5 items-center">
             {preschool.isClaimed ? (
-              <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500 text-white shadow-md">
-                <BadgeCheck className="w-3.5 h-3.5" />
+              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500 text-white shadow-md">
+                <BadgeCheck className="w-3 h-3" />
                 <span>Owner-Claimed</span>
               </div>
+            ) : preschool.dsdRegistration === 'Full' ? (
+              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-600 text-white shadow-sm">
+                <ShieldCheck className="w-3 h-3" />
+                <span>DSD Registered</span>
+              </div>
+            ) : preschool.dsdRegistration === 'Conditional' ? (
+              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-600 text-white shadow-sm">
+                <ShieldCheck className="w-3 h-3" />
+                <span>DSD Conditional</span>
+              </div>
             ) : preschool.isVerified ? (
-              <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-white/95 text-primary backdrop-blur-md shadow-sm border border-white/40">
-                <ShieldCheck className="w-3.5 h-3.5 text-primary fill-primary/20" />
-                <span>Verified ECD</span>
+              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-white/95 text-primary backdrop-blur-md shadow-sm border border-white/40">
+                <ShieldCheck className="w-3 h-3 text-primary fill-primary/20" />
+                <span>Audit Verified</span>
               </div>
             ) : null}
 
-            {preschool.emisNumber && (
+            {preschool.npoNumber && (
               <span className="hidden sm:inline-flex text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-black/60 text-white/90 backdrop-blur-md">
-                EMIS #{preschool.emisNumber}
+                NPO #{preschool.npoNumber}
+              </span>
+            )}
+
+            {preschool.isSubsidised && (
+              <span className="hidden md:inline-flex text-[10px] font-bold px-2 py-0.5 rounded bg-sky-600/90 text-white backdrop-blur-md">
+                Subsidised
               </span>
             )}
           </div>

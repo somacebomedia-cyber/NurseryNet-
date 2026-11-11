@@ -28,9 +28,9 @@ interface EcdBenchmarksDialogProps {
 }
 
 export default function EcdBenchmarksDialog({ isOpen, onClose }: EcdBenchmarksDialogProps) {
-  const infra = ECD_BENCHMARKS.nationalInfrastructure;
-  const equipment = ECD_BENCHMARKS.outdoorPlayEquipment;
-  const provinces = ECD_BENCHMARKS.provincialDistribution;
+  const infra = (ECD_BENCHMARKS as any).nationalInfrastructure;
+  const equipment = (ECD_BENCHMARKS as any).outdoorPlayEquipment;
+  const provinces = (ECD_BENCHMARKS as any).provincialDistribution || (ECD_BENCHMARKS as any).provinces || [];
 
   return (
     <Dialog open={isOpen} onOpenChange={(open: boolean) => !open && onClose()}>
@@ -45,7 +45,7 @@ export default function EcdBenchmarksDialog({ isOpen, onClose }: EcdBenchmarksDi
                 National ECD Census Benchmarks (South Africa)
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
-                Official Department of Basic Education (DBE) Census covering 42,420 early childhood centres across all 9 provinces.
+                Official Department of Basic Education & Social Development Census covering 42,420 early childhood centres across all 9 provinces.
               </DialogDescription>
             </div>
           </div>
@@ -158,11 +158,16 @@ export default function EcdBenchmarksDialog({ isOpen, onClose }: EcdBenchmarksDi
             </h4>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              {provinces.map((p, idx) => (
+              {provinces.map((p: any, idx: number) => (
                 <div key={idx} className="p-2.5 rounded-lg bg-background border border-border flex items-center justify-between text-xs">
-                  <span className="font-semibold text-foreground">{p.province}</span>
-                  <div className="text-right">
-                    <span className="font-mono font-bold text-primary">{p.count.toLocaleString()}</span>
+                  <div>
+                    <span className="font-semibold text-foreground block">{p.province}</span>
+                    <span className="text-[10px] text-muted-foreground">
+                      Med fee: R{p.medianMonthlyFee || 300} · {p.dsdRegisteredPct || 38}% DSD reg
+                    </span>
+                  </div>
+                  <div className="text-right shrink-0 ml-2">
+                    <span className="font-mono font-bold text-primary">{(p.count || p.centres || 0).toLocaleString()}</span>
                     <span className="text-[10px] text-muted-foreground ml-1">({p.percentage}%)</span>
                   </div>
                 </div>

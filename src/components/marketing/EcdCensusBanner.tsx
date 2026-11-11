@@ -22,10 +22,10 @@ export default function EcdCensusBanner() {
                   <span>South Africa National ECD Census 2021 Data</span>
                 </div>
                 <h3 className="text-lg sm:text-xl font-bold font-heading text-white">
-                  1,180+ Real Verified Preschools Benchmarked Against 42,420 National Centres
+                  20,291 Real Named Preschools Benchmarked Against 42,420 National Centres
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-300 max-w-2xl mt-0.5">
-                  Every nursery and crèche on NurseryNet is cross-referenced with Department of Basic Education safety norms, EMIS registry data, and infrastructure indicators.
+                  Every educare, nursery and crèche on NurseryNet is cross-referenced with Department of Social Development (DSD) audits, NPO registries, and Census 2021 municipal fee benchmarks across all 213 municipalities.
                 </p>
               </div>
             </div>
@@ -33,16 +33,16 @@ export default function EcdCensusBanner() {
             <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto justify-start lg:justify-end">
               <div className="hidden sm:flex items-center gap-4 text-xs font-mono pr-4 border-r border-slate-700">
                 <div>
-                  <span className="text-yellow-400 font-extrabold text-base block">88.6%</span>
-                  <span className="text-slate-400 text-[10px]">Secure Fencing</span>
+                  <span className="text-yellow-400 font-extrabold text-base block">R300</span>
+                  <span className="text-slate-400 text-[10px]">Nat Median Fee</span>
                 </div>
                 <div>
-                  <span className="text-yellow-400 font-extrabold text-base block">83.6%</span>
-                  <span className="text-slate-400 text-[10px]">Lockable Gates</span>
+                  <span className="text-yellow-400 font-extrabold text-base block">38.2%</span>
+                  <span className="text-slate-400 text-[10px]">DSD Registered</span>
                 </div>
                 <div>
-                  <span className="text-yellow-400 font-extrabold text-base block">81.0%</span>
-                  <span className="text-slate-400 text-[10px]">Playgrounds</span>
+                  <span className="text-yellow-400 font-extrabold text-base block">30.2%</span>
+                  <span className="text-slate-400 text-[10px]">Subsidised</span>
                 </div>
               </div>
 

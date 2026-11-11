@@ -181,11 +181,23 @@ export default function ClaimDialog({ preschool, isOpen, onClose, onClaimSuccess
                 <span className="text-muted-foreground">
                   {preschool.suburb}, {preschool.city} · {preschool.province || 'South Africa'}
                 </span>
-                {preschool.emisNumber && (
-                  <span className="inline-block mt-1 text-[11px] font-mono font-semibold px-2 py-0.5 rounded bg-primary/10 text-primary">
-                    Official EMIS #{preschool.emisNumber}
-                  </span>
-                )}
+                <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                  {preschool.dsdRegistration && (
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300">
+                      DSD: {preschool.dsdRegistration}
+                    </span>
+                  )}
+                  {preschool.npoNumber && (
+                    <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-primary/10 text-primary">
+                      NPO #{preschool.npoNumber}
+                    </span>
+                  )}
+                  {preschool.isSubsidised && (
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-sky-100 dark:bg-sky-950 text-sky-800 dark:text-sky-300">
+                      DSD Subsidised
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 

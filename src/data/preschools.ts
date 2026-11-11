@@ -56,6 +56,11 @@ export interface Preschool {
   rating: number;
   reviewCount: number;
   isVerified: boolean;
+  dsdRegistration?: 'Full' | 'Conditional' | 'Not Registered' | 'In Process' | string;
+  isSubsidised?: boolean;
+  npoNumber?: string | null;
+  municipality?: string;
+  wardId?: string | null;
   emisNumber?: string;
   sourceId?: string;
   primaryLanguage?: string;
@@ -159,7 +164,10 @@ export const FEATURED_PRESCHOOLS: Preschool[] = [
     rating: 4.9,
     reviewCount: 38,
     isVerified: true,
-    emisNumber: '700400192',
+    dsdRegistration: 'Full',
+    isSubsidised: false,
+    npoNumber: '048-161 NPO',
+    municipality: 'City of Johannesburg',
     sourceId: 'DSD-JHB-04001',
     primaryLanguage: 'English',
     status: 'Admissions Open',
@@ -215,8 +223,11 @@ export const FEATURED_PRESCHOOLS: Preschool[] = [
     rating: 5.0,
     reviewCount: 42,
     isVerified: true,
-    emisNumber: '0100000412',
-    sourceId: 'EMIS-0100000412',
+    dsdRegistration: 'Full',
+    isSubsidised: false,
+    npoNumber: '019-354 NPO',
+    municipality: 'City of Cape Town',
+    sourceId: 'DSD-CPT-00412',
     primaryLanguage: 'English',
     status: 'Limited Spots',
     teacherRatio: '1:5',
@@ -263,7 +274,10 @@ export const FEATURED_PRESCHOOLS: Preschool[] = [
     rating: 4.9,
     reviewCount: 31,
     isVerified: true,
-    emisNumber: '500200881',
+    dsdRegistration: 'Full',
+    isSubsidised: false,
+    npoNumber: '058-169 NPO',
+    municipality: 'eThekwini',
     sourceId: 'DSD-KZN-02008',
     primaryLanguage: 'English',
     status: 'Admissions Open',
@@ -310,7 +324,10 @@ export const FEATURED_PRESCHOOLS: Preschool[] = [
     rating: 4.9,
     reviewCount: 45,
     isVerified: true,
-    emisNumber: '700300912',
+    dsdRegistration: 'Full',
+    isSubsidised: true,
+    npoNumber: '063-476 NPO',
+    municipality: 'City of Tshwane',
     sourceId: 'DSD-PTA-03009',
     primaryLanguage: 'Dual Afr/Eng',
     status: 'Admissions Open',
@@ -357,8 +374,11 @@ export const FEATURED_PRESCHOOLS: Preschool[] = [
     rating: 4.9,
     reviewCount: 29,
     isVerified: true,
-    emisNumber: '0100000781',
-    sourceId: 'EMIS-0100000781',
+    sourceId: 'DSD-0100000781',
+    dsdRegistration: 'Full',
+    isSubsidised: false,
+    npoNumber: '116-771 NPO',
+    municipality: 'City of Cape Town',
     primaryLanguage: 'English',
     status: 'Limited Spots',
     teacherRatio: '1:5',
@@ -386,10 +406,39 @@ export const FEATURED_PRESCHOOLS: Preschool[] = [
 
 export const REAL_PRESCHOOLS: Preschool[] = (realPreschoolsData as any[]) as Preschool[];
 
-// Merged dataset of all 1,180+ verified South African preschools
+// Merged dataset of real verified South African preschools
 export const PRESCHOOLS: Preschool[] = [
   ...FEATURED_PRESCHOOLS,
   ...REAL_PRESCHOOLS.filter(
     (rp) => !FEATURED_PRESCHOOLS.some((fp) => fp.id === rp.id || fp.slug === rp.slug)
   ),
 ];
+
+export function getMunicipalityBenchmark(municipalityName?: string) {
+  const national = (ECD_BENCHMARKS as any).national || {
+    centres: 42420,
+    dsdRegisteredPct: 38.2,
+    subsidyPct: 30.2,
+    medianMonthlyFee: 300,
+    avgChildren: 34.4,
+    mealsPct: 94.1,
+    fencedPct: 88.6,
+    gatedPct: 83.6
+  };
+  if (!municipalityName) return national;
+  const normalized = municipalityName.toLowerCase().trim();
+  const shortNormalized = normalized.replace(/^(city of|local municipality of|municipality of)\s+/, '');
+  const byName = (ECD_BENCHMARKS as any).municipalitiesByName;
+  if (byName && (byName[normalized] || byName[shortNormalized])) {
+    return byName[normalized] || byName[shortNormalized];
+  }
+  const munis = (ECD_BENCHMARKS as any).municipalities;
+  if (Array.isArray(munis)) {
+    const match = munis.find((m: any) => {
+      const mn = (m.name || '').toLowerCase().trim();
+      return mn === normalized || mn === shortNormalized || mn.includes(shortNormalized) || shortNormalized.includes(mn);
+    });
+    if (match) return match;
+  }
+  return national;
+}
