@@ -45,8 +45,10 @@ export const navContent = {
         label: 'For Schools', 
         icon: School,
         subLinks: [
-          { href: '#', label: 'AI Grading Assistant', icon: Wand2 },
-          { href: '#', label: 'Parent Communication Tools', icon: Users },
+          { href: '/preschools/logo-generator', label: 'School Crest Generator', icon: Wand2 },
+          { href: '/preschools/growth-kit', label: 'Curriculum & Admin Tools', icon: Users },
+          { href: '/preschools/roi-calculator', label: 'Tuition ROI Calculator', icon: TrendingUp },
+          { href: '/funding', label: 'Education Funding Hub', icon: Search },
           { href: '/pricing', label: 'Pricing & Plans', icon: DollarSign, isSeparator: true },
         ]
     },
@@ -59,9 +61,10 @@ export const navContent = {
         label: 'For Counselors', 
         icon: BookOpenCheck,
         subLinks: [
-          { href: '#', label: 'AI Career Guidance', icon: GraduationCap },
-          { href: '#', label: 'University App Hub', icon: Briefcase },
-           { href: '/pricing', label: 'Pricing & Plans', icon: DollarSign, isSeparator: true },
+          { href: '/rankings', label: 'Academic Rankings Hub', icon: Award },
+          { href: '/funding', label: 'Bursaries & Subsidies', icon: Briefcase },
+          { href: '/preschools/growth-kit', label: 'School Admin Resources', icon: Gift },
+          { href: '/pricing', label: 'Pricing & Plans', icon: DollarSign, isSeparator: true },
         ]
     },
   },
@@ -73,9 +76,10 @@ export const navContent = {
         label: 'For Admissions',
         icon: GraduationCap,
         subLinks: [
-          { href: '#', label: 'AI Research Assistant', icon: Wand2 },
-          { href: '#', label: 'Corporate Partnerships', icon: Briefcase },
-           { href: '/pricing', label: 'Pricing & Plans', icon: DollarSign, isSeparator: true },
+          { href: '/rankings', label: 'Institution Rankings', icon: Award },
+          { href: '/funding', label: 'Bursary & Research Funds', icon: Briefcase },
+          { href: '/preschools/roi-calculator', label: 'Enrollment Modeling', icon: TrendingUp },
+          { href: '/pricing', label: 'Pricing & Plans', icon: DollarSign, isSeparator: true },
         ]
     },
   },
