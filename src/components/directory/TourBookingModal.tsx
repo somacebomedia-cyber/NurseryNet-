@@ -10,13 +10,20 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { Calendar, Clock, CheckCircle, User, Phone, Mail, Sparkles, MapPin } from 'lucide-react';
+import { Calendar, Clock, CheckCircle, User, Phone, Mail, Sparkles, MapPin, MessageCircle, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface TourBookingModalProps {
   preschool: Preschool | null;
   isOpen: boolean;
   onClose: () => void;
+}
+
+function formatSaWhatsAppNumber(rawPhone?: string): string {
+  const digits = (rawPhone || '0825551234').replace(/\D/g, '');
+  if (digits.startsWith('27') && digits.length >= 11) return digits;
+  if (digits.startsWith('0') && digits.length >= 10) return `27${digits.slice(1)}`;
+  return `27${digits}`;
 }
 
 export default function TourBookingModal({ preschool, isOpen, onClose }: TourBookingModalProps) {
@@ -53,10 +60,13 @@ export default function TourBookingModal({ preschool, isOpen, onClose }: TourBoo
       setIsSubmitting(false);
       setIsBooked(true);
 
-      // Save to localStorage for persistence
+      // Save to localStorage for Owner Dashboard persistence
       try {
         const stored = JSON.parse(localStorage.getItem('nurserynet_tours') || '[]');
-        stored.push({
+        const newTour = {
+          id: `tour-${Date.now()}`,
+          type: 'tour',
+          status: 'pending',
           schoolId: preschool.id,
           schoolName: preschool.name,
           parentName,
@@ -65,19 +75,61 @@ export default function TourBookingModal({ preschool, isOpen, onClose }: TourBoo
           childAge,
           tourDate,
           timeSlot,
-          bookedAt: new Date().toISOString()
-        });
-        localStorage.setItem('nurserynet_tours', JSON.stringify(stored));
+          notes,
+          bookedAt: new Date().toISOString(),
+        };
+        localStorage.setItem('nurserynet_tours', JSON.stringify([newTour, ...(Array.isArray(stored) ? stored : [])]));
+        window.dispatchEvent(new Event('nurserynet_leads_updated'));
       } catch (err) {
         console.error('Failed to store booked tour', err);
       }
 
       toast({
-        title: "Tour Scheduled Successfully! 🎉",
-        description: `Your appointment with ${preschool.name} is confirmed for ${tourDate} at ${timeSlot}. Check your email for directions.`,
+        title: "Tour Scheduled Successfully!",
+        description: `Your appointment with ${preschool.name} is confirmed for ${tourDate} at ${timeSlot}.`,
       });
-    }, 600);
+    }, 500);
   };
+
+  const handleDownloadCalendarInvite = () => {
+    const cleanDate = tourDate.replace(/-/g, '');
+    const startHour = timeSlot.includes('11:30') ? '113000' : timeSlot.includes('14:30') ? '143000' : '093000';
+    const endHour = timeSlot.includes('11:30') ? '123000' : timeSlot.includes('14:30') ? '153000' : '103000';
+    const icsContent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//NurseryNet South Africa//Campus Tour//EN',
+      'BEGIN:VEVENT',
+      `UID:tour-${Date.now()}@nurserynet.app`,
+      `DTSTAMP:${cleanDate}T080000Z`,
+      `DTSTART:${cleanDate}T${startHour}`,
+      `DTEND:${cleanDate}T${endHour}`,
+      `SUMMARY:Preschool Tour: ${preschool.name}`,
+      `LOCATION:${(preschool.address || preschool.city || '').replace(/,/g, '\\,')}`,
+      `DESCRIPTION:Private Preschool Tour for ${parentName} (${childAge}). Host: ${preschool.principal} (Principal). Phone: ${preschool.phone || 'On file'}.`,
+      'END:VEVENT',
+      'END:VCALENDAR',
+    ].join('\r\n');
+
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `${preschool.slug || 'preschool'}-tour-invite.ics`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: 'Calendar Invite Downloaded',
+      description: 'Open the .ics file to add this campus visit to Google, Apple, or Outlook Calendar.',
+    });
+  };
+
+  const whatsAppPrincipalUrl = `https://wa.me/${formatSaWhatsAppNumber(preschool.phone)}?text=${encodeURIComponent(
+    `Hi ${preschool.principal || preschool.name}, I just booked a campus tour via NurseryNet for ${tourDate} at ${timeSlot}.\n\nParent: ${parentName}\nChild Age: ${childAge}\nPhone: ${phone}${notes ? `\nNotes: ${notes}` : ''}\n\nLooking forward to visiting!`
+  )}`;
 
   const handleResetAndClose = () => {
     setIsBooked(false);
@@ -92,7 +144,7 @@ export default function TourBookingModal({ preschool, isOpen, onClose }: TourBoo
     <Dialog open={isOpen} onOpenChange={(open: boolean) => !open && handleResetAndClose()}>
       <DialogContent className="max-w-lg p-6 rounded-2xl bg-card border-border">
         {isBooked ? (
-          <div className="text-center py-6 space-y-4">
+          <div className="text-center py-4 space-y-4">
             <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 mx-auto flex items-center justify-center">
               <CheckCircle className="w-10 h-10" />
             </div>
@@ -100,34 +152,57 @@ export default function TourBookingModal({ preschool, isOpen, onClose }: TourBoo
               <DialogTitle className="font-heading text-2xl font-bold text-foreground">
                 Tour Confirmed!
               </DialogTitle>
-              <DialogDescription className="text-sm text-muted-foreground mt-2 max-w-sm mx-auto">
-                We've reserved your private campus tour with <strong>{preschool.name}</strong>.
+              <DialogDescription className="text-sm text-muted-foreground mt-1.5 max-w-sm mx-auto">
+                Your campus visit with <strong>{preschool.name}</strong> has been logged in the Principal&apos;s Owner Dashboard.
               </DialogDescription>
             </div>
 
-            <div className="p-4 rounded-xl bg-muted/40 border border-border text-left text-xs space-y-2">
+            <div className="p-4 rounded-xl bg-muted/40 border border-border text-left text-xs space-y-2 font-mono tabular-nums">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Date:</span>
+                <span className="text-muted-foreground font-sans">Date:</span>
                 <span className="font-semibold text-foreground">{tourDate}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Time Slot:</span>
+                <span className="text-muted-foreground font-sans">Time Slot:</span>
                 <span className="font-semibold text-foreground">{timeSlot}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Address:</span>
-                <span className="font-semibold text-foreground text-right">{preschool.address}</span>
+                <span className="text-muted-foreground font-sans">Address:</span>
+                <span className="font-semibold text-foreground font-sans text-right">{preschool.address}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Host:</span>
-                <span className="font-semibold text-foreground">{preschool.principal} (Principal)</span>
+                <span className="text-muted-foreground font-sans">Host:</span>
+                <span className="font-semibold text-foreground font-sans">{preschool.principal} (Principal)</span>
               </div>
             </div>
 
-            <div className="pt-2 flex flex-col gap-2">
+            {/* Instant Follow-Up & Calendar Lock-In Actions */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
               <Button
+                asChild
+                className="w-full h-11 rounded-xl font-bold text-xs bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
+              >
+                <a href={whatsAppPrincipalUrl} target="_blank" rel="noopener noreferrer">
+                  <MessageCircle className="w-4 h-4 mr-1.5" />
+                  WhatsApp Principal Now
+                </a>
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleDownloadCalendarInvite}
+                className="w-full h-11 rounded-xl font-bold text-xs border-primary/40 text-primary hover:bg-primary/10"
+              >
+                <Download className="w-4 h-4 mr-1.5" />
+                Add to Calendar (.ics)
+              </Button>
+            </div>
+
+            <div className="pt-1 flex flex-col gap-2">
+              <Button
+                variant="ghost"
                 onClick={handleResetAndClose}
-                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-11 rounded-xl font-bold"
+                className="w-full h-10 rounded-xl font-semibold text-xs text-muted-foreground hover:text-foreground"
               >
                 Back to Directory
               </Button>

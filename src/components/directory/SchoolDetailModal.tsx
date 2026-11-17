@@ -36,6 +36,7 @@ import {
   AlertCircle,
   Globe,
   RefreshCw,
+  Heart,
 } from 'lucide-react';
 
 interface SchoolDetailModalProps {
@@ -45,6 +46,8 @@ interface SchoolDetailModalProps {
   onBookTour: (preschool: Preschool) => void;
   onInquire: (preschool: Preschool) => void;
   onClaim?: (preschool: Preschool) => void;
+  isSaved?: boolean;
+  onToggleSave?: (preschool: Preschool) => void;
 }
 
 export default function SchoolDetailModal({
@@ -54,6 +57,8 @@ export default function SchoolDetailModal({
   onBookTour,
   onInquire,
   onClaim,
+  isSaved = false,
+  onToggleSave,
 }: SchoolDetailModalProps) {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [liveData, setLiveData] = useState<LiveSearchResponse | null>(null);
@@ -243,13 +248,29 @@ export default function SchoolDetailModal({
               </div>
             </div>
 
-            <div className="flex items-center gap-2.5 w-full sm:w-auto">
+            <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+              {onToggleSave && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onToggleSave(preschool)}
+                  className={`text-xs font-bold h-11 px-3.5 rounded-xl whitespace-nowrap shrink-0 ${
+                    isSaved
+                      ? 'border-rose-500/50 bg-rose-500/10 text-rose-600 dark:text-rose-400'
+                      : 'border-border text-foreground'
+                  }`}
+                >
+                  <Heart className={`w-4 h-4 mr-1.5 ${isSaved ? 'fill-current text-rose-500' : ''}`} />
+                  {isSaved ? 'Saved' : 'Save'}
+                </Button>
+              )}
+
               {/* Claim button if not claimed */}
               {!preschool.isClaimed && onClaim && (
                 <Button
                   variant="outline"
                   onClick={() => onClaim(preschool)}
-                  className="text-xs font-bold h-11 px-3.5 rounded-xl border-primary/40 text-primary hover:bg-primary/10"
+                  className="text-xs font-bold h-11 px-3.5 rounded-xl border-primary/40 text-primary hover:bg-primary/10 whitespace-nowrap shrink-0"
                 >
                   <BadgeCheck className="w-4 h-4 mr-1.5" />
                   Claim School

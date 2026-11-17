@@ -85,14 +85,14 @@ export default function Footer() {
               <Rocket className="h-4 w-4" />
               Launch Roadmap
             </Link>
-            <a href="/logo-viewer.html" target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-accent hover:underline flex items-center gap-1">
+            <a href="/logo-viewer.html" target="_blank" rel="noopener noreferrer" className="hidden text-sm font-bold text-accent hover:underline items-center gap-1">
               <Download className="h-4 w-4" />
               Download Logo
             </a>
           </nav>
         </div>
-        <Separator className="my-6" />
-        <div className="flex justify-center">
+        <Separator className="my-6 hidden" />
+        <div className="hidden justify-center">
            <BrandSwitcher />
         </div>
       </div>

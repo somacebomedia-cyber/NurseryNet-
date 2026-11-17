@@ -19,7 +19,9 @@ import TourBookingModal from '@/components/directory/TourBookingModal';
 import InquiryModal from '@/components/directory/InquiryModal';
 import ClaimDialog from '@/components/directory/ClaimDialog';
 import EcdBenchmarksDialog from '@/components/directory/EcdBenchmarksDialog';
+import CompareSchoolsModal from '@/components/directory/CompareSchoolsModal';
 import LiveSearchSources from '@/components/directory/LiveSearchSources';
+import { useToast } from '@/hooks/use-toast';
 import {
   buildLiveCacheKey,
   getCachedLiveSearch,
@@ -54,6 +56,8 @@ import {
   ExternalLink,
   AlertCircle,
   Clock,
+  Heart,
+  Scale,
 } from 'lucide-react';
 import {
   Sheet,
@@ -66,6 +70,8 @@ import {
 const ITEMS_PER_PAGE = 24;
 
 export default function DirectoryPage() {
+  const { toast } = useToast();
+
   // Filter States
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProvince, setSelectedProvince] = useState<Province | 'All'>('All');
@@ -78,6 +84,7 @@ export default function DirectoryPage() {
   const [selectedFacilities, setSelectedFacilities] = useState<string[]>([]);
   const [onlyVerified, setOnlyVerified] = useState(false);
   const [onlyClaimed, setOnlyClaimed] = useState(false);
+  const [onlySaved, setOnlySaved] = useState(false);
   const [sortBy, setSortBy] = useState<'rating' | 'fee-asc' | 'fee-desc' | 'reviews' | 'name'>('rating');
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -95,9 +102,10 @@ export default function DirectoryPage() {
   const [liveError, setLiveError] = useState<string | null>(null);
   const [livePanelOpen, setLivePanelOpen] = useState(false);
 
-  // Claimed Slugs & Custom Added Preschools tracking in localStorage
+  // Claimed Slugs, Custom Added Preschools, and Saved Shortlist tracking in localStorage
   const [claimedSlugs, setClaimedSlugs] = useState<string[]>([]);
   const [customSchools, setCustomSchools] = useState<Preschool[]>([]);
+  const [savedSchools, setSavedSchools] = useState<Preschool[]>([]);
   const [claimFromLiveSearch, setClaimFromLiveSearch] = useState(false);
 
   useEffect(() => {
@@ -109,6 +117,10 @@ export default function DirectoryPage() {
       const storedCustom = JSON.parse(localStorage.getItem('nurserynet_custom_preschools') || '[]');
       if (Array.isArray(storedCustom)) {
         setCustomSchools(storedCustom);
+      }
+      const storedSaved = JSON.parse(localStorage.getItem('nurserynet_saved_schools') || '[]');
+      if (Array.isArray(storedSaved)) {
+        setSavedSchools(storedSaved);
       }
     } catch {
       // Ignore localStorage errors
@@ -122,6 +134,7 @@ export default function DirectoryPage() {
   const [inquiryModalOpen, setInquiryModalOpen] = useState(false);
   const [claimModalOpen, setClaimModalOpen] = useState(false);
   const [benchmarksModalOpen, setBenchmarksModalOpen] = useState(false);
+  const [compareModalOpen, setCompareModalOpen] = useState(false);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
   // Reset page when any filter criteria changes
@@ -235,11 +248,58 @@ export default function DirectoryPage() {
       });
 
     const combined = [...matchingCustom.map((c) => ({ ...c, isClaimed: true })), ...baseMapped];
+    if (onlySaved) {
+      return savedSchools;
+    }
     if (onlyClaimed) {
       return combined.filter((s) => s.isClaimed);
     }
     return combined;
-  }, [preschools, claimedSlugs, customSchools, searchQuery, selectedProvince, selectedCity, onlyClaimed]);
+  }, [preschools, claimedSlugs, customSchools, searchQuery, selectedProvince, selectedCity, onlyClaimed, onlySaved, savedSchools]);
+
+  const savedIdSet = useMemo(() => new Set(savedSchools.map((s) => s.id)), [savedSchools]);
+
+  const handleToggleSave = (school: Preschool) => {
+    setSavedSchools((prev) => {
+      const exists = prev.some((s) => s.id === school.id);
+      const next = exists ? prev.filter((s) => s.id !== school.id) : [school, ...prev];
+      try {
+        localStorage.setItem('nurserynet_saved_schools', JSON.stringify(next));
+      } catch {
+        // Ignore storage error
+      }
+      toast({
+        title: exists ? 'Removed from Shortlist' : 'Saved to Shortlist',
+        description: exists
+          ? `${school.name} was removed from your saved comparison list.`
+          : `${school.name} added to your shortlist (${next.length} saved).`,
+      });
+      return next;
+    });
+  };
+
+  const handleRemoveSaved = (schoolId: string) => {
+    setSavedSchools((prev) => {
+      const next = prev.filter((s) => s.id !== schoolId);
+      try {
+        localStorage.setItem('nurserynet_saved_schools', JSON.stringify(next));
+      } catch {
+        // Ignore storage error
+      }
+      if (next.length === 0) setOnlySaved(false);
+      return next;
+    });
+  };
+
+  const handleClearSaved = () => {
+    setSavedSchools([]);
+    setOnlySaved(false);
+    try {
+      localStorage.removeItem('nurserynet_saved_schools');
+    } catch {
+      // Ignore storage error
+    }
+  };
 
   const toggleFacility = (facility: string) => {
     setSelectedFacilities((prev) =>
@@ -259,6 +319,7 @@ export default function DirectoryPage() {
     setSelectedFacilities([]);
     setOnlyVerified(false);
     setOnlyClaimed(false);
+    setOnlySaved(false);
     setSortBy('rating');
     setCurrentPage(1);
   };
@@ -274,7 +335,8 @@ export default function DirectoryPage() {
     maxMonthlyFee < 8500 ||
     selectedFacilities.length > 0 ||
     onlyVerified ||
-    onlyClaimed;
+    onlyClaimed ||
+    onlySaved;
 
   // Handlers for cards & modals
   const handleOpenDetail = (school: Preschool) => {
@@ -908,10 +970,34 @@ export default function DirectoryPage() {
             {selectedCity !== 'All' && <span> ({selectedCity})</span>}
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setOnlySaved((prev) => !prev)}
+              className={`px-3 py-1 rounded-lg font-bold flex items-center gap-1.5 border transition-colors whitespace-nowrap shrink-0 ${
+                onlySaved
+                  ? 'bg-rose-500 text-white border-rose-500'
+                  : 'bg-card text-foreground border-border hover:border-rose-400'
+              }`}
+            >
+              <Heart className={`w-3.5 h-3.5 ${onlySaved || savedSchools.length > 0 ? 'fill-current text-rose-500' : ''} ${onlySaved ? '!text-white' : ''}`} />
+              <span>Saved Shortlist ({savedSchools.length})</span>
+            </button>
+
+            {savedSchools.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setCompareModalOpen(true)}
+                className="px-3 py-1 rounded-lg font-bold flex items-center gap-1.5 bg-primary/10 text-primary border border-primary/30 hover:bg-primary/20 transition-colors whitespace-nowrap shrink-0"
+              >
+                <Scale className="w-3.5 h-3.5" />
+                <span>Compare ({Math.min(4, savedSchools.length)})</span>
+              </button>
+            )}
+
             <button
               onClick={() => setBenchmarksModalOpen(true)}
-              className="text-primary hover:underline font-bold flex items-center gap-1"
+              className="text-primary hover:underline font-bold flex items-center gap-1 whitespace-nowrap shrink-0"
             >
               <BarChart3 className="w-3.5 h-3.5" />
               <span>National Benchmarks</span>
@@ -920,7 +1006,7 @@ export default function DirectoryPage() {
             {hasActiveFilters && (
               <button
                 onClick={resetFilters}
-                className="text-destructive hover:underline font-bold flex items-center gap-1"
+                className="text-destructive hover:underline font-bold flex items-center gap-1 whitespace-nowrap shrink-0"
               >
                 <RotateCcw className="w-3 h-3" />
                 <span>Reset Filters</span>
@@ -1194,12 +1280,14 @@ export default function DirectoryPage() {
                       onSelect={handleOpenDetail}
                       onBookTour={handleOpenTour}
                       onClaim={handleOpenClaim}
+                      isSaved={savedIdSet.has(school.id)}
+                      onToggleSave={handleToggleSave}
                     />
                   ))}
                 </div>
 
                 {/* Pagination Bar */}
-                {totalPages > 1 && (
+                {totalPages > 1 && !onlySaved && (
                   <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-card border border-border/80">
                     <div className="text-xs text-muted-foreground">
                       Page <strong className="text-foreground">{currentPage}</strong> of{' '}
@@ -1273,6 +1361,62 @@ export default function DirectoryPage() {
         </div>
       </div>
 
+      {/* Floating Shortlist & Side-by-Side Comparison Bar */}
+      {savedSchools.length > 0 && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[94vw] max-w-3xl p-3 rounded-2xl bg-card/95 backdrop-blur-md border border-primary/30 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="flex items-center gap-3 overflow-x-auto max-w-full">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-foreground shrink-0">
+              <Heart className="w-4 h-4 fill-rose-500 text-rose-500" />
+              <span>Shortlist ({savedSchools.length}):</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              {savedSchools.slice(0, 3).map((school) => (
+                <span
+                  key={school.id}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted text-xs font-medium text-foreground max-w-[160px]"
+                >
+                  <span className="truncate">{school.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveSaved(school.id)}
+                    className="text-muted-foreground hover:text-destructive shrink-0"
+                    aria-label={`Remove ${school.name}`}
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+              {savedSchools.length > 3 && (
+                <span className="text-xs text-muted-foreground font-mono shrink-0">
+                  +{savedSchools.length - 3} more
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-end shrink-0">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={handleClearSaved}
+              className="h-9 px-3 text-xs font-semibold text-muted-foreground hover:text-destructive whitespace-nowrap"
+            >
+              Clear
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              onClick={() => setCompareModalOpen(true)}
+              className="h-9 px-4 rounded-xl text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90 whitespace-nowrap"
+            >
+              <Scale className="w-3.5 h-3.5 mr-1.5" />
+              Compare Side-by-Side ({Math.min(4, savedSchools.length)})
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Interactive Modals */}
       <SchoolDetailModal
         preschool={activeSchool}
@@ -1281,6 +1425,24 @@ export default function DirectoryPage() {
         onBookTour={handleOpenTour}
         onInquire={handleOpenInquiry}
         onClaim={handleOpenClaim}
+        isSaved={activeSchool ? savedIdSet.has(activeSchool.id) : false}
+        onToggleSave={handleToggleSave}
+      />
+
+      <CompareSchoolsModal
+        schools={savedSchools}
+        isOpen={compareModalOpen}
+        onClose={() => setCompareModalOpen(false)}
+        onRemove={handleRemoveSaved}
+        onClearAll={handleClearSaved}
+        onBookTour={(school) => {
+          setCompareModalOpen(false);
+          handleOpenTour(school);
+        }}
+        onSelectDetail={(school) => {
+          setCompareModalOpen(false);
+          handleOpenDetail(school);
+        }}
       />
 
       <TourBookingModal

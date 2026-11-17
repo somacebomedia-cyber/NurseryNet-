@@ -10,13 +10,20 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { Mail, CheckCircle, User, Phone, Send, FileText } from 'lucide-react';
+import { Mail, CheckCircle, User, Phone, Send, FileText, MessageCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface InquiryModalProps {
   preschool: Preschool | null;
   isOpen: boolean;
   onClose: () => void;
+}
+
+function formatSaWhatsAppNumber(rawPhone?: string): string {
+  const digits = (rawPhone || '0825551234').replace(/\D/g, '');
+  if (digits.startsWith('27') && digits.length >= 11) return digits;
+  if (digits.startsWith('0') && digits.length >= 10) return `27${digits.slice(1)}`;
+  return `27${digits}`;
 }
 
 export default function InquiryModal({ preschool, isOpen, onClose }: InquiryModalProps) {
@@ -47,12 +54,41 @@ export default function InquiryModal({ preschool, isOpen, onClose }: InquiryModa
       setIsSubmitting(false);
       setIsSent(true);
 
+      // Persist inquiry to localStorage so it syncs to the Owner Dashboard
+      try {
+        const stored = JSON.parse(localStorage.getItem('nurserynet_inquiries') || '[]');
+        const newInquiry = {
+          id: `inq-${Date.now()}`,
+          type: 'inquiry',
+          status: 'pending',
+          schoolId: preschool.id,
+          schoolName: preschool.name,
+          parentName,
+          email,
+          phone: phone || 'Email enquiry',
+          inquiryType,
+          message,
+          createdAt: new Date().toISOString().split('T')[0],
+        };
+        localStorage.setItem(
+          'nurserynet_inquiries',
+          JSON.stringify([newInquiry, ...(Array.isArray(stored) ? stored : [])])
+        );
+        window.dispatchEvent(new Event('nurserynet_leads_updated'));
+      } catch (err) {
+        console.error('Failed to store inquiry', err);
+      }
+
       toast({
         title: "Inquiry Sent to Admissions",
         description: `${preschool.name}'s admissions coordinator (${preschool.email}) has received your inquiry.`,
       });
-    }, 500);
+    }, 450);
   };
+
+  const whatsAppInquiryUrl = `https://wa.me/${formatSaWhatsAppNumber(preschool.phone)}?text=${encodeURIComponent(
+    `Hi ${preschool.principal || preschool.name}, I just submitted an admissions inquiry on NurseryNet regarding "${inquiryType}".\n\nParent: ${parentName}\nEmail: ${email}${phone ? `\nPhone: ${phone}` : ''}${message ? `\nQuestion: ${message}` : ''}`
+  )}`;
 
   const handleResetAndClose = () => {
     setIsSent(false);
@@ -67,7 +103,7 @@ export default function InquiryModal({ preschool, isOpen, onClose }: InquiryModa
     <Dialog open={isOpen} onOpenChange={(open: boolean) => !open && handleResetAndClose()}>
       <DialogContent className="max-w-md p-6 rounded-2xl bg-card border-border">
         {isSent ? (
-          <div className="text-center py-6 space-y-4">
+          <div className="text-center py-5 space-y-4">
             <div className="w-14 h-14 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 mx-auto flex items-center justify-center">
               <CheckCircle className="w-8 h-8" />
             </div>
@@ -76,15 +112,27 @@ export default function InquiryModal({ preschool, isOpen, onClose }: InquiryModa
                 Inquiry Sent!
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground mt-2 max-w-xs mx-auto">
-                Thank you, {parentName}. <strong>{preschool.name}</strong> will email you the requested admissions package within 24 hours.
+                Thank you, {parentName}. <strong>{preschool.name}</strong> has received your request for <strong>{inquiryType}</strong> in their Owner Dashboard.
               </DialogDescription>
             </div>
-            <Button
-              onClick={handleResetAndClose}
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-10 rounded-xl font-bold text-xs"
-            >
-              Done
-            </Button>
+            <div className="space-y-2 pt-1">
+              <Button
+                asChild
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-10 rounded-xl font-bold text-xs"
+              >
+                <a href={whatsAppInquiryUrl} target="_blank" rel="noopener noreferrer">
+                  <MessageCircle className="w-4 h-4 mr-1.5" />
+                  Message Principal on WhatsApp for Faster Reply
+                </a>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={handleResetAndClose}
+                className="w-full h-9 rounded-xl font-semibold text-xs text-muted-foreground hover:text-foreground"
+              >
+                Done
+              </Button>
+            </div>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">

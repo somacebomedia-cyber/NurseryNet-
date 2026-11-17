@@ -3,16 +3,25 @@
 import Image from 'next/image';
 import { Preschool } from '@/data/preschools';
 import { Button } from '@/components/ui/button';
-import { Star, MapPin, ShieldCheck, BadgeCheck, Users, Calendar, ArrowRight, Languages } from 'lucide-react';
+import { Star, MapPin, ShieldCheck, BadgeCheck, Users, Calendar, ArrowRight, Languages, Heart } from 'lucide-react';
 
 interface PreschoolCardProps {
   preschool: Preschool;
   onSelect: (preschool: Preschool) => void;
   onBookTour: (preschool: Preschool) => void;
   onClaim?: (preschool: Preschool) => void;
+  isSaved?: boolean;
+  onToggleSave?: (preschool: Preschool) => void;
 }
 
-export default function PreschoolCard({ preschool, onSelect, onBookTour, onClaim }: PreschoolCardProps) {
+export default function PreschoolCard({
+  preschool,
+  onSelect,
+  onBookTour,
+  onClaim,
+  isSaved = false,
+  onToggleSave,
+}: PreschoolCardProps) {
   const statusStyles = {
     'Admissions Open': 'text-emerald-700 bg-emerald-50 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800',
     'Limited Spots': 'text-amber-700 bg-amber-50 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800',
@@ -76,9 +85,29 @@ export default function PreschoolCard({ preschool, onSelect, onBookTour, onClaim
             )}
           </div>
 
-          <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border shadow-sm backdrop-blur-md ${statusStyles}`}>
-            {preschool.status}
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border shadow-sm backdrop-blur-md ${statusStyles}`}>
+              {preschool.status}
+            </span>
+            {onToggleSave && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleSave(preschool);
+                }}
+                aria-label={isSaved ? `Remove ${preschool.name} from shortlist` : `Save ${preschool.name} to shortlist`}
+                title={isSaved ? 'Saved to Shortlist (Click to remove)' : 'Save to Shortlist & Compare'}
+                className={`w-7 h-7 rounded-full flex items-center justify-center transition-transform duration-150 active:scale-95 shadow-sm backdrop-blur-md border ${
+                  isSaved
+                    ? 'bg-rose-500 text-white border-rose-400'
+                    : 'bg-black/55 text-white hover:bg-black/75 border-white/30'
+                }`}
+              >
+                <Heart className={`w-3.5 h-3.5 ${isSaved ? 'fill-current' : ''}`} />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Location & Rating Scrim on bottom of photo */}
