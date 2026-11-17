@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useBrand } from '@/context/BrandContext';
+import { TiersConfig } from '@/config/tiers';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -22,12 +23,17 @@ import {
 export default function AffiliatesPage() {
   const { brand } = useBrand();
   const [schoolsReferred, setSchoolsReferred] = useState<number>(15);
+  const [referralTier, setReferralTier] = useState<'verified' | 'pro'>('pro');
   const [partnerName, setPartnerName] = useState('');
   const [partnerEmail, setPartnerEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
-  // 20% recurring commission on R349 Verified plan = R69.80 / school / month
-  const monthlyEarnings = Math.round(schoolsReferred * 349 * 0.20);
+  // 20% recurring commission on Verified (R149) or Featured Top Slot + Free Website (R390)
+  const tierPrice =
+    referralTier === 'verified'
+      ? TiersConfig.VERIFIED.monthlyPriceZAR
+      : TiersConfig.PRO_FEATURED.monthlyPriceZAR;
+  const monthlyEarnings = Math.round(schoolsReferred * tierPrice * 0.20);
   const annualEarnings = monthlyEarnings * 12;
 
   const handleJoin = (e: React.FormEvent) => {
@@ -93,6 +99,37 @@ export default function AffiliatesPage() {
                   <span>2 schools</span>
                   <span>100 schools</span>
                 </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setReferralTier('verified')}
+                  className={`p-3 rounded-xl border text-left transition-colors ${
+                    referralTier === 'verified'
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-border bg-muted/30 text-foreground hover:bg-muted/60'
+                  }`}
+                >
+                  <div className="text-xs font-bold">Verified Centre (R{TiersConfig.VERIFIED.monthlyPriceZAR}/mo)</div>
+                  <div className="text-[11px] text-muted-foreground mt-0.5 font-mono">
+                    R{(TiersConfig.VERIFIED.monthlyPriceZAR * 0.2).toFixed(2)} / school / mo
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setReferralTier('pro')}
+                  className={`p-3 rounded-xl border text-left transition-colors ${
+                    referralTier === 'pro'
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-border bg-muted/30 text-foreground hover:bg-muted/60'
+                  }`}
+                >
+                  <div className="text-xs font-bold">Featured + Free Website (R{TiersConfig.PRO_FEATURED.monthlyPriceZAR}/mo)</div>
+                  <div className="text-[11px] text-muted-foreground mt-0.5 font-mono">
+                    R{(TiersConfig.PRO_FEATURED.monthlyPriceZAR * 0.2).toFixed(2)} / school / mo
+                  </div>
+                </button>
               </div>
 
               <div className="p-5 bg-muted/40 rounded-xl border border-border/60 flex items-center justify-between">

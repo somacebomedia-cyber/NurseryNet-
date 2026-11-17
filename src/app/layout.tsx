@@ -10,6 +10,7 @@ import { Loader2 } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import SocialProofPopup from '@/components/marketing/SocialProofPopup';
+import VoiceAssistantDock from '@/components/voice/VoiceAssistantDock';
 
 export const metadata: Metadata = {
   title: 'NurseryNet - Find Your Perfect Preschool',
@@ -35,7 +36,7 @@ export default function RootLayout({
        <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Nunito:wght@200..1000&family=Poppins:wght@400;600;700&family=Lato:wght@400;700&family=Roboto:wght@400;500;700&family=Lora:wght@400;700&family=Merriweather:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Nunito:wght@200..700&family=Poppins:wght@400;600;700&family=Lato:wght@400;700&family=Roboto:wght@400;500;700&family=Lora:wght@400;700&family=Merriweather:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
         
         <link rel="manifest" href="/manifest.json?v=4" />
         <link rel="icon" href={`${newIconUrl}&v=4`} type="image/png" />
@@ -52,6 +53,7 @@ export default function RootLayout({
                       <main className="flex-grow">{children}</main>
                       <Footer />
                       <SocialProofPopup />
+                      <VoiceAssistantDock />
                     </div>
                 </BrandProvider>
                 <Toaster />

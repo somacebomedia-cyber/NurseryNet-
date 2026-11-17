@@ -3,8 +3,11 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useBrand } from '@/context/BrandContext';
 import { useAuth } from '@/context/AuthContext';
+import { TiersConfig } from '@/config/tiers';
+import SchoolMicrositeBuilder from '@/components/preschools/SchoolMicrositeBuilder';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -24,7 +27,8 @@ import {
   Save, 
   ArrowRight,
   TrendingUp,
-  FileText
+  FileText,
+  Globe
 } from 'lucide-react';
 
 interface TourBooking {
@@ -41,8 +45,15 @@ interface TourBooking {
 export default function DashboardPage() {
   const { brand } = useBrand();
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'leads' | 'profile' | 'billing'>('leads');
-  const [activePlan, setActivePlan] = useState<{ tierName: string; schoolName: string } | null>(null);
+  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState<'leads' | 'profile' | 'website' | 'billing'>('leads');
+  const [activePlan, setActivePlan] = useState<{
+    tierId?: string;
+    tierName: string;
+    monthlyPriceZAR?: number;
+    includesFreeWebsite?: boolean;
+    schoolName: string;
+  } | null>(null);
 
   // Edit form states
   const [schoolName, setSchoolName] = useState('Sunshine Early Learning Centre');
@@ -85,6 +96,13 @@ export default function DashboardPage() {
   ]);
 
   useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam === 'website' || tabParam === 'profile' || tabParam === 'billing' || tabParam === 'leads') {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('nurserynet_active_plan');
       if (stored) {
@@ -92,12 +110,20 @@ export default function DashboardPage() {
           const parsed = JSON.parse(stored);
           setActivePlan(parsed);
           if (parsed.schoolName) setSchoolName(parsed.schoolName);
+          if (parsed.monthlyFeeZAR) setMonthlyFee(String(parsed.monthlyFeeZAR));
+          if (parsed.operatingHours) setOperatingHours(parsed.operatingHours);
         } catch (e) {
           console.error(e);
         }
       }
     }
   }, []);
+
+  const currentMonthlyPrice =
+    activePlan?.monthlyPriceZAR ??
+    (activePlan?.tierId === 'pro_featured'
+      ? TiersConfig.PRO_FEATURED.monthlyPriceZAR
+      : TiersConfig.VERIFIED.monthlyPriceZAR);
 
   const handleConfirmTour = (id: string) => {
     setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'confirmed' } : b));
@@ -129,7 +155,7 @@ export default function DashboardPage() {
                 {schoolName}
               </h1>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Active Plan: <strong className="text-primary">{activePlan?.tierName || 'Verified Centre (R349/mo)'}</strong> · Connected to South African Directory
+                Active Plan: <strong className="text-primary">{activePlan?.tierName ? `${activePlan.tierName} (R${currentMonthlyPrice}/mo)` : `Verified Centre (R${TiersConfig.VERIFIED.monthlyPriceZAR}/mo)`}</strong> · Connected to South African Directory
               </p>
             </div>
 
@@ -195,7 +221,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Tab Navigation */}
-          <div className="border-b border-border mb-8 flex gap-2">
+          <div className="border-b border-border mb-8 flex flex-wrap gap-2">
             <button
               onClick={() => setActiveTab('leads')}
               className={`pb-3 px-4 text-sm font-semibold border-b-2 transition-colors ${
@@ -215,6 +241,17 @@ export default function DashboardPage() {
               }`}
             >
               Edit School Profile
+            </button>
+            <button
+              onClick={() => setActiveTab('website')}
+              className={`pb-3 px-4 text-sm font-semibold border-b-2 transition-colors flex items-center gap-1.5 ${
+                activeTab === 'website'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Globe className="h-4 w-4" />
+              Free School Website
             </button>
             <button
               onClick={() => setActiveTab('billing')}
@@ -354,7 +391,24 @@ export default function DashboardPage() {
             </form>
           )}
 
-          {/* TAB 3: BILLING */}
+          {/* TAB 3: FREE SCHOOL WEBSITE */}
+          {activeTab === 'website' && (
+            <div className="space-y-6">
+              {currentMonthlyPrice < TiersConfig.PRO_FEATURED.monthlyPriceZAR && (
+                <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="text-xs text-foreground">
+                    <strong>Interactive Preview Mode:</strong> Customizing your microsite is live to preview below. Publish your custom website free with the <strong>Featured Top Slot (R{TiersConfig.PRO_FEATURED.monthlyPriceZAR}/mo)</strong> plan.
+                  </div>
+                  <Button asChild size="sm" className="shrink-0 font-semibold">
+                    <Link href="/pricing">Upgrade to R{TiersConfig.PRO_FEATURED.monthlyPriceZAR}/mo</Link>
+                  </Button>
+                </div>
+              )}
+              <SchoolMicrositeBuilder />
+            </div>
+          )}
+
+          {/* TAB 4: BILLING */}
           {activeTab === 'billing' && (
             <div className="max-w-2xl bg-card border border-border rounded-2xl p-6 sm:p-8 space-y-6">
               <h3 className="font-heading text-lg font-bold text-foreground">Stitch Money Subscription</h3>
@@ -365,7 +419,7 @@ export default function DashboardPage() {
                   <span className="text-xs text-muted-foreground">Active via Stitch Capitec Pay / Instant EFT</span>
                 </div>
                 <div className="text-right">
-                  <span className="font-bold font-mono text-foreground">R349.00 / mo</span>
+                  <span className="font-bold font-mono text-foreground">R{currentMonthlyPrice}.00 / mo</span>
                   <span className="block text-[11px] text-emerald-600 font-semibold">Renews Next Month</span>
                 </div>
               </div>

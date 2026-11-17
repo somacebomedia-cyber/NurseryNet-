@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useBrand } from '@/context/BrandContext';
+import { TiersConfig } from '@/config/tiers';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -26,7 +27,10 @@ export default function RoiCalculatorPage() {
   const [newEnrolments, setNewEnrolments] = useState<number>(3);
   const [planType, setPlanType] = useState<'verified' | 'pro'>('verified');
 
-  const subscriptionCostPerMonth = planType === 'verified' ? 349 : 690;
+  const subscriptionCostPerMonth =
+    planType === 'verified'
+      ? TiersConfig.VERIFIED.monthlyPriceZAR
+      : TiersConfig.PRO_FEATURED.monthlyPriceZAR;
   const annualSubscriptionCost = subscriptionCostPerMonth * 12;
 
   // South African preschool fee model: typically 11 to 12 monthly fee cycles per year
@@ -158,7 +162,7 @@ export default function RoiCalculatorPage() {
                     }`}
                   >
                     <div className="text-xs font-bold">Verified Centre</div>
-                    <div className="text-sm font-mono font-bold mt-1">R349 / mo</div>
+                    <div className="text-sm font-mono font-bold mt-1">R{TiersConfig.VERIFIED.monthlyPriceZAR} / mo</div>
                   </button>
 
                   <button
@@ -170,8 +174,8 @@ export default function RoiCalculatorPage() {
                         : 'border-border bg-muted/30 text-foreground hover:bg-muted/60'
                     }`}
                   >
-                    <div className="text-xs font-bold">Pro Featured Slot</div>
-                    <div className="text-sm font-mono font-bold mt-1">R690 / mo</div>
+                    <div className="text-xs font-bold">Featured Top Slot + Free Website</div>
+                    <div className="text-sm font-mono font-bold mt-1">R{TiersConfig.PRO_FEATURED.monthlyPriceZAR} / mo</div>
                   </button>
                 </div>
               </div>

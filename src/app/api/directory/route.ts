@@ -1,152 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-
-// Cached in-memory storage for the full 20,291 real preschool listings
-let allPreschoolsCache: any[] | null = null;
-
-const CURRICULUMS = ['Play-Based', 'CAPS / Grade R', 'Montessori', 'Reggio Emilia', 'Waldorf'];
-const RATIOS = ['1:4', '1:5', '1:6', '1:8'];
-const DEFAULT_PHOTOS = [
-  'https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1596495578065-6e0763fa1178?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80',
-];
-
-function transformRawListing(item: any, idx: number): any {
-  const name = (item.name || '').trim();
-  const prov = item.province || 'Gauteng';
-  const muni = item.municipality || prov;
-  const dsdObj = item.dsd || {};
-  let dsdVal = 'Not Registered';
-  if (['Full', 'Conditional', 'Not Registered'].includes(dsdObj.registration)) {
-    dsdVal = dsdObj.registration;
-  } else if (dsdObj.registration === 'Registered') {
-    dsdVal = 'Full';
-  }
-
-  const slugBase = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-  const muniSlug = muni.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-  const id = `${slugBase}-${muniSlug}-${idx + 1}`;
-  const isSubsidised = Boolean(dsdObj.subsidy);
-  const npo = dsdObj.npoNumber || null;
-  const curriculum = CURRICULUMS[idx % CURRICULUMS.length];
-  const ratio = RATIOS[idx % RATIOS.length];
-
-  return {
-    id,
-    slug: id,
-    name,
-    tagline: `Early learning & child care centre in ${muni}`,
-    description: `${name} is an authentic early childhood development centre located in ${muni}, ${prov}. Registered under DSD status: ${dsdVal}${npo ? ` (NPO: ${npo})` : ''}, providing foundational ${curriculum} education.`,
-    province: prov,
-    district: muni,
-    municipality: muni,
-    educationDistrict: muni,
-    city: muni,
-    suburb: muni,
-    address: item.address || `${muni}, ${prov}, South Africa`,
-    latitude: item.lat ?? -26.2041,
-    longitude: item.lng ?? 28.0473,
-    curriculum,
-    ageRange: '18 months – 6 years',
-    minAgeMonths: 18,
-    maxAgeMonths: 72,
-    monthlyFeeZAR: Math.max(150, 300 + ((idx * 17) % 7 - 3) * 20),
-    rating: Number((4.0 + ((idx * 7) % 11) * 0.1).toFixed(1)),
-    reviewCount: 3 + ((idx * 13) % 18),
-    isVerified: dsdVal === 'Full' || dsdVal === 'Conditional',
-    dsdRegistration: dsdVal,
-    isSubsidised,
-    npoNumber: npo,
-    status: 'Admissions Open',
-    teacherRatio: ratio,
-    operatingHours: '07:00 – 17:30',
-    facilities: [
-      'Lockable Gate',
-      'Secure Perimeter Fence',
-      'Nutritious Meals',
-      'Outdoor Playground',
-      'Grade R Readiness',
-      'On-Site Clean Tap Water',
-    ],
-    images: [
-      DEFAULT_PHOTOS[idx % DEFAULT_PHOTOS.length],
-      DEFAULT_PHOTOS[(idx + 1) % DEFAULT_PHOTOS.length],
-    ],
-    phone: item.phone || null,
-    email: item.email || null,
-    websiteUrl: item.website || null,
-    principal: 'Principal / ECD Supervisor',
-    reviews: [
-      {
-        id: `rev-${idx}-1`,
-        author: 'Verified Parent',
-        childAge: 'Child enrolled 2 yrs',
-        date: 'October 2026',
-        rating: 5,
-        comment: `Warm, dedicated staff and safe environment for our child at ${name}.`,
-      },
-    ],
-  };
-}
-
-function loadAllPreschools(): any[] {
-  if (allPreschoolsCache && allPreschoolsCache.length > 0) {
-    return allPreschoolsCache;
-  }
-  // 1. Try public/data/preschools-all.json
-  try {
-    const fullDataPath = path.join(process.cwd(), 'public', 'data', 'preschools-all.json');
-    if (fs.existsSync(fullDataPath)) {
-      const data = fs.readFileSync(fullDataPath, 'utf-8');
-      const parsed = JSON.parse(data);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        allPreschoolsCache = parsed;
-        return allPreschoolsCache;
-      }
-    }
-  } catch (err) {
-    console.error('Failed reading public/data/preschools-all.json:', err);
-  }
-
-  // 2. Try committed public/assets/aistudio/NurseryNet-real-listings_8917a630.json
-  try {
-    const rawAssetPath = path.join(
-      process.cwd(),
-      'public',
-      'assets',
-      'aistudio',
-      'NurseryNet-real-listings_8917a630.json'
-    );
-    if (fs.existsSync(rawAssetPath)) {
-      const data = fs.readFileSync(rawAssetPath, 'utf-8');
-      const rawList = JSON.parse(data);
-      if (Array.isArray(rawList) && rawList.length > 0) {
-        allPreschoolsCache = rawList.map((item, idx) => transformRawListing(item, idx));
-        return allPreschoolsCache;
-      }
-    }
-  } catch (err) {
-    console.error('Failed loading public assets raw listings:', err);
-  }
-
-  // 3. Fallback to src/data/real-preschools.json
-  try {
-    const fallbackPath = path.join(process.cwd(), 'src', 'data', 'real-preschools.json');
-    if (fs.existsSync(fallbackPath)) {
-      const data = fs.readFileSync(fallbackPath, 'utf-8');
-      allPreschoolsCache = JSON.parse(data);
-      return allPreschoolsCache || [];
-    }
-  } catch (err) {
-    console.error('Failed loading fallback real-preschools.json:', err);
-  }
-
-  return [];
-}
+import { loadAllPreschools } from '@/lib/preschool-pool';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -232,6 +85,8 @@ export async function GET(request: NextRequest) {
   }
 
   if (query) {
+    const queryNorm = query.replace(/\bcenter\b/g, 'centre');
+    const queryTokens = queryNorm.split(/\s+/).filter((t) => t.length >= 2);
     filtered = filtered.filter((s) => {
       const name = (s.name || '').toLowerCase();
       const suburb = (s.suburb || '').toLowerCase();
@@ -240,6 +95,10 @@ export async function GET(request: NextRequest) {
       const npo = (s.npoNumber || '').toLowerCase();
       const phone = (s.phone || '').toLowerCase();
       const curr = (s.curriculum || '').toLowerCase();
+      const hayNorm = `${name} ${suburb} ${muni} ${city} ${npo} ${phone} ${curr}`.replace(
+        /\bcenter\b/g,
+        'centre'
+      );
       return (
         name.includes(query) ||
         suburb.includes(query) ||
@@ -247,7 +106,9 @@ export async function GET(request: NextRequest) {
         city.includes(query) ||
         npo.includes(query) ||
         phone.includes(query) ||
-        curr.includes(query)
+        curr.includes(query) ||
+        hayNorm.includes(queryNorm) ||
+        (queryTokens.length > 1 && queryTokens.every((t) => hayNorm.includes(t)))
       );
     });
   }

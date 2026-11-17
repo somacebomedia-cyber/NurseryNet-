@@ -3,7 +3,8 @@
  * Path: src/config/tiers.ts
  *
  * Monetization model for preschool listings. Free listings are sourced from
- * official government open data; paid tiers add visibility and lead routing.
+ * official government open data; paid tiers add visibility, lead routing,
+ * and a complimentary school website in the top tier.
  */
 
 export interface SubscriptionTier {
@@ -15,6 +16,7 @@ export interface SubscriptionTier {
   isPinnedTopSlot: boolean;
   hasVerifiedBadge: boolean;
   directLeadRouting: boolean;
+  includesFreeWebsite: boolean;
   maxGalleryImages: number;
   popular?: boolean;
   features: string[];
@@ -30,6 +32,7 @@ export class TiersConfig {
     isPinnedTopSlot: false,
     hasVerifiedBadge: false,
     directLeadRouting: false,
+    includesFreeWebsite: false,
     maxGalleryImages: 1,
     features: [
       'Basic profile from official DSD audit data',
@@ -43,11 +46,12 @@ export class TiersConfig {
     id: 'verified',
     name: 'Verified Centre',
     tagline: 'Claim your profile and receive direct tour bookings',
-    monthlyPriceZAR: 349,
-    annualPriceZAR: 3550, // ~15% discount
+    monthlyPriceZAR: 149,
+    annualPriceZAR: 1520, // ~15% annual discount (R149 * 12 * 0.85)
     isPinnedTopSlot: false,
     hasVerifiedBadge: true,
     directLeadRouting: true,
+    includesFreeWebsite: false,
     maxGalleryImages: 8,
     popular: true,
     features: [
@@ -63,20 +67,21 @@ export class TiersConfig {
   static readonly PRO_FEATURED: SubscriptionTier = {
     id: 'pro_featured',
     name: 'Featured Top Slot',
-    tagline: 'Maximum visibility & top placement in your area',
-    monthlyPriceZAR: 690,
-    annualPriceZAR: 7000,
+    tagline: 'Top search placement + your own Free Custom School Website',
+    monthlyPriceZAR: 390,
+    annualPriceZAR: 3980, // ~15% annual discount (R390 * 12 * 0.85)
     isPinnedTopSlot: true,
     hasVerifiedBadge: true,
     directLeadRouting: true,
+    includesFreeWebsite: true,
     maxGalleryImages: 20,
     features: [
+      'Free Custom School Website (mobile-ready microsite + tour booking)',
       'Everything included in Verified Centre',
       'Pinned #1 Top Slot in your municipality search results',
       'Featured badge & gold border on directory cards',
       'Priority placement in monthly City Parent Guides',
       'Full Analytics Dashboard: views, phone clicks, conversion funnel',
-      'Dedicated listing manager & priority WhatsApp support',
     ],
   };
 

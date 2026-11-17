@@ -60,7 +60,7 @@ export default function PreschoolsOverviewPage() {
     },
     {
       title: 'Pricing & Verification Plans',
-      description: 'Explore South African ZAR tiers (Free, Verified Centre R349/mo, Featured Slot R690/mo) with instant Stitch checkout.',
+      description: 'Explore South African ZAR tiers (Free, Verified Centre R149/mo, Featured Slot R390/mo + Free Website) with instant Stitch checkout.',
       href: '/pricing',
       icon: DollarSign,
       badge: 'Monetization',

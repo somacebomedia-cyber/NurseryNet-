@@ -19,6 +19,20 @@ import TourBookingModal from '@/components/directory/TourBookingModal';
 import InquiryModal from '@/components/directory/InquiryModal';
 import ClaimDialog from '@/components/directory/ClaimDialog';
 import EcdBenchmarksDialog from '@/components/directory/EcdBenchmarksDialog';
+import LiveSearchSources from '@/components/directory/LiveSearchSources';
+import {
+  buildLiveCacheKey,
+  getCachedLiveSearch,
+  highlightToDraftPreschool,
+  LiveSearchHighlight,
+  LiveSearchResponse,
+  setCachedLiveSearch,
+} from '@/lib/live-search-types';
+import {
+  consumePendingVoiceAction,
+  VOICE_ACTION_EVENT,
+  VoiceAction,
+} from '@/lib/voice-types';
 import { Button } from '@/components/ui/button';
 import {
   Search,
@@ -36,6 +50,10 @@ import {
   School,
   Building,
   Info,
+  Globe,
+  ExternalLink,
+  AlertCircle,
+  Clock,
 } from 'lucide-react';
 import {
   Sheet,
@@ -71,14 +89,26 @@ export default function DirectoryPage() {
   const [availableCities, setAvailableCities] = useState<{ name: string; count: number }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Claimed Slugs tracking in localStorage
+  // On-demand Live Google Search Grounding State
+  const [liveResults, setLiveResults] = useState<LiveSearchResponse | null>(null);
+  const [liveLoading, setLiveLoading] = useState(false);
+  const [liveError, setLiveError] = useState<string | null>(null);
+  const [livePanelOpen, setLivePanelOpen] = useState(false);
+
+  // Claimed Slugs & Custom Added Preschools tracking in localStorage
   const [claimedSlugs, setClaimedSlugs] = useState<string[]>([]);
+  const [customSchools, setCustomSchools] = useState<Preschool[]>([]);
+  const [claimFromLiveSearch, setClaimFromLiveSearch] = useState(false);
 
   useEffect(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('nurserynet_claimed_slugs') || '[]');
       if (Array.isArray(stored)) {
         setClaimedSlugs(stored);
+      }
+      const storedCustom = JSON.parse(localStorage.getItem('nurserynet_custom_preschools') || '[]');
+      if (Array.isArray(storedCustom)) {
+        setCustomSchools(storedCustom);
       }
     } catch {
       // Ignore localStorage errors
@@ -170,17 +200,46 @@ export default function DirectoryPage() {
     currentPage,
   ]);
 
-  // Map claimed state onto the currently loaded page of preschools
+  // Map claimed state and merge custom added schools onto the currently loaded page of preschools
   const displayedSchools = useMemo(() => {
-    if (claimedSlugs.length === 0) return preschools;
-    return preschools.map((s) => {
-      const slug = s.slug || s.id;
-      if (claimedSlugs.includes(slug)) {
-        return { ...s, isClaimed: true };
+    const q = searchQuery.trim().toLowerCase();
+    // Normalize common center/centre spelling so "Nawi Learn Toddler Center" matches "Nawi Learn Toddler Centre"
+    const qNormalized = q.replace(/\bcenter\b/g, 'centre');
+
+    const matchingCustom = customSchools.filter((cs) => {
+      if (selectedProvince !== 'All' && cs.province !== selectedProvince) return false;
+      if (
+        selectedCity !== 'All' &&
+        !(cs.city || '').toLowerCase().includes(selectedCity.toLowerCase()) &&
+        !(cs.municipality || '').toLowerCase().includes(selectedCity.toLowerCase())
+      ) {
+        return false;
       }
-      return s;
+      if (!q) return true;
+      const hay = `${cs.name} ${cs.city} ${cs.suburb} ${cs.province} ${cs.websiteUrl || ''}`
+        .toLowerCase()
+        .replace(/\bcenter\b/g, 'centre');
+      const qTokens = qNormalized.split(/\s+/).filter((t) => t.length >= 2);
+      return hay.includes(qNormalized) || qTokens.every((t) => hay.includes(t));
     });
-  }, [preschools, claimedSlugs]);
+
+    const customSlugSet = new Set(matchingCustom.map((c) => c.slug || c.id));
+    const baseMapped = preschools
+      .filter((s) => !customSlugSet.has(s.slug || s.id))
+      .map((s) => {
+        const slug = s.slug || s.id;
+        if (claimedSlugs.includes(slug)) {
+          return { ...s, isClaimed: true };
+        }
+        return s;
+      });
+
+    const combined = [...matchingCustom.map((c) => ({ ...c, isClaimed: true })), ...baseMapped];
+    if (onlyClaimed) {
+      return combined.filter((s) => s.isClaimed);
+    }
+    return combined;
+  }, [preschools, claimedSlugs, customSchools, searchQuery, selectedProvince, selectedCity, onlyClaimed]);
 
   const toggleFacility = (facility: string) => {
     setSelectedFacilities((prev) =>
@@ -237,17 +296,196 @@ export default function DirectoryPage() {
 
   const handleOpenClaim = (school: Preschool) => {
     setActiveSchool(school);
+    setClaimFromLiveSearch(false);
+    setDetailModalOpen(false);
+    setClaimModalOpen(true);
+  };
+
+  const handleAddAndClaimFromLiveSearch = (item: LiveSearchHighlight) => {
+    const draftSchool = highlightToDraftPreschool(item, {
+      province: selectedProvince,
+      city: selectedCity,
+      query: searchQuery,
+    });
+    setActiveSchool(draftSchool);
+    setClaimFromLiveSearch(true);
     setDetailModalOpen(false);
     setClaimModalOpen(true);
   };
 
   const handleClaimSuccess = (updatedSchool: Preschool) => {
     const slug = updatedSchool.slug || updatedSchool.id;
+    const finalized: Preschool = { ...updatedSchool, isClaimed: true, isVerified: true };
+
     setClaimedSlugs((prev) => (prev.includes(slug) ? prev : [...prev, slug]));
+    setCustomSchools((prev) => [
+      finalized,
+      ...prev.filter((item) => (item.slug || item.id) !== slug),
+    ]);
+    setPreschools((prev) => {
+      const exists = prev.some((p) => (p.slug || p.id) === slug);
+      if (exists) {
+        return prev.map((p) => ((p.slug || p.id) === slug ? finalized : p));
+      }
+      setTotalCount((c) => c + 1);
+      return [finalized, ...prev];
+    });
     if (activeSchool && (activeSchool.slug === slug || activeSchool.id === slug)) {
-      setActiveSchool({ ...activeSchool, isClaimed: true });
+      setActiveSchool(finalized);
     }
   };
+
+  const handleLiveWebSearch = async (forceRefresh = false) => {
+    const cleanQuery = searchQuery.trim();
+    const areaProvince = selectedProvince !== 'All' ? selectedProvince : '';
+    const areaCity = selectedCity !== 'All' ? selectedCity : '';
+
+    if (!cleanQuery && !areaProvince && !areaCity) {
+      return;
+    }
+
+    setLivePanelOpen(true);
+    setLiveError(null);
+
+    const cacheKey = buildLiveCacheKey('directory', [
+      cleanQuery || 'preschools',
+      areaCity,
+      areaProvince,
+    ]);
+
+    if (!forceRefresh) {
+      const cached = getCachedLiveSearch(cacheKey);
+      if (cached) {
+        setLiveResults(cached);
+        return;
+      }
+    }
+
+    setLiveLoading(true);
+    try {
+      const res = await fetch('/api/live-search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'directory',
+          query: cleanQuery,
+          province: areaProvince,
+          municipality: areaCity,
+        }),
+      });
+      const raw = await res.text();
+      let data: any = null;
+      try {
+        data = JSON.parse(raw);
+      } catch {
+        data = null;
+      }
+      if (!res.ok) {
+        setLiveError(
+          data?.error ||
+            (res.status >= 500
+              ? 'The server is still starting up. Please wait a moment and click Retry.'
+              : `Unable to run live Google Search (HTTP ${res.status}).`)
+        );
+        return;
+      }
+      if (!data) {
+        setLiveError('Received an unexpected response from the server. Please click Retry.');
+        return;
+      }
+      const typed = data as LiveSearchResponse;
+      setLiveResults(typed);
+      setCachedLiveSearch(cacheKey, typed);
+    } catch {
+      setLiveError('Could not reach the live search service. Please check your connection and retry.');
+    } finally {
+      setLiveLoading(false);
+    }
+  };
+
+  const canRunLiveSearch =
+    searchQuery.trim().length > 0 || selectedProvince !== 'All' || selectedCity !== 'All';
+
+  // Listen for voice assistant actions (search_directory or claim_school)
+  useEffect(() => {
+    const applyVoiceAction = (action: VoiceAction | null) => {
+      if (!action) return;
+
+      if (action.type === 'search_directory') {
+        const nextQuery = (action.query || '').trim();
+        const nextProvince =
+          action.province && PROVINCES.includes(action.province as Province)
+            ? (action.province as Province)
+            : 'All';
+        if (nextQuery) setSearchQuery(nextQuery);
+        if (nextProvince !== 'All') setSelectedProvince(nextProvince);
+
+        if (action.liveSearchPayload) {
+          setLivePanelOpen(true);
+          setLiveError(null);
+          setLiveResults(action.liveSearchPayload);
+          const cacheKey = buildLiveCacheKey('directory', [
+            nextQuery || 'preschools',
+            '',
+            nextProvince !== 'All' ? nextProvince : '',
+          ]);
+          setCachedLiveSearch(cacheKey, action.liveSearchPayload);
+        } else if (action.runLiveSearch && nextQuery) {
+          setLivePanelOpen(true);
+          setLiveLoading(true);
+          setLiveError(null);
+          fetch('/api/live-search', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              mode: 'directory',
+              query: nextQuery,
+              province: nextProvince !== 'All' ? nextProvince : '',
+            }),
+          })
+            .then((r) => r.json())
+            .then((data: LiveSearchResponse) => {
+              if (data && data.highlights) {
+                setLiveResults(data);
+              }
+            })
+            .catch(() => {})
+            .finally(() => setLiveLoading(false));
+        }
+      } else if (action.type === 'claim_school' && action.highlight) {
+        if (action.query) setSearchQuery(action.query);
+        if (action.liveSearchPayload) {
+          setLivePanelOpen(true);
+          setLiveResults(action.liveSearchPayload);
+        }
+        const draftSchool = highlightToDraftPreschool(action.highlight, {
+          province: action.province || selectedProvince,
+          city: action.municipality || selectedCity,
+          query: action.query || searchQuery,
+        });
+        setActiveSchool(draftSchool);
+        setClaimFromLiveSearch(true);
+        setDetailModalOpen(false);
+        setClaimModalOpen(true);
+      }
+    };
+
+    const pending = consumePendingVoiceAction();
+    if (pending && (pending.type === 'search_directory' || pending.type === 'claim_school')) {
+      applyVoiceAction(pending);
+    }
+
+    const onVoiceEvent = (e: Event) => {
+      const custom = e as CustomEvent<VoiceAction>;
+      if (custom.detail) {
+        consumePendingVoiceAction();
+        applyVoiceAction(custom.detail);
+      }
+    };
+
+    window.addEventListener(VOICE_ACTION_EVENT, onVoiceEvent);
+    return () => window.removeEventListener(VOICE_ACTION_EVENT, onVoiceEvent);
+  }, [selectedProvince, selectedCity, searchQuery]);
 
   // Filter Sidebar Content (shared between desktop and mobile sheet)
   const FilterControls = () => (
@@ -572,24 +810,49 @@ export default function DirectoryPage() {
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-8">
         {/* Search & Filter Top Bar */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-6">
-          {/* Search Box */}
-          <div className="relative flex-1 max-w-xl">
-            <Search className="w-4 h-4 text-muted-foreground absolute left-3.5 top-3.5" />
-            <input
-              type="text"
-              placeholder="Search by school name, NPO #, suburb (e.g. Soweto, Sandton, Centurion), or town..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-10 py-2.5 text-sm rounded-xl border border-border bg-card shadow-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3.5 top-3.5 text-muted-foreground hover:text-foreground"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
+          {/* Search Box + On-Demand Live Web Search */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 flex-1 max-w-2xl">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 text-muted-foreground absolute left-3.5 top-3" />
+              <input
+                type="text"
+                placeholder="Search by school name, NPO #, suburb (e.g. Soweto, Sandton, Centurion), or town..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && totalCount === 0 && canRunLiveSearch) {
+                    handleLiveWebSearch();
+                  }
+                }}
+                className="w-full pl-10 pr-10 py-2.5 text-sm rounded-xl border border-border bg-card shadow-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3.5 top-3 text-muted-foreground hover:text-foreground"
+                  aria-label="Clear search query"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              disabled={!canRunLiveSearch || liveLoading}
+              onClick={() => handleLiveWebSearch(false)}
+              title={
+                canRunLiveSearch
+                  ? 'Search the live web with Google Search for schools matching your query or area'
+                  : 'Enter a keyword or select a province/city first'
+              }
+              className="h-10 px-4 rounded-xl text-xs font-bold border-primary/40 text-primary hover:bg-primary/10 whitespace-nowrap shrink-0"
+            >
+              <Globe className="w-4 h-4 mr-1.5" />
+              <span>{liveLoading ? 'Searching Web...' : 'Search Live Web'}</span>
+            </Button>
           </div>
 
           {/* Mobile Filter Button & Sort Controls */}
@@ -688,26 +951,234 @@ export default function DirectoryPage() {
           </aside>
 
           {/* Preschool Cards Grid */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3 space-y-6">
+            {/* On-Demand Live Google Search Results Panel */}
+            {livePanelOpen && (
+              <section className="p-5 rounded-2xl bg-card border border-border shadow-sm space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/60">
+                  <div>
+                    <h2 className="font-heading text-base font-bold text-foreground flex items-center gap-2">
+                      <Globe className="w-4 h-4 text-primary" />
+                      <span>Live Google Search Results</span>
+                    </h2>
+                    {liveResults?.query && (
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Live web matches for <span className="font-semibold text-foreground">{liveResults.query}</span>
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={liveLoading || !canRunLiveSearch}
+                      onClick={() => handleLiveWebSearch(true)}
+                      className="h-8 px-3 rounded-lg text-xs font-semibold whitespace-nowrap shrink-0"
+                    >
+                      Refresh
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setLivePanelOpen(false)}
+                      className="h-8 px-2.5 rounded-lg text-xs font-semibold text-muted-foreground hover:text-foreground whitespace-nowrap shrink-0"
+                    >
+                      <X className="w-4 h-4 mr-1" />
+                      Close
+                    </Button>
+                  </div>
+                </div>
+
+                {liveLoading && (
+                  <div className="space-y-3 animate-pulse">
+                    <div className="h-4 bg-muted rounded w-3/4" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="h-28 bg-muted rounded-xl" />
+                      <div className="h-28 bg-muted rounded-xl" />
+                    </div>
+                  </div>
+                )}
+
+                {liveError && !liveLoading && (
+                  <div className="p-3.5 rounded-xl bg-destructive/10 border border-destructive/30 flex items-center justify-between gap-3 text-xs text-destructive">
+                    <span className="flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 shrink-0" />
+                      <span>{liveError}</span>
+                    </span>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleLiveWebSearch(true)}
+                      className="h-8 px-3 text-xs font-semibold shrink-0"
+                    >
+                      Retry
+                    </Button>
+                  </div>
+                )}
+
+                {liveResults && !liveLoading && !liveError && (
+                  <div className="space-y-4">
+                    <p className="text-xs sm:text-sm text-foreground leading-relaxed">
+                      {liveResults.summary}
+                    </p>
+
+                    {liveResults.highlights.length > 0 && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                        {liveResults.highlights.map((item, idx) => {
+                          const draftForCheck = highlightToDraftPreschool(item, {
+                            province: selectedProvince,
+                            city: selectedCity,
+                            query: searchQuery,
+                          });
+                          const existingClaimed =
+                            customSchools.find(
+                              (cs) =>
+                                (cs.slug || cs.id) === draftForCheck.slug ||
+                                cs.name.toLowerCase() === draftForCheck.name.toLowerCase()
+                            ) ||
+                            displayedSchools.find(
+                              (ds) =>
+                                ds.isClaimed &&
+                                ((ds.slug || ds.id) === draftForCheck.slug ||
+                                  ds.name.toLowerCase() === draftForCheck.name.toLowerCase())
+                            );
+
+                          return (
+                            <div
+                              key={idx}
+                              className="p-4 rounded-xl bg-background border border-border/80 flex flex-col justify-between gap-3"
+                            >
+                              <div className="space-y-1.5">
+                                <div className="flex items-start justify-between gap-2">
+                                  <h3 className="font-heading text-sm font-bold text-foreground leading-snug">
+                                    {item.title}
+                                  </h3>
+                                  {item.websiteUrl && (
+                                    <a
+                                      href={item.websiteUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline shrink-0"
+                                    >
+                                      <span>Website</span>
+                                      <ExternalLink className="w-3 h-3" />
+                                    </a>
+                                  )}
+                                </div>
+
+                                {item.subtitle && (
+                                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                    <MapPin className="w-3 h-3 text-accent shrink-0" />
+                                    <span>{item.subtitle}</span>
+                                  </p>
+                                )}
+
+                                <p className="text-xs text-muted-foreground leading-relaxed">
+                                  {item.details}
+                                </p>
+
+                                {item.reviewsSummary && (
+                                  <p className="text-xs text-foreground/85 leading-relaxed">
+                                    <strong className="text-foreground">Reviews: </strong>
+                                    {item.reviewsSummary}
+                                  </p>
+                                )}
+                              </div>
+
+                              <div className="pt-2.5 border-t border-border/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                                <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-muted-foreground tabular-nums">
+                                  {item.feeOrAmount && (
+                                    <span>
+                                      Fees: <strong className="text-foreground">{item.feeOrAmount}</strong>
+                                    </span>
+                                  )}
+                                  {item.feeOrAmount && item.hoursOrDeadline && (
+                                    <span aria-hidden="true" className="text-muted-foreground/40">
+                                      ·
+                                    </span>
+                                  )}
+                                  {item.hoursOrDeadline && (
+                                    <span className="inline-flex items-center gap-1">
+                                      <Clock className="w-3 h-3" />
+                                      <span>{item.hoursOrDeadline}</span>
+                                    </span>
+                                  )}
+                                </div>
+
+                                {existingClaimed ? (
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleOpenDetail(existingClaimed)}
+                                    className="h-8 px-3 rounded-lg text-xs font-bold border-emerald-600/40 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 whitespace-nowrap shrink-0"
+                                  >
+                                    <BadgeCheck className="w-3.5 h-3.5 mr-1.5" />
+                                    <span>Claimed in Directory · View</span>
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    onClick={() => handleAddAndClaimFromLiveSearch(item)}
+                                    className="h-8 px-3 rounded-lg text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm whitespace-nowrap shrink-0"
+                                  >
+                                    <BadgeCheck className="w-3.5 h-3.5 mr-1.5" />
+                                    <span>Add &amp; Claim Listing</span>
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    <LiveSearchSources sources={liveResults.sources} searchedAt={liveResults.searchedAt} />
+                  </div>
+                )}
+              </section>
+            )}
+
             {displayedSchools.length === 0 && !isLoading ? (
               <div className="text-center py-16 px-4 rounded-2xl bg-card border border-dashed border-border/80 space-y-4">
                 <div className="w-16 h-16 rounded-full bg-muted mx-auto flex items-center justify-center text-muted-foreground">
                   <Search className="w-8 h-8" />
                 </div>
                 <div>
-                  <h3 className="font-heading text-xl font-bold text-foreground">No Preschools Found</h3>
-                  <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-                    We couldn't find any preschools matching your active filter criteria. Try selecting "All Provinces" or clearing keyword searches.
+                  <h3 className="font-heading text-xl font-bold text-foreground">No Local Preschools Matched</h3>
+                  <p className="text-sm text-muted-foreground mt-1 max-w-md mx-auto">
+                    We couldn't find matching records in our 20,291 local directory entries. You can reset filters or search the live web for newly opened schools.
                   </p>
                 </div>
-                <Button
-                  onClick={resetFilters}
-                  variant="outline"
-                  className="rounded-xl font-bold text-xs"
-                >
-                  <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
-                  Reset Filters
-                </Button>
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  {canRunLiveSearch && (
+                    <Button
+                      type="button"
+                      onClick={() => handleLiveWebSearch(false)}
+                      disabled={liveLoading}
+                      className="rounded-xl font-bold text-xs whitespace-nowrap shrink-0"
+                    >
+                      <Globe className="w-3.5 h-3.5 mr-1.5" />
+                      <span>
+                        {searchQuery.trim()
+                          ? `Search Live Web for "${searchQuery.trim()}"`
+                          : 'Search Live Web in Selected Area'}
+                      </span>
+                    </Button>
+                  )}
+                  <Button
+                    onClick={resetFilters}
+                    variant="outline"
+                    className="rounded-xl font-bold text-xs whitespace-nowrap shrink-0"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
+                    Reset Filters
+                  </Button>
+                </div>
               </div>
             ) : (
               <>
@@ -829,6 +1300,7 @@ export default function DirectoryPage() {
         isOpen={claimModalOpen}
         onClose={() => setClaimModalOpen(false)}
         onClaimSuccess={handleClaimSuccess}
+        isFromLiveSearch={claimFromLiveSearch}
       />
 
       <EcdBenchmarksDialog

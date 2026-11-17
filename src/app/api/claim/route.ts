@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { upsertCustomPreschool } from '@/lib/preschool-pool';
 
 interface ClaimRecord {
   id: string;
@@ -12,15 +13,24 @@ interface ClaimRecord {
   status: 'pending_review' | 'approved' | 'rejected';
   createdAt: string;
   token?: string;
+  preschool?: any;
 }
 
-// In-memory persistent store during server lifetime
 const claimsStore: Map<string, ClaimRecord> = new Map();
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { nurserySlug, nurseryName, ownerName, ownerEmail, ownerPhone, role, proofNotes } = body || {};
+    const {
+      nurserySlug,
+      nurseryName,
+      ownerName,
+      ownerEmail,
+      ownerPhone,
+      role,
+      proofNotes,
+      preschoolData,
+    } = body || {};
 
     if (!nurserySlug || !ownerName || !ownerEmail || !ownerPhone) {
       return NextResponse.json(
@@ -29,33 +39,41 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if already claimed
-    const existing = claimsStore.get(nurserySlug);
-    if (existing && existing.status === 'approved') {
-      return NextResponse.json(
-        { error: 'This listing is already claimed and verified by the school administration.' },
-        { status: 409 }
-      );
-    }
-
     const claimId = `claim_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     const token = `owner_tok_${Math.random().toString(36).substring(2, 10)}`;
 
+    // Upsert the claimed/added preschool into the shared directory pool so it appears in /api/directory
+    let savedPreschool: any = null;
+    if (preschoolData && typeof preschoolData === 'object') {
+      savedPreschool = upsertCustomPreschool({
+        ...preschoolData,
+        slug: nurserySlug,
+        id: nurserySlug,
+        name: preschoolData.name || nurseryName || nurserySlug,
+        phone: preschoolData.phone || ownerPhone,
+        email: preschoolData.email || ownerEmail,
+        principal: `${ownerName} (${role || 'Owner / Principal'})`,
+        isClaimed: true,
+        isVerified: true,
+      });
+    }
+
     const newClaim: ClaimRecord = {
       id: claimId,
-      nurserySlug,
-      nurseryName: nurseryName || nurserySlug,
+      nurserySlug: savedPreschool?.slug || nurserySlug,
+      nurseryName: savedPreschool?.name || nurseryName || nurserySlug,
       ownerName,
       ownerEmail,
       ownerPhone,
       role: role || 'Owner / Principal',
       proofNotes: proofNotes || '',
-      status: 'approved', // Auto-approve in demo sandbox so users can immediately test the claimed listing!
+      status: 'approved',
       createdAt: new Date().toISOString(),
       token,
+      preschool: savedPreschool,
     };
 
-    claimsStore.set(nurserySlug, newClaim);
+    claimsStore.set(newClaim.nurserySlug, newClaim);
 
     return NextResponse.json(
       {
@@ -63,7 +81,9 @@ export async function POST(req: NextRequest) {
         claimId,
         token,
         status: newClaim.status,
-        message: 'Claim verified successfully! Your listing now shows the Owner-Claimed & Verified badge.',
+        preschool: savedPreschool,
+        message:
+          'Claim verified and published! Your preschool now appears in the NurseryNet Directory with the Owner-Claimed & Verified badge.',
       },
       { status: 201 }
     );
@@ -85,7 +105,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ claimed: true, claim });
   }
 
-  // List all claims
   return NextResponse.json({
     totalClaims: claimsStore.size,
     claims: Array.from(claimsStore.values()),

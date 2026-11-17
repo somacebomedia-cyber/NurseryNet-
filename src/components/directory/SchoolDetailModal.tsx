@@ -1,8 +1,15 @@
 "use client";
 
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Preschool, ECD_BENCHMARKS, getMunicipalityBenchmark } from '@/data/preschools';
+import {
+  buildLiveCacheKey,
+  getCachedLiveSearch,
+  LiveSearchResponse,
+  setCachedLiveSearch,
+} from '@/lib/live-search-types';
+import LiveSearchSources from '@/components/directory/LiveSearchSources';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -26,7 +33,9 @@ import {
   Lock,
   TreePine,
   Droplets,
-  AlertCircle
+  AlertCircle,
+  Globe,
+  RefreshCw,
 } from 'lucide-react';
 
 interface SchoolDetailModalProps {
@@ -47,8 +56,74 @@ export default function SchoolDetailModal({
   onClaim,
 }: SchoolDetailModalProps) {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [liveData, setLiveData] = useState<LiveSearchResponse | null>(null);
+  const [liveLoading, setLiveLoading] = useState(false);
+  const [liveError, setLiveError] = useState<string | null>(null);
+
+  const schoolId = preschool?.id || '';
+  const schoolName = preschool?.name || '';
+  const schoolMunicipality = preschool?.municipality || preschool?.city || preschool?.suburb || '';
+  const schoolProvince = preschool?.province || '';
+  const schoolNpo = preschool?.npoNumber || null;
+
+  useEffect(() => {
+    setActiveImageIndex(0);
+    setLiveError(null);
+    if (!schoolId && !schoolName) {
+      setLiveData(null);
+      return;
+    }
+    const cacheKey = buildLiveCacheKey('school', [schoolId || schoolName, schoolMunicipality]);
+    const cached = getCachedLiveSearch(cacheKey);
+    setLiveData(cached);
+  }, [schoolId, schoolName, schoolMunicipality]);
 
   if (!preschool) return null;
+
+  const handleRunLiveVerification = async () => {
+    setLiveLoading(true);
+    setLiveError(null);
+    try {
+      const res = await fetch('/api/live-search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'school',
+          schoolName,
+          municipality: schoolMunicipality,
+          province: schoolProvince,
+          npoNumber: schoolNpo,
+        }),
+      });
+      const raw = await res.text();
+      let data: any = null;
+      try {
+        data = JSON.parse(raw);
+      } catch {
+        data = null;
+      }
+      if (!res.ok) {
+        setLiveError(
+          data?.error ||
+            (res.status >= 500
+              ? 'The server is still starting up. Please wait a moment and click Retry.'
+              : `Could not fetch live web details (HTTP ${res.status}).`)
+        );
+        return;
+      }
+      if (!data) {
+        setLiveError('Received an unexpected response from the server. Please click Retry.');
+        return;
+      }
+      setLiveData(data as LiveSearchResponse);
+      const cacheKey = buildLiveCacheKey('school', [schoolId || schoolName, schoolMunicipality]);
+      setCachedLiveSearch(cacheKey, data as LiveSearchResponse);
+    } catch {
+      setLiveError('Could not reach the live search service. Please check your connection and retry.');
+    } finally {
+      setLiveLoading(false);
+    }
+  };
 
   const images = preschool.images && preschool.images.length > 0
     ? preschool.images
@@ -345,6 +420,119 @@ export default function SchoolDetailModal({
                 </span>
               </div>
             </div>
+          </div>
+
+          {/* Live Google Search Verification Section */}
+          <div className="p-4 rounded-xl bg-background border border-border space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h4 className="font-heading text-sm font-bold text-foreground flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-primary" />
+                  <span>Live Web Verification</span>
+                </h4>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Check Google Search for current tuition fees, operating hours, official website, and parent reviews.
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant={liveData ? 'outline' : 'default'}
+                size="sm"
+                disabled={liveLoading}
+                onClick={handleRunLiveVerification}
+                className="whitespace-nowrap shrink-0 h-9 px-4 text-xs font-bold rounded-lg"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${liveLoading ? 'animate-spin' : ''}`} />
+                <span>{liveLoading ? 'Checking Web...' : liveData ? 'Refresh Live Info' : 'Check Live Web Details'}</span>
+              </Button>
+            </div>
+
+            {liveLoading && (
+              <div className="space-y-2 pt-2 border-t border-border/60 animate-pulse">
+                <div className="h-3.5 bg-muted rounded w-3/4" />
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
+                  <div className="h-14 bg-muted rounded-lg" />
+                  <div className="h-14 bg-muted rounded-lg" />
+                  <div className="h-14 bg-muted rounded-lg" />
+                </div>
+              </div>
+            )}
+
+            {liveError && !liveLoading && (
+              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/30 flex items-center justify-between gap-3 text-xs text-destructive">
+                <span className="flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{liveError}</span>
+                </span>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRunLiveVerification}
+                  className="h-7 px-3 text-xs font-semibold shrink-0"
+                >
+                  Retry
+                </Button>
+              </div>
+            )}
+
+            {liveData && !liveLoading && (
+              <div className="pt-3 border-t border-border/60 space-y-3">
+                <p className="text-xs text-foreground leading-relaxed">
+                  {liveData.summary}
+                </p>
+
+                {liveData.highlights.length > 0 && (
+                  <div className="space-y-2.5">
+                    {liveData.highlights.map((item, idx) => (
+                      <div key={idx} className="space-y-2.5">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+                          <div className="p-2.5 rounded-lg bg-muted/40 border border-border/60">
+                            <span className="text-[11px] text-muted-foreground block">Published Fees</span>
+                            <span className="font-semibold text-foreground tabular-nums mt-0.5 block">
+                              {item.feeOrAmount || 'Not published online'}
+                            </span>
+                          </div>
+                          <div className="p-2.5 rounded-lg bg-muted/40 border border-border/60">
+                            <span className="text-[11px] text-muted-foreground block">Operating Hours</span>
+                            <span className="font-semibold text-foreground tabular-nums mt-0.5 block">
+                              {item.hoursOrDeadline || 'Not published online'}
+                            </span>
+                          </div>
+                          <div className="p-2.5 rounded-lg bg-muted/40 border border-border/60">
+                            <span className="text-[11px] text-muted-foreground block">Web Presence</span>
+                            {item.websiteUrl ? (
+                              <a
+                                href={item.websiteUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 font-semibold text-primary hover:underline mt-0.5 max-w-full truncate"
+                              >
+                                <span className="truncate">Visit Website</span>
+                                <ExternalLink className="w-3 h-3 shrink-0" />
+                              </a>
+                            ) : (
+                              <span className="font-medium text-muted-foreground mt-0.5 block">
+                                No standalone site listed
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {item.reviewsSummary && (
+                          <div className="text-xs text-muted-foreground leading-relaxed">
+                            <strong className="text-foreground">Web Reviews & Reputation: </strong>
+                            {item.reviewsSummary}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <LiveSearchSources sources={liveData.sources} searchedAt={liveData.searchedAt} />
+              </div>
+            )}
           </div>
 
           {/* About School */}

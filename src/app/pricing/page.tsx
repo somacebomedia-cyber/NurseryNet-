@@ -11,6 +11,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import SchoolMicrositeBuilder from '@/components/preschools/SchoolMicrositeBuilder';
 import { 
   Check, 
   Sparkles, 
@@ -24,7 +25,8 @@ import {
   CheckCircle2,
   Lock,
   Loader2,
-  Award
+  Award,
+  Globe
 } from 'lucide-react';
 
 export default function PricingPage() {
@@ -37,6 +39,7 @@ export default function PricingPage() {
   const [ownerEmail, setOwnerEmail] = useState('');
   const [ownerPhone, setOwnerPhone] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'capitec' | 'card' | 'eft'>('capitec');
+  const [isWebsitePreviewOpen, setIsWebsitePreviewOpen] = useState(false);
 
   const tiers = TiersConfig.all();
 
@@ -59,6 +62,9 @@ export default function PricingPage() {
         localStorage.setItem('nurserynet_active_plan', JSON.stringify({
           tierId: selectedTier.id,
           tierName: selectedTier.name,
+          monthlyPriceZAR: selectedTier.monthlyPriceZAR,
+          annualPriceZAR: selectedTier.annualPriceZAR,
+          includesFreeWebsite: selectedTier.includesFreeWebsite,
           schoolName: schoolName || 'Sunshine Early Learning Centre',
           billingCycle,
           activatedAt: new Date().toISOString(),
@@ -173,6 +179,21 @@ export default function PricingPage() {
                     </div>
 
                     <div className="space-y-3 mb-6 flex-1">
+                      {tier.includesFreeWebsite && (
+                        <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between gap-2 mb-3">
+                          <div className="flex items-center gap-2 text-xs font-bold text-amber-800 dark:text-amber-300">
+                            <Globe className="h-4 w-4 text-amber-600 shrink-0" />
+                            <span>Free Custom School Website</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setIsWebsitePreviewOpen(true)}
+                            className="text-[11px] font-bold text-primary hover:underline whitespace-nowrap shrink-0"
+                          >
+                            Preview Site
+                          </button>
+                        </div>
+                      )}
                       <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                         Included Features:
                       </p>
@@ -187,7 +208,7 @@ export default function PricingPage() {
                     </div>
                   </CardContent>
 
-                  <CardFooter className="pt-2">
+                  <CardFooter className="pt-2 flex flex-col gap-2">
                     <Button 
                       onClick={() => handleOpenCheckout(tier)}
                       variant={tier.popular ? 'default' : 'outline'}
@@ -199,6 +220,15 @@ export default function PricingPage() {
                         <>Get Started with {tier.name} <ArrowRight className="ml-2 h-4 w-4" /></>
                       )}
                     </Button>
+                    {tier.includesFreeWebsite && (
+                      <button
+                        type="button"
+                        onClick={() => setIsWebsitePreviewOpen(true)}
+                        className="text-xs font-semibold text-primary hover:underline py-1 flex items-center justify-center gap-1.5"
+                      >
+                        <Globe className="h-3.5 w-3.5" /> Interactive Free Website Preview & Setup
+                      </button>
+                    )}
                   </CardFooter>
                 </Card>
               );
@@ -284,6 +314,17 @@ export default function PricingPage() {
                   <td className="p-4 text-center text-muted-foreground">-</td>
                   <td className="p-4 text-center text-muted-foreground bg-primary/5">Basic Leads Count</td>
                   <td className="p-4 text-center text-emerald-600 font-bold">Full Conversion Funnel</td>
+                </tr>
+                <tr className="bg-amber-500/5">
+                  <td className="p-4 font-semibold text-foreground flex items-center gap-2">
+                    <Globe className="h-4 w-4 text-amber-600 shrink-0" />
+                    <span>Free Custom School Website</span>
+                  </td>
+                  <td className="p-4 text-center text-muted-foreground">-</td>
+                  <td className="p-4 text-center text-muted-foreground bg-primary/5">-</td>
+                  <td className="p-4 text-center text-emerald-600 font-bold">
+                    Included (Live Microsite Builder)
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -515,15 +556,55 @@ export default function PricingPage() {
               </div>
 
               <div className="flex gap-3 w-full pt-2">
-                <Button asChild variant="outline" className="flex-1" onClick={() => setIsCheckoutOpen(false)}>
-                  <Link href="/dashboard">View Dashboard</Link>
-                </Button>
-                <Button asChild className="flex-1" onClick={() => setIsCheckoutOpen(false)}>
+                {selectedTier.includesFreeWebsite ? (
+                  <Button asChild className="flex-1" onClick={() => setIsCheckoutOpen(false)}>
+                    <Link href="/dashboard?tab=website">Set Up Free Website</Link>
+                  </Button>
+                ) : (
+                  <Button asChild variant="outline" className="flex-1" onClick={() => setIsCheckoutOpen(false)}>
+                    <Link href="/dashboard">View Dashboard</Link>
+                  </Button>
+                )}
+                <Button asChild variant={selectedTier.includesFreeWebsite ? 'outline' : 'default'} className="flex-1" onClick={() => setIsCheckoutOpen(false)}>
                   <Link href="/directory">Browse Listings</Link>
                 </Button>
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Interactive Free School Website Preview Modal */}
+      <Dialog open={isWebsitePreviewOpen} onOpenChange={setIsWebsitePreviewOpen}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Globe className="h-5 w-5 text-primary" />
+              Free Custom School Website (Included in R390/mo Featured Top Slot)
+            </DialogTitle>
+            <DialogDescription>
+              Customize your school&apos;s microsite below to see how parents view your standalone website on desktop and mobile.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-2">
+            <SchoolMicrositeBuilder compact />
+          </div>
+
+          <div className="pt-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
+            <span className="text-xs text-muted-foreground">
+              Included at no extra cost when you subscribe to Featured Top Slot (R390/mo).
+            </span>
+            <Button
+              onClick={() => {
+                setIsWebsitePreviewOpen(false);
+                handleOpenCheckout(TiersConfig.PRO_FEATURED);
+              }}
+              className="font-semibold"
+            >
+              Get Featured Top Slot + Free Website (R390/mo) <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

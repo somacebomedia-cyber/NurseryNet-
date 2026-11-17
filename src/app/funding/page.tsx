@@ -1,9 +1,21 @@
 // src/app/funding/page.tsx
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useBrand } from '@/context/BrandContext';
+import {
+  buildLiveCacheKey,
+  getCachedLiveSearch,
+  LiveSearchResponse,
+  setCachedLiveSearch,
+} from '@/lib/live-search-types';
+import {
+  consumePendingVoiceAction,
+  VOICE_ACTION_EVENT,
+  VoiceAction,
+} from '@/lib/voice-types';
+import LiveSearchSources from '@/components/directory/LiveSearchSources';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,7 +31,10 @@ import {
   Coins, 
   ArrowRight,
   FileCheck2,
-  HelpCircle
+  HelpCircle,
+  Globe,
+  AlertCircle,
+  X,
 } from 'lucide-react';
 
 interface GrantSource {
@@ -32,16 +47,112 @@ interface GrantSource {
   url: string;
 }
 
+const FUNDING_TOPICS = [
+  'DSD Provincial Subsidies',
+  'Infrastructure Grants',
+  'NLC Lottery Funding',
+  'Corporate CSI Funds',
+];
+
 export default function FundingPage() {
   const { brand } = useBrand();
   const [qualifyingChildren, setQualifyingChildren] = useState<number>(25);
   const [daysPerMonth, setDaysPerMonth] = useState<number>(21);
   const [searchQuery, setSearchQuery] = useState('');
+  const [liveGrantQuery, setLiveGrantQuery] = useState('');
+  const [liveGrants, setLiveGrants] = useState<LiveSearchResponse | null>(null);
+  const [liveLoading, setLiveLoading] = useState(false);
+  const [liveError, setLiveError] = useState<string | null>(null);
 
   // Official SA DSD standard subsidy is R17.00 per child per operating day
   const dailySubsidyZAR = 17.00;
   const monthlySubsidy = qualifyingChildren * dailySubsidyZAR * daysPerMonth;
   const annualSubsidy = monthlySubsidy * 11; // 11-month subsidy grant cycle
+
+  useEffect(() => {
+    const applyFundingVoiceAction = (action: VoiceAction | null) => {
+      if (!action || action.type !== 'search_funding') return;
+      if (action.query) {
+        setLiveGrantQuery(action.query);
+      }
+      if (action.liveSearchPayload) {
+        setLiveError(null);
+        setLiveGrants(action.liveSearchPayload);
+      }
+    };
+
+    const pending = consumePendingVoiceAction();
+    if (pending && pending.type === 'search_funding') {
+      applyFundingVoiceAction(pending);
+    }
+
+    const onVoiceEvent = (e: Event) => {
+      const custom = e as CustomEvent<VoiceAction>;
+      if (custom.detail?.type === 'search_funding') {
+        consumePendingVoiceAction();
+        applyFundingVoiceAction(custom.detail);
+      }
+    };
+
+    window.addEventListener(VOICE_ACTION_EVENT, onVoiceEvent);
+    return () => window.removeEventListener(VOICE_ACTION_EVENT, onVoiceEvent);
+  }, []);
+
+  const handleSearchLiveGrants = async (topicQuery?: string, forceRefresh = false) => {
+    const queryToRun = (topicQuery ?? liveGrantQuery).trim() || 'South Africa ECD preschool grants DSD subsidy';
+    if (topicQuery) {
+      setLiveGrantQuery(topicQuery);
+    }
+
+    setLiveError(null);
+    const cacheKey = buildLiveCacheKey('funding', [queryToRun]);
+    if (!forceRefresh) {
+      const cached = getCachedLiveSearch(cacheKey);
+      if (cached) {
+        setLiveGrants(cached);
+        return;
+      }
+    }
+
+    setLiveLoading(true);
+    try {
+      const res = await fetch('/api/live-search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'funding',
+          query: queryToRun,
+        }),
+      });
+      const raw = await res.text();
+      let data: any = null;
+      try {
+        data = JSON.parse(raw);
+      } catch {
+        data = null;
+      }
+      if (!res.ok) {
+        setLiveError(
+          data?.error ||
+            (res.status >= 500
+              ? 'The server is still starting up. Please wait a moment and click Retry.'
+              : `Could not retrieve live grant calls (HTTP ${res.status}).`)
+        );
+        return;
+      }
+      if (!data) {
+        setLiveError('Received an unexpected response from the server. Please click Retry.');
+        return;
+      }
+      const typed = data as LiveSearchResponse;
+      setLiveGrants(typed);
+      setCachedLiveSearch(cacheKey, typed);
+    } catch {
+      setLiveError('Could not reach the live search service. Please check your connection and retry.');
+    } finally {
+      setLiveLoading(false);
+    }
+  };
 
   const grants: GrantSource[] = [
     {
@@ -193,10 +304,183 @@ export default function FundingPage() {
       {/* Grant Directory */}
       <section className="py-16">
         <div className="container mx-auto max-w-5xl px-4">
+          {/* Live Google Search ECD Grant Finder */}
+          <div className="mb-12 p-6 rounded-2xl bg-card border border-border shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h2 className="font-heading text-xl font-bold text-foreground flex items-center gap-2">
+                  <Globe className="h-5 w-5 text-primary" />
+                  <span>Live SA Grant &amp; DSD Call Finder</span>
+                </h2>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                  Query Google Search for current South African ECD funding windows, provincial DSD tenders, and NLC deadlines.
+                </p>
+              </div>
+              {liveGrants && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLiveGrants(null);
+                    setLiveError(null);
+                  }}
+                  className="text-xs font-semibold text-muted-foreground hover:text-foreground inline-flex items-center gap-1 self-start sm:self-center"
+                >
+                  <X className="w-3.5 h-3.5" />
+                  <span>Clear Live Results</span>
+                </button>
+              )}
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSearchLiveGrants(undefined, false);
+              }}
+              className="flex flex-col sm:flex-row gap-2.5"
+            >
+              <div className="relative flex-1">
+                <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-3" />
+                <Input
+                  placeholder="e.g. Gauteng DSD ECD subsidy 2026, NLC charities grant, municipal crèche upgrade..."
+                  value={liveGrantQuery}
+                  onChange={(e) => setLiveGrantQuery(e.target.value)}
+                  className="pl-9 h-10"
+                />
+              </div>
+              <Button
+                type="submit"
+                disabled={liveLoading}
+                className="h-10 px-5 font-bold text-xs whitespace-nowrap shrink-0"
+              >
+                <Globe className="w-4 h-4 mr-1.5" />
+                <span>{liveLoading ? 'Searching Live Web...' : 'Search Live Grants'}</span>
+              </Button>
+            </form>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs text-muted-foreground">Quick topics:</span>
+              {FUNDING_TOPICS.map((topic) => (
+                <button
+                  key={topic}
+                  type="button"
+                  disabled={liveLoading}
+                  onClick={() => handleSearchLiveGrants(topic, false)}
+                  className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-border bg-background hover:bg-muted text-foreground transition-colors whitespace-nowrap shrink-0"
+                >
+                  {topic}
+                </button>
+              ))}
+            </div>
+
+            {liveLoading && (
+              <div className="space-y-3 pt-3 border-t border-border/60 animate-pulse">
+                <div className="h-4 bg-muted rounded w-2/3" />
+                <div className="h-24 bg-muted rounded-xl" />
+                <div className="h-24 bg-muted rounded-xl" />
+              </div>
+            )}
+
+            {liveError && !liveLoading && (
+              <div className="p-3.5 rounded-xl bg-destructive/10 border border-destructive/30 flex items-center justify-between gap-3 text-xs text-destructive">
+                <span className="flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{liveError}</span>
+                </span>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleSearchLiveGrants(undefined, true)}
+                  className="h-8 px-3 text-xs font-semibold shrink-0"
+                >
+                  Retry
+                </Button>
+              </div>
+            )}
+
+            {liveGrants && !liveLoading && !liveError && (
+              <div className="pt-4 border-t border-border/60 space-y-4">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-xs sm:text-sm text-foreground leading-relaxed">
+                    {liveGrants.summary}
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleSearchLiveGrants(liveGrants.query, true)}
+                    className="h-8 px-3 text-xs font-semibold whitespace-nowrap shrink-0"
+                  >
+                    Refresh
+                  </Button>
+                </div>
+
+                {liveGrants.highlights.length > 0 && (
+                  <div className="space-y-3">
+                    {liveGrants.highlights.map((grant, idx) => (
+                      <div
+                        key={idx}
+                        className="p-4 rounded-xl bg-background border border-border/80 space-y-2"
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                          <div>
+                            <h3 className="font-heading text-base font-bold text-foreground">
+                              {grant.title}
+                            </h3>
+                            <p className="text-xs text-muted-foreground">
+                              {grant.subtitle}
+                            </p>
+                          </div>
+                          {grant.websiteUrl && (
+                            <Button asChild size="sm" variant="outline" className="h-8 text-xs whitespace-nowrap shrink-0 self-start">
+                              <a href={grant.websiteUrl} target="_blank" rel="noopener noreferrer">
+                                Official Portal <ExternalLink className="ml-1.5 h-3.5 w-3.5" />
+                              </a>
+                            </Button>
+                          )}
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground tabular-nums">
+                          {grant.feeOrAmount && (
+                            <span>
+                              Amount: <strong className="text-emerald-600">{grant.feeOrAmount}</strong>
+                            </span>
+                          )}
+                          {grant.feeOrAmount && grant.hoursOrDeadline && (
+                            <span aria-hidden="true" className="text-muted-foreground/40">
+                              ·
+                            </span>
+                          )}
+                          {grant.hoursOrDeadline && (
+                            <span>
+                              Window: <strong className="text-foreground">{grant.hoursOrDeadline}</strong>
+                            </span>
+                          )}
+                        </div>
+
+                        {grant.reviewsSummary && (
+                          <p className="text-xs text-muted-foreground">
+                            <strong className="text-foreground">Eligibility: </strong>
+                            {grant.reviewsSummary}
+                          </p>
+                        )}
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          {grant.details}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <LiveSearchSources sources={liveGrants.sources} searchedAt={liveGrants.searchedAt} />
+              </div>
+            )}
+          </div>
+
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
             <div>
               <h2 className="font-heading text-2xl font-bold text-foreground">
-                Active South African Grants & Funds
+                Baseline South African Grants & Funds
               </h2>
               <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                 Verified funding windows for registered non-profit and community educares.
@@ -204,7 +488,7 @@ export default function FundingPage() {
             </div>
             <div className="w-full sm:w-72">
               <Input
-                placeholder="Search grants or providers..."
+                placeholder="Filter baseline grants..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full"

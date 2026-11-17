@@ -55,7 +55,7 @@ export default function TermsPage() {
           <div>
             <h2 className="font-heading text-xl font-bold text-foreground mb-2">3. Subscriptions & Stitch Money Billing</h2>
             <p>
-              Paid plans (Verified Centre at R349/mo, Featured Slot at R690/mo) provide enhanced visibility and direct lead routing:
+              Paid plans (Verified Centre at R149/mo, Featured Top Slot at R390/mo including a Free Custom School Website) provide enhanced visibility and direct lead routing:
             </p>
             <ul className="list-disc pl-5 space-y-1.5 mt-2">
               <li><strong>Billing Currency:</strong> All prices are denominated in South African Rand (ZAR) inclusive of standard statutory levies where applicable.</li>
