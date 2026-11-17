@@ -1,4 +1,4 @@
-import { Preschool, Province } from '@/data/preschools';
+import type { Preschool, Province } from '@/data/preschools';
 
 export type LiveSearchMode = 'directory' | 'school' | 'funding';
 

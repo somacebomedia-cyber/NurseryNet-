@@ -19,6 +19,7 @@ import {
   Scale,
   CheckCircle2,
   MapPin,
+  FileText,
 } from 'lucide-react';
 
 interface CompareSchoolsModalProps {
@@ -28,6 +29,8 @@ interface CompareSchoolsModalProps {
   onRemove: (schoolId: string) => void;
   onClearAll: () => void;
   onBookTour: (school: Preschool) => void;
+  onApplySchool?: (school: Preschool) => void;
+  onApplyAll?: (schools: Preschool[]) => void;
   onSelectDetail: (school: Preschool) => void;
 }
 
@@ -38,6 +41,8 @@ export default function CompareSchoolsModal({
   onRemove,
   onClearAll,
   onBookTour,
+  onApplySchool,
+  onApplyAll,
   onSelectDetail,
 }: CompareSchoolsModalProps) {
   const compared = schools.slice(0, 4);
@@ -52,20 +57,33 @@ export default function CompareSchoolsModal({
               <span>Side-by-Side Preschool Comparison ({compared.length})</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground mt-1">
-              Compare monthly tuition against municipal Census 2021 medians, DSD accreditation, ratios, and campus facilities.
+              Compare monthly tuition against municipal Census 2021 medians, DSD accreditation, ratios, and apply to all at once.
             </DialogDescription>
           </div>
           {compared.length > 0 && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={onClearAll}
-              className="text-xs font-semibold text-muted-foreground hover:text-destructive whitespace-nowrap shrink-0 self-start sm:self-auto"
-            >
-              <Trash2 className="w-3.5 h-3.5 mr-1.5" />
-              Clear Shortlist
-            </Button>
+            <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+              {onApplyAll && (
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => onApplyAll(compared)}
+                  className="text-xs font-bold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 whitespace-nowrap"
+                >
+                  <FileText className="w-3.5 h-3.5 mr-1.5" />
+                  Apply to All {compared.length} at Once
+                </Button>
+              )}
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={onClearAll}
+                className="text-xs font-semibold text-muted-foreground hover:text-destructive whitespace-nowrap"
+              >
+                <Trash2 className="w-3.5 h-3.5 mr-1.5" />
+                Clear
+              </Button>
+            </div>
           )}
         </DialogHeader>
 
@@ -125,13 +143,23 @@ export default function CompareSchoolsModal({
                             </p>
                           </div>
                           <div className="flex items-center gap-1.5">
+                            {onApplySchool && (
+                              <Button
+                                size="sm"
+                                onClick={() => onApplySchool(school)}
+                                className="flex-1 h-8 text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg whitespace-nowrap"
+                              >
+                                <FileText className="w-3 h-3 mr-1" />
+                                Apply
+                              </Button>
+                            )}
                             <Button
                               size="sm"
                               onClick={() => onBookTour(school)}
                               className="flex-1 h-8 text-xs font-bold bg-accent text-accent-foreground hover:bg-accent/90 rounded-lg whitespace-nowrap"
                             >
                               <Calendar className="w-3 h-3 mr-1" />
-                              Book Tour
+                              Tour
                             </Button>
                           </div>
                         </div>

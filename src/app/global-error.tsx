@@ -11,6 +11,16 @@ export default function GlobalError({
 }) {
   useEffect(() => {
     console.error(error);
+    if (
+      typeof window !== 'undefined' &&
+      (error?.name === 'ChunkLoadError' || error?.message?.includes('Loading chunk'))
+    ) {
+      const reloaded = sessionStorage.getItem('nurserynet_chunk_reload');
+      if (!reloaded) {
+        sessionStorage.setItem('nurserynet_chunk_reload', '1');
+        window.location.reload();
+      }
+    }
   }, [error]);
 
   return (

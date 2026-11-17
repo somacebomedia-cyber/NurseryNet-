@@ -3,12 +3,13 @@
 import Image from 'next/image';
 import { Preschool } from '@/data/preschools';
 import { Button } from '@/components/ui/button';
-import { Star, MapPin, ShieldCheck, BadgeCheck, Users, Calendar, ArrowRight, Languages, Heart } from 'lucide-react';
+import { Star, MapPin, ShieldCheck, BadgeCheck, Users, Calendar, ArrowRight, Languages, Heart, FileText } from 'lucide-react';
 
 interface PreschoolCardProps {
   preschool: Preschool;
   onSelect: (preschool: Preschool) => void;
   onBookTour: (preschool: Preschool) => void;
+  onApply?: (preschool: Preschool) => void;
   onClaim?: (preschool: Preschool) => void;
   isSaved?: boolean;
   onToggleSave?: (preschool: Preschool) => void;
@@ -18,6 +19,7 @@ export default function PreschoolCard({
   preschool,
   onSelect,
   onBookTour,
+  onApply,
   onClaim,
   isSaved = false,
   onToggleSave,
@@ -205,22 +207,32 @@ export default function PreschoolCard({
             <span className="text-[11px] text-muted-foreground"> / mo</span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <Button
               variant="outline"
               size="sm"
               onClick={() => onSelect(preschool)}
-              className="text-xs font-semibold h-9 px-3 rounded-lg hover:border-primary hover:text-primary"
+              className="text-xs font-semibold h-9 px-2.5 rounded-lg hover:border-primary hover:text-primary whitespace-nowrap"
             >
               Details
             </Button>
+            {onApply && (
+              <Button
+                size="sm"
+                onClick={() => onApply(preschool)}
+                className="text-xs font-bold h-9 px-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm flex items-center gap-1 whitespace-nowrap"
+              >
+                <FileText className="w-3.5 h-3.5" />
+                <span>Apply</span>
+              </Button>
+            )}
             <Button
               size="sm"
               onClick={() => onBookTour(preschool)}
-              className="text-xs font-bold h-9 px-3.5 rounded-lg bg-accent text-accent-foreground hover:bg-accent/90 shadow-md flex items-center gap-1.5"
+              className="text-xs font-bold h-9 px-3 rounded-lg bg-accent text-accent-foreground hover:bg-accent/90 shadow-md flex items-center gap-1 whitespace-nowrap"
             >
               <Calendar className="w-3.5 h-3.5" />
-              <span>Book Tour</span>
+              <span>Tour</span>
             </Button>
           </div>
         </div>

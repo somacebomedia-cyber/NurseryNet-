@@ -37,6 +37,7 @@ import {
   Globe,
   RefreshCw,
   Heart,
+  FileText,
 } from 'lucide-react';
 
 interface SchoolDetailModalProps {
@@ -45,6 +46,7 @@ interface SchoolDetailModalProps {
   onClose: () => void;
   onBookTour: (preschool: Preschool) => void;
   onInquire: (preschool: Preschool) => void;
+  onApply?: (preschool: Preschool) => void;
   onClaim?: (preschool: Preschool) => void;
   isSaved?: boolean;
   onToggleSave?: (preschool: Preschool) => void;
@@ -56,6 +58,7 @@ export default function SchoolDetailModal({
   onClose,
   onBookTour,
   onInquire,
+  onApply,
   onClaim,
   isSaved = false,
   onToggleSave,
@@ -280,19 +283,30 @@ export default function SchoolDetailModal({
               <Button
                 variant="outline"
                 onClick={() => onInquire(preschool)}
-                className="flex-1 sm:flex-initial text-sm font-semibold h-11 px-4 rounded-xl"
+                className="flex-1 sm:flex-initial text-sm font-semibold h-11 px-4 rounded-xl whitespace-nowrap"
               >
                 <Mail className="w-4 h-4 mr-1.5" />
                 Inquire
               </Button>
 
               <Button
+                variant="outline"
                 onClick={() => onBookTour(preschool)}
-                className="flex-1 sm:flex-initial text-sm font-bold h-11 px-5 rounded-xl bg-accent text-accent-foreground hover:bg-accent/90 shadow-lg"
+                className="flex-1 sm:flex-initial text-sm font-bold h-11 px-4 rounded-xl border-accent text-accent hover:bg-accent/10 whitespace-nowrap"
               >
-                <Calendar className="w-4 h-4 mr-2" />
-                Schedule Tour
+                <Calendar className="w-4 h-4 mr-1.5" />
+                Book Tour
               </Button>
+
+              {onApply && (
+                <Button
+                  onClick={() => onApply(preschool)}
+                  className="flex-1 sm:flex-initial text-sm font-bold h-11 px-5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg whitespace-nowrap"
+                >
+                  <FileText className="w-4 h-4 mr-1.5" />
+                  Apply Online
+                </Button>
+              )}
             </div>
           </div>
 

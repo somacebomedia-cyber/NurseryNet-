@@ -7,6 +7,19 @@ import { useSearchParams } from 'next/navigation';
 import { useBrand } from '@/context/BrandContext';
 import { useAuth } from '@/context/AuthContext';
 import { TiersConfig } from '@/config/tiers';
+import type { Preschool } from '@/data/preschools';
+import {
+  ApplicationFormConfig,
+  CustomApplicationField,
+  CustomFieldType,
+  DEFAULT_APPLICATION_FORM_CONFIG,
+  getApplicationFormConfig,
+  getSubmittedApplications,
+  PreschoolApplication,
+  saveApplicationFormConfig,
+  updateApplicationStatus,
+} from '@/lib/application-types';
+import OnlineApplicationModal from '@/components/directory/OnlineApplicationModal';
 import SchoolMicrositeBuilder from '@/components/preschools/SchoolMicrositeBuilder';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,6 +49,14 @@ import {
   Sparkles,
   Check,
   AlertCircle,
+  FileText,
+  Sliders,
+  Plus,
+  Trash2,
+  RotateCcw,
+  UserCheck,
+  HeartPulse,
+  MapPin,
 } from 'lucide-react';
 
 interface UnifiedLead {
@@ -89,6 +110,33 @@ const DEFAULT_BOOKINGS: UnifiedLead[] = [
   },
 ];
 
+const PRESET_ECD_CUSTOM_FIELDS: Array<Omit<CustomApplicationField, 'id'>> = [
+  {
+    label: 'Do you qualify for the DSD ECD Subsidy / SASSA Grant?',
+    type: 'select',
+    required: false,
+    options: ['No – Private Tuition', 'Yes – SASSA Child Support Grant Recipient', 'Unsure – Requesting Assessment'],
+  },
+  {
+    label: 'Potty / Toilet Training Status',
+    type: 'select',
+    required: true,
+    options: ['Fully Toilet Trained', 'In Training (Pull-ups)', 'Nappies / Diapers'],
+  },
+  {
+    label: 'Dietary or Cultural Meal Requirements',
+    type: 'select',
+    required: false,
+    options: ['Standard School Menu', 'Halaal', 'Vegetarian', 'Food Allergy – Packed from Home'],
+  },
+  {
+    label: 'Names of Siblings Currently Attending Our School',
+    type: 'text',
+    required: false,
+    placeholder: 'Leave blank if none',
+  },
+];
+
 function formatSaWhatsAppNumber(rawPhone?: string): string {
   const digits = (rawPhone || '0825551829').replace(/\D/g, '');
   if (digits.startsWith('27') && digits.length >= 11) return digits;
@@ -102,9 +150,13 @@ export default function DashboardPage() {
   const { toast } = useToast();
   const searchParams = useSearchParams();
 
-  const [activeTab, setActiveTab] = useState<'leads' | 'profile' | 'website' | 'billing'>('leads');
+  const [activeTab, setActiveTab] = useState<
+    'applications' | 'form-builder' | 'leads' | 'profile' | 'website' | 'billing'
+  >('applications');
   const [leadFilter, setLeadFilter] = useState<'all' | 'pending' | 'confirmed' | 'inquiry'>('all');
+  const [appFilter, setAppFilter] = useState<'all' | 'new' | 'accepted' | 'waitlisted'>('all');
   const [retentionModalOpen, setRetentionModalOpen] = useState(false);
+  const [previewModalOpen, setPreviewModalOpen] = useState(false);
 
   const [activePlan, setActivePlan] = useState<{
     tierId?: string;
@@ -130,10 +182,26 @@ export default function DashboardPage() {
   const [savedNotice, setSavedNotice] = useState(false);
 
   const [bookings, setBookings] = useState<UnifiedLead[]>(DEFAULT_BOOKINGS);
+  const [applications, setApplications] = useState<PreschoolApplication[]>([]);
+
+  // Editable Application Form Builder State
+  const [formConfig, setFormConfig] = useState<ApplicationFormConfig>(DEFAULT_APPLICATION_FORM_CONFIG);
+  const [newFieldLabel, setNewFieldLabel] = useState('');
+  const [newFieldType, setNewFieldType] = useState<CustomFieldType>('text');
+  const [newFieldRequired, setNewFieldRequired] = useState(false);
+  const [newFieldOptions, setNewFieldOptions] = useState('');
+  const [newDocItem, setNewDocItem] = useState('');
 
   useEffect(() => {
     const tabParam = searchParams.get('tab');
-    if (tabParam === 'website' || tabParam === 'profile' || tabParam === 'billing' || tabParam === 'leads') {
+    if (
+      tabParam === 'applications' ||
+      tabParam === 'form-builder' ||
+      tabParam === 'website' ||
+      tabParam === 'profile' ||
+      tabParam === 'billing' ||
+      tabParam === 'leads'
+    ) {
       setActiveTab(tabParam);
       if (tabParam === 'website') {
         setWebsitePreviewed(true);
@@ -141,7 +209,7 @@ export default function DashboardPage() {
     }
   }, [searchParams]);
 
-  // Hydrate active plan, profile fields, and live parent tour bookings & inquiries from localStorage
+  // Hydrate active plan, profile fields, applications, form config, and live parent tour bookings
   useEffect(() => {
     const loadStoredState = () => {
       if (typeof window === 'undefined') return;
@@ -161,6 +229,9 @@ export default function DashboardPage() {
           console.error(e);
         }
       }
+
+      setApplications(getSubmittedApplications());
+      setFormConfig(getApplicationFormConfig());
 
       try {
         const rawTours = JSON.parse(localStorage.getItem('nurserynet_tours') || '[]');
@@ -220,9 +291,11 @@ export default function DashboardPage() {
 
     loadStoredState();
     window.addEventListener('nurserynet_leads_updated', loadStoredState);
+    window.addEventListener('nurserynet_form_config_updated', loadStoredState);
     window.addEventListener('storage', loadStoredState);
     return () => {
       window.removeEventListener('nurserynet_leads_updated', loadStoredState);
+      window.removeEventListener('nurserynet_form_config_updated', loadStoredState);
       window.removeEventListener('storage', loadStoredState);
     };
   }, []);
@@ -237,7 +310,8 @@ export default function DashboardPage() {
 
   const numericMonthlyFee = Math.max(150, Number(monthlyFee) || 1450);
   const annualTuitionPerChild = numericMonthlyFee * 12;
-  const roiMultiple = currentMonthlyPrice > 0 ? Math.max(1, Math.round(annualTuitionPerChild / (currentMonthlyPrice * 12))) : 10;
+  const roiMultiple =
+    currentMonthlyPrice > 0 ? Math.max(1, Math.round(annualTuitionPerChild / (currentMonthlyPrice * 12))) : 10;
 
   // Profile Strength & Activation Checklist (5 concrete milestones, 20% each)
   const checklistItems = useMemo(
@@ -259,12 +333,12 @@ export default function DashboardPage() {
         onAction: () => setActiveTab('profile'),
       },
       {
-        id: 'whatsapp',
-        label: 'Verified WhatsApp Lead Routing',
-        detail: whatsappPhone.trim() ? `Mirrored to ${whatsappPhone}` : 'Add WhatsApp number',
-        done: Boolean(whatsappPhone.replace(/\D/g, '').length >= 9),
-        actionLabel: 'Verify Phone',
-        onAction: () => setActiveTab('profile'),
+        id: 'form',
+        label: 'Online Application Form',
+        detail: `${formConfig.customFields.length} custom questions active`,
+        done: Boolean(formConfig.formTitle.trim().length > 0),
+        actionLabel: 'Customize Form',
+        onAction: () => setActiveTab('form-builder'),
       },
       {
         id: 'dsd',
@@ -286,7 +360,17 @@ export default function DashboardPage() {
         },
       },
     ],
-    [schoolName, monthlyFee, numericMonthlyFee, operatingHours, capacity, whatsappPhone, npoNumber, websitePreviewed, activePlan]
+    [
+      schoolName,
+      monthlyFee,
+      numericMonthlyFee,
+      operatingHours,
+      capacity,
+      formConfig,
+      npoNumber,
+      websitePreviewed,
+      activePlan,
+    ]
   );
 
   const profileStrengthPct = useMemo(() => {
@@ -301,7 +385,50 @@ export default function DashboardPage() {
     return bookings;
   }, [bookings, leadFilter]);
 
+  const filteredApplications = useMemo(() => {
+    if (appFilter === 'new') return applications.filter((a) => a.status === 'new');
+    if (appFilter === 'accepted') return applications.filter((a) => a.status === 'accepted');
+    if (appFilter === 'waitlisted') return applications.filter((a) => a.status === 'waitlisted');
+    return applications;
+  }, [applications, appFilter]);
+
   const pendingCount = useMemo(() => bookings.filter((b) => b.status === 'pending').length, [bookings]);
+  const newApplicationsCount = useMemo(
+    () => applications.filter((a) => a.status === 'new').length,
+    [applications]
+  );
+
+  // Mock school object for live preview of the customizable Online Application Form
+  const previewSchoolObject: Preschool = useMemo(
+    () => ({
+      id: 'sunshine-early-learning-centre',
+      name: schoolName || 'Sunshine Early Learning Centre',
+      tagline: 'Nurturing curious young minds in a safe, DSD-registered environment.',
+      description: 'DSD registered early learning centre.',
+      province: 'Gauteng',
+      city: 'Johannesburg',
+      suburb: 'Randburg',
+      address: '14 Acacia Road, Randburg',
+      curriculum: 'Play-Based',
+      ageRange: '3 months – 6 years',
+      minAgeMonths: 3,
+      maxAgeMonths: 72,
+      monthlyFeeZAR: numericMonthlyFee,
+      rating: 4.9,
+      reviewCount: 38,
+      isVerified: true,
+      status: 'Admissions Open',
+      teacherRatio: '1:10',
+      operatingHours: operatingHours || '07:00 - 17:30',
+      facilities: ['Meals Included', 'Aftercare', 'Qualified Teachers'],
+      images: ['https://picsum.photos/seed/sunshine-ecd/600/400'],
+      phone: whatsappPhone || '082 555 1829',
+      email: 'admissions@sunshineecd.co.za',
+      principal: 'Mrs. N. Dlamini',
+      reviews: [],
+    }),
+    [schoolName, numericMonthlyFee, operatingHours, whatsappPhone]
+  );
 
   const handleConfirmTour = (id: string) => {
     setBookings((prev) => prev.map((b) => (b.id === id ? { ...b, status: 'confirmed' } : b)));
@@ -316,6 +443,129 @@ export default function DashboardPage() {
       title: 'Lead Confirmed',
       description: 'Parent tour status updated to Confirmed.',
     });
+  };
+
+  const handleApplicationStatusChange = (
+    applicationId: string,
+    nextStatus: PreschoolApplication['status']
+  ) => {
+    const updated = updateApplicationStatus(applicationId, nextStatus);
+    setApplications(updated);
+    toast({
+      title:
+        nextStatus === 'accepted'
+          ? 'Learner Application Accepted'
+          : nextStatus === 'waitlisted'
+          ? 'Application Placed on Waitlist'
+          : 'Application Status Updated',
+      description: 'Status saved to your school admission dashboard.',
+    });
+  };
+
+  // Form Builder Handlers
+  const handleSaveFormBuilder = () => {
+    saveApplicationFormConfig({
+      ...formConfig,
+      schoolName,
+    });
+    toast({
+      title: 'Online Application Form Saved',
+      description:
+        'Parents applying to your school in the Directory now see your updated questions and checklist immediately.',
+    });
+  };
+
+  const handleResetFormBuilder = () => {
+    setFormConfig(DEFAULT_APPLICATION_FORM_CONFIG);
+    saveApplicationFormConfig(DEFAULT_APPLICATION_FORM_CONFIG);
+    toast({
+      title: 'Reset to Standard SA ECD Form',
+      description: 'Restored default admission questions and document checklist.',
+    });
+  };
+
+  const handleAddCustomField = (preset?: Omit<CustomApplicationField, 'id'>) => {
+    if (preset) {
+      const exists = formConfig.customFields.some((f) => f.label === preset.label);
+      if (exists) {
+        toast({
+          title: 'Question Already Added',
+          description: 'That question is already in your custom application form.',
+        });
+        return;
+      }
+      const nextField: CustomApplicationField = {
+        ...preset,
+        id: `custom-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      };
+      setFormConfig((prev) => ({
+        ...prev,
+        customFields: [...prev.customFields, nextField],
+      }));
+      return;
+    }
+
+    if (!newFieldLabel.trim()) return;
+    const parsedOptions =
+      newFieldType === 'select'
+        ? newFieldOptions
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : undefined;
+
+    const nextField: CustomApplicationField = {
+      id: `custom-${Date.now()}`,
+      label: newFieldLabel.trim(),
+      type: newFieldType,
+      required: newFieldRequired,
+      options:
+        newFieldType === 'select' && (!parsedOptions || parsedOptions.length === 0)
+          ? ['Yes', 'No']
+          : parsedOptions,
+      placeholder: newFieldType === 'text' || newFieldType === 'textarea' ? 'Enter your answer' : undefined,
+    };
+
+    setFormConfig((prev) => ({
+      ...prev,
+      customFields: [...prev.customFields, nextField],
+    }));
+    setNewFieldLabel('');
+    setNewFieldOptions('');
+    setNewFieldRequired(false);
+  };
+
+  const handleUpdateCustomField = (
+    fieldId: string,
+    patch: Partial<CustomApplicationField>
+  ) => {
+    setFormConfig((prev) => ({
+      ...prev,
+      customFields: prev.customFields.map((f) => (f.id === fieldId ? { ...f, ...patch } : f)),
+    }));
+  };
+
+  const handleRemoveCustomField = (fieldId: string) => {
+    setFormConfig((prev) => ({
+      ...prev,
+      customFields: prev.customFields.filter((f) => f.id !== fieldId),
+    }));
+  };
+
+  const handleAddDocChecklistItem = () => {
+    if (!newDocItem.trim()) return;
+    setFormConfig((prev) => ({
+      ...prev,
+      requiredDocumentsChecklist: [...prev.requiredDocumentsChecklist, newDocItem.trim()],
+    }));
+    setNewDocItem('');
+  };
+
+  const handleRemoveDocChecklistItem = (idx: number) => {
+    setFormConfig((prev) => ({
+      ...prev,
+      requiredDocumentsChecklist: prev.requiredDocumentsChecklist.filter((_, i) => i !== idx),
+    }));
   };
 
   const handleSaveProfile = (e: React.FormEvent) => {
@@ -345,7 +595,9 @@ export default function DashboardPage() {
     setTimeout(() => setSavedNotice(false), 2500);
   };
 
-  const handleApplyRetentionOption = (action: 'pause' | 'downgrade_verified' | 'switch_annual' | 'downgrade_free') => {
+  const handleApplyRetentionOption = (
+    action: 'pause' | 'downgrade_verified' | 'switch_annual' | 'downgrade_free'
+  ) => {
     const pauseDate = new Date();
     pauseDate.setDate(pauseDate.getDate() + 30);
     const formattedPauseDate = pauseDate.toISOString().split('T')[0];
@@ -378,7 +630,8 @@ export default function DashboardPage() {
       };
       toast({
         title: 'Switched to Verified Centre (R149/mo)',
-        description: 'Your monthly cost has been lowered while retaining your Verified Shield and Lead Inbox.',
+        description:
+          'Your monthly cost has been lowered while retaining your Verified Shield and Lead Inbox.',
       });
     } else if (action === 'switch_annual') {
       const baseMonthly = currentMonthlyPrice || TiersConfig.VERIFIED.monthlyPriceZAR;
@@ -456,9 +709,19 @@ export default function DashboardPage() {
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setActiveTab('form-builder')}
+                className="whitespace-nowrap shrink-0 font-semibold"
+              >
+                <Sliders className="w-3.5 h-3.5 mr-1.5" />
+                Customize Application Form
+              </Button>
               <Button asChild variant="outline" size="sm" className="whitespace-nowrap shrink-0">
-                <Link href="/directory">View Public Profile</Link>
+                <Link href="/directory">View Public Directory</Link>
               </Button>
               <Button asChild size="sm" className="whitespace-nowrap shrink-0">
                 <Link href="/pricing">Upgrade Placement</Link>
@@ -474,13 +737,15 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <div className="p-5 bg-card border border-border rounded-xl">
               <div className="flex items-center justify-between text-muted-foreground text-xs font-semibold mb-2">
-                <span>Profile Views (30d)</span>
-                <Eye className="h-4 w-4 text-primary" />
+                <span>Online Applications</span>
+                <FileText className="h-4 w-4 text-primary" />
               </div>
               <div className="font-heading text-3xl font-extrabold text-foreground font-mono tabular-nums">
-                248
+                {applications.length}
               </div>
-              <span className="text-[11px] text-emerald-600 font-semibold">+18% vs last month</span>
+              <span className="text-[11px] text-emerald-600 font-semibold font-mono tabular-nums">
+                {newApplicationsCount} new learner applications
+              </span>
             </div>
 
             <div className="p-5 bg-card border border-border rounded-xl">
@@ -532,7 +797,7 @@ export default function DashboardPage() {
                   </h2>
                 </div>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Complete all 5 onboarding milestones to maximize parent search ranking and tour conversions.
+                  Complete all 5 onboarding milestones to maximize parent search ranking and online applications.
                 </p>
               </div>
               <div className="text-right font-mono tabular-nums">
@@ -582,6 +847,28 @@ export default function DashboardPage() {
           {/* Tab Navigation */}
           <div className="border-b border-border mb-8 flex flex-wrap gap-2">
             <button
+              onClick={() => setActiveTab('applications')}
+              className={`pb-3 px-4 text-sm font-semibold border-b-2 transition-colors flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
+                activeTab === 'applications'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <FileText className="h-4 w-4" />
+              Online Applications ({applications.length})
+            </button>
+            <button
+              onClick={() => setActiveTab('form-builder')}
+              className={`pb-3 px-4 text-sm font-semibold border-b-2 transition-colors flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
+                activeTab === 'form-builder'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Sliders className="h-4 w-4" />
+              Application Form Builder
+            </button>
+            <button
               onClick={() => setActiveTab('leads')}
               className={`pb-3 px-4 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap shrink-0 ${
                 activeTab === 'leads'
@@ -589,7 +876,7 @@ export default function DashboardPage() {
                   : 'border-transparent text-muted-foreground hover:text-foreground'
               }`}
             >
-              Tour Bookings &amp; Inbound Leads ({bookings.length})
+              Tour Bookings &amp; Leads ({bookings.length})
             </button>
             <button
               onClick={() => setActiveTab('profile')}
@@ -627,7 +914,729 @@ export default function DashboardPage() {
             </button>
           </div>
 
-          {/* TAB 1: LEADS INBOX */}
+          {/* TAB 1: ONLINE APPLICATIONS INBOX */}
+          {activeTab === 'applications' && (
+            <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
+                <div>
+                  <h3 className="font-heading text-lg font-bold text-foreground">
+                    Received Online Learner Applications
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    Parents can apply to your preschool individually or in a multi-school batch. Applications appear here immediately with all custom form answers.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setActiveTab('form-builder')}
+                    className="h-8 text-xs font-semibold whitespace-nowrap shrink-0"
+                  >
+                    <Sliders className="w-3.5 h-3.5 mr-1.5" />
+                    Edit Online Form Questions
+                  </Button>
+
+                  <div className="flex items-center gap-1 p-1 bg-muted rounded-lg">
+                    {[
+                      { id: 'all', label: `All (${applications.length})` },
+                      { id: 'new', label: `New (${newApplicationsCount})` },
+                      { id: 'accepted', label: 'Accepted' },
+                      { id: 'waitlisted', label: 'Waitlisted' },
+                    ].map((tab) => (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => setAppFilter(tab.id as any)}
+                        className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors whitespace-nowrap shrink-0 ${
+                          appFilter === tab.id
+                            ? 'bg-background text-foreground shadow-sm'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {filteredApplications.length === 0 ? (
+                <div className="p-8 text-center bg-card border border-dashed border-border rounded-xl space-y-2">
+                  <p className="text-sm font-semibold text-foreground">No applications in this filter view</p>
+                  <p className="text-xs text-muted-foreground">
+                    Switch back to All Applications or click Preview Live Application Form to test submitting a learner application.
+                  </p>
+                  <div className="flex items-center justify-center gap-2 pt-2">
+                    <Button variant="outline" size="sm" onClick={() => setAppFilter('all')} className="text-xs">
+                      Show All Applications
+                    </Button>
+                    <Button size="sm" onClick={() => setPreviewModalOpen(true)} className="text-xs font-semibold">
+                      Test Live Application Form
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                filteredApplications.map((app) => {
+                  const whatsAppUrl = `https://wa.me/${formatSaWhatsAppNumber(app.parentPhone)}?text=${encodeURIComponent(
+                    `Hi ${app.parentFullName}, this is the Principal at ${app.schoolName || schoolName}. We have received your online enrolment application for ${app.childFullName} (${app.childAgeGroup}, starting ${app.preferredStartDate}).`
+                  )}`;
+                  const customEntries = Object.entries(app.customAnswers || {});
+
+                  return (
+                    <div
+                      key={app.id}
+                      className="bg-card border border-border rounded-xl p-5 space-y-4"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/60 pb-3.5">
+                        <div className="space-y-1">
+                          <div className="flex flex-wrap items-center gap-2 text-xs">
+                            <span className="font-heading font-extrabold text-base text-foreground">
+                              Learner: {app.childFullName}
+                            </span>
+                            <span className="text-muted-foreground" aria-hidden="true">·</span>
+                            <span className="font-semibold text-primary">{app.childAgeGroup}</span>
+                            <span className="text-muted-foreground" aria-hidden="true">·</span>
+                            <span
+                              className={`font-bold flex items-center gap-1 ${
+                                app.status === 'accepted'
+                                  ? 'text-emerald-600 dark:text-emerald-400'
+                                  : app.status === 'waitlisted'
+                                  ? 'text-amber-600 dark:text-amber-400'
+                                  : 'text-primary'
+                              }`}
+                            >
+                              {app.status === 'accepted' ? (
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                              ) : (
+                                <Clock className="w-3.5 h-3.5" />
+                              )}
+                              <span className="capitalize">{app.status.replace('_', ' ')}</span>
+                            </span>
+                            {app.schoolName && (
+                              <>
+                                <span className="text-muted-foreground" aria-hidden="true">·</span>
+                                <span className="text-muted-foreground">
+                                  Applied to <strong className="text-foreground">{app.schoolName}</strong>
+                                </span>
+                              </>
+                            )}
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground font-mono tabular-nums">
+                            <span>DOB: {app.childDateOfBirth}</span>
+                            <span aria-hidden="true">·</span>
+                            <span>Start: {app.preferredStartDate}</span>
+                            <span aria-hidden="true">·</span>
+                            <span>Submitted: {app.submittedAt}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2 shrink-0">
+                          {app.status !== 'accepted' ? (
+                            <Button
+                              size="sm"
+                              onClick={() => handleApplicationStatusChange(app.id, 'accepted')}
+                              className="h-8 text-xs font-semibold whitespace-nowrap"
+                            >
+                              <UserCheck className="w-3.5 h-3.5 mr-1.5" />
+                              Accept Learner
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled
+                              className="h-8 text-xs text-emerald-600 font-semibold whitespace-nowrap"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
+                              Accepted
+                            </Button>
+                          )}
+
+                          {app.status !== 'waitlisted' && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleApplicationStatusChange(app.id, 'waitlisted')}
+                              className="h-8 text-xs whitespace-nowrap"
+                            >
+                              Waitlist
+                            </Button>
+                          )}
+
+                          <Button
+                            asChild
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setWhatsAppClicks((c) => c + 1)}
+                            className="h-8 text-xs border-emerald-600/40 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 font-semibold whitespace-nowrap"
+                          >
+                            <a href={whatsAppUrl} target="_blank" rel="noopener noreferrer">
+                              <MessageCircle className="w-3.5 h-3.5 mr-1.5" />
+                              WhatsApp Parent
+                            </a>
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Parent, Medical & Custom Form Answers Grid */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                        <div className="p-3 rounded-lg bg-muted/30 border border-border/60 space-y-1">
+                          <div className="font-bold text-foreground flex items-center gap-1.5">
+                            <Phone className="w-3.5 h-3.5 text-primary" />
+                            Parent / Guardian Details
+                          </div>
+                          <p className="text-foreground font-semibold">
+                            {app.parentFullName} ({app.parentRelationship})
+                          </p>
+                          <p className="text-muted-foreground font-mono tabular-nums">
+                            Tel: {app.parentPhone} · {app.parentEmail}
+                          </p>
+                          {app.parentIdOrPassport && (
+                            <p className="text-muted-foreground font-mono tabular-nums">
+                              SA ID / Passport: {app.parentIdOrPassport}
+                            </p>
+                          )}
+                          <p className="text-muted-foreground flex items-start gap-1 pt-0.5">
+                            <MapPin className="w-3 h-3 shrink-0 mt-0.5" />
+                            <span>{app.residentialAddress}</span>
+                          </p>
+                        </div>
+
+                        <div className="p-3 rounded-lg bg-muted/30 border border-border/60 space-y-1">
+                          <div className="font-bold text-foreground flex items-center gap-1.5">
+                            <HeartPulse className="w-3.5 h-3.5 text-rose-500" />
+                            Medical &amp; Emergency Contact
+                          </div>
+                          <p className="text-muted-foreground">
+                            Allergies / Medical:{' '}
+                            <strong className="text-foreground">
+                              {app.medicalAllergies || 'None reported'}
+                            </strong>
+                          </p>
+                          <p className="text-muted-foreground">
+                            Emergency Contact:{' '}
+                            <strong className="text-foreground">
+                              {app.emergencyContactName || 'Same as parent'}
+                            </strong>
+                          </p>
+                          {app.emergencyContactPhone && (
+                            <p className="text-muted-foreground font-mono tabular-nums">
+                              Emergency Phone: {app.emergencyContactPhone}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="p-3 rounded-lg bg-muted/30 border border-border/60 space-y-1">
+                          <div className="font-bold text-foreground flex items-center gap-1.5">
+                            <FileText className="w-3.5 h-3.5 text-emerald-600" />
+                            School-Specific Form Answers
+                          </div>
+                          {customEntries.length === 0 ? (
+                            <p className="text-muted-foreground">Standard application questions completed.</p>
+                          ) : (
+                            <div className="space-y-1">
+                              {customEntries.map(([question, answer]) => (
+                                <div key={question} className="text-[11px] leading-snug">
+                                  <span className="text-muted-foreground">{question}: </span>
+                                  <strong className="text-foreground">{answer || '—'}</strong>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          )}
+
+          {/* TAB 2: EDITABLE ONLINE APPLICATION FORM BUILDER */}
+          {activeTab === 'form-builder' && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              <div className="lg:col-span-8 bg-card border border-border rounded-2xl p-6 space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
+                  <div>
+                    <h3 className="font-heading text-lg font-bold text-foreground">
+                      Online Application Form Editor
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Customize your online application form to match your preschool&apos;s existing paper or PDF admission form.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        saveApplicationFormConfig({ ...formConfig, schoolName });
+                        setPreviewModalOpen(true);
+                      }}
+                      className="text-xs font-semibold whitespace-nowrap"
+                    >
+                      <Eye className="w-3.5 h-3.5 mr-1.5" />
+                      Preview Live Form
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={handleSaveFormBuilder}
+                      className="text-xs font-semibold whitespace-nowrap"
+                    >
+                      <Save className="w-3.5 h-3.5 mr-1.5" />
+                      Save Form Changes
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Form Header & Welcome Instructions */}
+                <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="formTitle" className="text-xs font-semibold">
+                      Application Form Title
+                    </Label>
+                    <Input
+                      id="formTitle"
+                      value={formConfig.formTitle}
+                      onChange={(e) =>
+                        setFormConfig((prev) => ({ ...prev, formTitle: e.target.value }))
+                      }
+                      placeholder="e.g. Official 2027 Learner Enrolment Application Form"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="welcomeNote" className="text-xs font-semibold">
+                      Admission Instructions / Welcome Note for Parents
+                    </Label>
+                    <textarea
+                      id="welcomeNote"
+                      rows={2}
+                      value={formConfig.welcomeNote}
+                      onChange={(e) =>
+                        setFormConfig((prev) => ({ ...prev, welcomeNote: e.target.value }))
+                      }
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    />
+                  </div>
+                </div>
+
+                {/* Toggleable Standard Sections */}
+                <div className="space-y-2.5 pt-2 border-t border-border">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                    Standard Admission Sections (Toggle On / Off)
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <label className="flex items-start gap-2.5 p-3 rounded-xl border border-border bg-muted/20 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formConfig.requireIdNumbers}
+                        onChange={(e) =>
+                          setFormConfig((prev) => ({
+                            ...prev,
+                            requireIdNumbers: e.target.checked,
+                          }))
+                        }
+                        className="mt-0.5 rounded border-border text-primary"
+                      />
+                      <div className="text-xs">
+                        <span className="font-bold text-foreground block">SA ID / Passport #</span>
+                        <span className="text-[11px] text-muted-foreground">
+                          Require parent ID or passport number
+                        </span>
+                      </div>
+                    </label>
+
+                    <label className="flex items-start gap-2.5 p-3 rounded-xl border border-border bg-muted/20 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formConfig.requireMedicalInfo}
+                        onChange={(e) =>
+                          setFormConfig((prev) => ({
+                            ...prev,
+                            requireMedicalInfo: e.target.checked,
+                          }))
+                        }
+                        className="mt-0.5 rounded border-border text-primary"
+                      />
+                      <div className="text-xs">
+                        <span className="font-bold text-foreground block">Medical &amp; Allergies</span>
+                        <span className="text-[11px] text-muted-foreground">
+                          Ask for allergies &amp; clinic card notes
+                        </span>
+                      </div>
+                    </label>
+
+                    <label className="flex items-start gap-2.5 p-3 rounded-xl border border-border bg-muted/20 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formConfig.requireEmergencyContact}
+                        onChange={(e) =>
+                          setFormConfig((prev) => ({
+                            ...prev,
+                            requireEmergencyContact: e.target.checked,
+                          }))
+                        }
+                        className="mt-0.5 rounded border-border text-primary"
+                      />
+                      <div className="text-xs">
+                        <span className="font-bold text-foreground block">Emergency Contact</span>
+                        <span className="text-[11px] text-muted-foreground">
+                          Require secondary emergency contact
+                        </span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Custom School Questions */}
+                <div className="space-y-4 pt-2 border-t border-border">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                      <h4 className="text-sm font-bold text-foreground">
+                        Custom School Questions ({formConfig.customFields.length})
+                      </h4>
+                      <p className="text-xs text-muted-foreground">
+                        Edit, remove, or add any custom fields so this online form matches your school&apos;s paper form.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* 1-Click Preset Questions */}
+                  <div className="space-y-1.5">
+                    <span className="text-[11px] font-semibold text-muted-foreground">
+                      Quick-Add Common South African Preschool Questions:
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {PRESET_ECD_CUSTOM_FIELDS.map((preset) => (
+                        <button
+                          key={preset.label}
+                          type="button"
+                          onClick={() => handleAddCustomField(preset)}
+                          className="px-2.5 py-1 rounded-lg border border-border bg-muted/40 hover:bg-primary/10 hover:border-primary/40 text-xs font-medium text-foreground transition-colors flex items-center gap-1"
+                        >
+                          <Plus className="w-3 h-3 text-primary" />
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Existing Custom Fields List */}
+                  <div className="space-y-2.5">
+                    {formConfig.customFields.map((field, index) => (
+                      <div
+                        key={field.id}
+                        className="p-3.5 rounded-xl border border-border bg-background flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                      >
+                        <div className="space-y-1.5 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] font-mono font-bold text-muted-foreground">
+                              Q{index + 1}
+                            </span>
+                            <Input
+                              value={field.label}
+                              onChange={(e) =>
+                                handleUpdateCustomField(field.id, { label: e.target.value })
+                              }
+                              className="h-8 text-xs font-semibold"
+                            />
+                          </div>
+
+                          {field.type === 'select' && (
+                            <div className="flex items-center gap-2 pl-6">
+                              <span className="text-[11px] text-muted-foreground shrink-0">
+                                Options (comma-separated):
+                              </span>
+                              <Input
+                                value={(field.options || []).join(', ')}
+                                onChange={(e) =>
+                                  handleUpdateCustomField(field.id, {
+                                    options: e.target.value
+                                      .split(',')
+                                      .map((s) => s.trim())
+                                      .filter(Boolean),
+                                  })
+                                }
+                                className="h-7 text-xs"
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-center">
+                          <select
+                            value={field.type}
+                            onChange={(e) =>
+                              handleUpdateCustomField(field.id, {
+                                type: e.target.value as CustomFieldType,
+                              })
+                            }
+                            className="h-8 rounded-md border border-input bg-background px-2 text-xs text-foreground"
+                          >
+                            <option value="text">Short Text</option>
+                            <option value="select">Dropdown Select</option>
+                            <option value="checkbox">Yes / No Checkbox</option>
+                            <option value="textarea">Long Notes</option>
+                          </select>
+
+                          <label className="flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer whitespace-nowrap">
+                            <input
+                              type="checkbox"
+                              checked={field.required}
+                              onChange={(e) =>
+                                handleUpdateCustomField(field.id, { required: e.target.checked })
+                              }
+                              className="rounded border-border text-primary"
+                            />
+                            Required
+                          </label>
+
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveCustomField(field.id)}
+                            className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                            title="Remove question"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Add Custom Question Creator Box */}
+                  <div className="p-4 rounded-xl bg-muted/30 border border-dashed border-border space-y-3">
+                    <div className="text-xs font-bold text-foreground">
+                      + Add Your Own Custom Question
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+                      <div className="sm:col-span-6">
+                        <Input
+                          placeholder="e.g. Who is authorized to collect your child?"
+                          value={newFieldLabel}
+                          onChange={(e) => setNewFieldLabel(e.target.value)}
+                          className="h-9 text-xs"
+                        />
+                      </div>
+                      <div className="sm:col-span-3">
+                        <select
+                          value={newFieldType}
+                          onChange={(e) => setNewFieldType(e.target.value as CustomFieldType)}
+                          className="w-full h-9 rounded-md border border-input bg-background px-2.5 text-xs text-foreground"
+                        >
+                          <option value="text">Short Text</option>
+                          <option value="select">Dropdown Options</option>
+                          <option value="checkbox">Yes/No Checkbox</option>
+                          <option value="textarea">Long Textarea</option>
+                        </select>
+                      </div>
+                      <div className="sm:col-span-3 flex items-center justify-between sm:justify-end gap-2">
+                        <label className="flex items-center gap-1 text-xs text-muted-foreground cursor-pointer whitespace-nowrap">
+                          <input
+                            type="checkbox"
+                            checked={newFieldRequired}
+                            onChange={(e) => setNewFieldRequired(e.target.checked)}
+                            className="rounded border-border text-primary"
+                          />
+                          Req
+                        </label>
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={() => handleAddCustomField()}
+                          className="h-9 text-xs font-semibold whitespace-nowrap"
+                        >
+                          <Plus className="w-3.5 h-3.5 mr-1" />
+                          Add Field
+                        </Button>
+                      </div>
+                    </div>
+
+                    {newFieldType === 'select' && (
+                      <div>
+                        <Input
+                          placeholder="Dropdown choices separated by commas (e.g. Full Day, Half Day, Aftercare Only)"
+                          value={newFieldOptions}
+                          onChange={(e) => setNewFieldOptions(e.target.value)}
+                          className="h-8 text-xs"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Required Supporting Documents Checklist */}
+                <div className="space-y-3 pt-2 border-t border-border">
+                  <div>
+                    <h4 className="text-sm font-bold text-foreground">
+                      Required Enrolment Documents Checklist ({formConfig.requiredDocumentsChecklist.length})
+                    </h4>
+                    <p className="text-xs text-muted-foreground">
+                      Specify which documents parents must acknowledge when submitting their application.
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    {formConfig.requiredDocumentsChecklist.map((doc, idx) => (
+                      <div
+                        key={`${doc}-${idx}`}
+                        className="flex items-center justify-between gap-2 p-2.5 rounded-lg border border-border bg-background text-xs"
+                      >
+                        <span className="font-medium text-foreground">{doc}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveDocChecklistItem(idx)}
+                          className="text-muted-foreground hover:text-destructive p-1"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Add required document (e.g. Latest Fee Clearance Certificate or Clinic Card)"
+                      value={newDocItem}
+                      onChange={(e) => setNewDocItem(e.target.value)}
+                      className="h-9 text-xs"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleAddDocChecklistItem}
+                      className="h-9 text-xs font-semibold whitespace-nowrap shrink-0"
+                    >
+                      <Plus className="w-3.5 h-3.5 mr-1" />
+                      Add Document
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-border">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleResetFormBuilder}
+                    className="text-xs text-muted-foreground"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
+                    Reset to Standard SA ECD Template
+                  </Button>
+
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        saveApplicationFormConfig({ ...formConfig, schoolName });
+                        setPreviewModalOpen(true);
+                      }}
+                      className="text-xs font-semibold"
+                    >
+                      <Eye className="w-3.5 h-3.5 mr-1.5" />
+                      Preview Live Form
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={handleSaveFormBuilder}
+                      className="text-xs font-semibold"
+                    >
+                      <Save className="w-3.5 h-3.5 mr-1.5" />
+                      Publish Online Application Form
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Live Parent Form Summary Card */}
+              <div className="lg:col-span-4 bg-card border border-border rounded-2xl p-5 space-y-4 sticky top-24">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-primary">
+                    Live Parent Experience
+                  </span>
+                  <span className="text-[11px] font-mono text-emerald-600 font-semibold">
+                    Active in Directory
+                  </span>
+                </div>
+
+                <div className="p-4 rounded-xl bg-muted/40 border border-border space-y-2">
+                  <h4 className="font-heading font-bold text-sm text-foreground">
+                    {formConfig.formTitle || 'Official Learner Enrolment Application Form'}
+                  </h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    {formConfig.welcomeNote}
+                  </p>
+                </div>
+
+                <div className="space-y-2 text-xs">
+                  <div className="font-semibold text-foreground">Included Form Sections:</div>
+                  <ul className="space-y-1.5 text-muted-foreground">
+                    <li className="flex items-center gap-2">
+                      <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      Child Full Name, DOB, Age Group &amp; Start Date
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      Parent / Guardian Contact &amp; Home Address
+                    </li>
+                    {formConfig.requireIdNumbers && (
+                      <li className="flex items-center gap-2">
+                        <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        SA ID / Passport Number Verification
+                      </li>
+                    )}
+                    {formConfig.requireMedicalInfo && (
+                      <li className="flex items-center gap-2">
+                        <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        Medical, Allergies &amp; Clinic Card Notes
+                      </li>
+                    )}
+                    {formConfig.requireEmergencyContact && (
+                      <li className="flex items-center gap-2">
+                        <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        Secondary Emergency Contact Person
+                      </li>
+                    )}
+                    <li className="flex items-center gap-2 text-foreground font-semibold">
+                      <Sparkles className="w-3.5 h-3.5 text-primary shrink-0" />
+                      {formConfig.customFields.length} Custom School Questions
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      {formConfig.requiredDocumentsChecklist.length} Required Document Checkboxes
+                    </li>
+                  </ul>
+                </div>
+
+                <Button
+                  type="button"
+                  onClick={() => {
+                    saveApplicationFormConfig({ ...formConfig, schoolName });
+                    setPreviewModalOpen(true);
+                  }}
+                  className="w-full font-semibold text-xs"
+                >
+                  <Eye className="w-4 h-4 mr-1.5" />
+                  Test &amp; Preview Parent Application Modal
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: LEADS INBOX */}
           {activeTab === 'leads' && (
             <div className="space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
@@ -783,7 +1792,7 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* TAB 2: EDIT PROFILE */}
+          {/* TAB 4: EDIT PROFILE */}
           {activeTab === 'profile' && (
             <form onSubmit={handleSaveProfile} className="max-w-2xl bg-card border border-border rounded-2xl p-6 sm:p-8 space-y-5">
               <div>
@@ -873,7 +1882,7 @@ export default function DashboardPage() {
             </form>
           )}
 
-          {/* TAB 3: FREE SCHOOL WEBSITE */}
+          {/* TAB 5: FREE SCHOOL WEBSITE */}
           {activeTab === 'website' && (
             <div className="space-y-6">
               {currentMonthlyPrice < TiersConfig.PRO_FEATURED.monthlyPriceZAR && (
@@ -890,7 +1899,7 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* TAB 4: BILLING & RETENTION */}
+          {/* TAB 6: BILLING & RETENTION */}
           {activeTab === 'billing' && (
             <div className="max-w-3xl bg-card border border-border rounded-2xl p-6 sm:p-8 space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -932,7 +1941,7 @@ export default function DashboardPage() {
                 <div className="flex items-center justify-between font-semibold text-foreground">
                   <span>Your School&apos;s Enrollment ROI Math</span>
                   <span className="font-mono tabular-nums text-primary">
-                    {bookings.length} Leads Generated · {whatsAppClicks} WhatsApp Enquiries
+                    {applications.length} Applications · {bookings.length} Leads
                   </span>
                 </div>
                 <p className="text-muted-foreground leading-relaxed">
@@ -960,6 +1969,14 @@ export default function DashboardPage() {
         </div>
       </section>
 
+      {/* Live Preview of Customizable Online Application Modal */}
+      <OnlineApplicationModal
+        isOpen={previewModalOpen}
+        onClose={() => setPreviewModalOpen(false)}
+        initialSchools={[previewSchoolObject]}
+        availablePool={[previewSchoolObject]}
+      />
+
       {/* Subscription Pause, Downgrade & ROI Save Modal */}
       <Dialog open={retentionModalOpen} onOpenChange={setRetentionModalOpen}>
         <DialogContent className="max-w-lg p-6 rounded-2xl bg-card border-border">
@@ -977,95 +1994,100 @@ export default function DashboardPage() {
             <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs space-y-1">
               <div className="font-bold text-emerald-800 dark:text-emerald-300 flex items-center justify-between">
                 <span>Live Activity on Your Listing</span>
-                <span className="font-mono tabular-nums">{bookings.length} Tours · 248 Views</span>
+                <span className="font-mono tabular-nums">
+                  {applications.length} Applications · {bookings.length} Tours
+                </span>
               </div>
               <p className="text-muted-foreground">
-                1 enrolled learner brings <strong className="text-foreground font-mono">R{annualTuitionPerChild.toLocaleString()}/yr</strong> in tuition vs. <strong className="text-foreground font-mono">R{currentMonthlyPrice}/mo</strong>.
+                1 enrolled learner at R{numericMonthlyFee.toLocaleString()}/mo equals{' '}
+                <strong className="text-foreground font-mono">R{annualTuitionPerChild.toLocaleString()}/year</strong> in tuition ({roiMultiple}x your plan cost).
               </p>
             </div>
 
-            {/* Option 1: Pause for 30 Days */}
-            <div className="p-4 rounded-xl border border-border bg-background flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="space-y-0.5">
-                <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                  <PauseCircle className="w-4 h-4 text-primary" />
-                  <span>Pause Billing for 30 Days (R0 Next Month)</span>
+            {/* Option 1: Pause for 30 days */}
+            <button
+              type="button"
+              onClick={() => handleApplyRetentionOption('pause')}
+              className="w-full p-4 rounded-xl border border-border hover:border-primary/50 bg-background text-left transition-colors flex items-start justify-between gap-3"
+            >
+              <div className="space-y-1">
+                <div className="text-sm font-bold text-foreground flex items-center gap-2">
+                  <PauseCircle className="w-4 h-4 text-amber-500 shrink-0" />
+                  Pause Billing for 30 Days (R0 during school holidays)
                 </div>
-                <p className="text-[11px] text-muted-foreground">
-                  Ideal for school holidays or when your classes are at 100% capacity. Keeps your DSD Verified badge intact.
+                <p className="text-xs text-muted-foreground">
+                  Keep your DSD Verified badge, profile history, and online application form active while pausing debit orders for 1 month.
                 </p>
               </div>
-              <Button
-                type="button"
-                size="sm"
-                onClick={() => handleApplyRetentionOption('pause')}
-                className="whitespace-nowrap shrink-0 font-semibold"
-              >
-                Pause 30 Days
-              </Button>
-            </div>
+              <span className="text-xs font-semibold text-primary whitespace-nowrap shrink-0 mt-0.5">
+                Pause 30d
+              </span>
+            </button>
 
-            {/* Option 2: Step Down to Verified (R149/mo) */}
+            {/* Option 2: Switch to Annual 15% Off */}
+            <button
+              type="button"
+              onClick={() => handleApplyRetentionOption('switch_annual')}
+              className="w-full p-4 rounded-xl border border-border hover:border-primary/50 bg-background text-left transition-colors flex items-start justify-between gap-3"
+            >
+              <div className="space-y-1">
+                <div className="text-sm font-bold text-foreground flex items-center gap-2">
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                  Lock In 15% Off with Annual Billing
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Reduce your effective monthly rate to{' '}
+                  <strong className="font-mono text-foreground">
+                    R{Math.round((currentMonthlyPrice || 149) * 0.85)}/mo
+                  </strong>{' '}
+                  and get 2 months free.
+                </p>
+              </div>
+              <span className="text-xs font-semibold text-emerald-600 whitespace-nowrap shrink-0 mt-0.5">
+                Save 15%
+              </span>
+            </button>
+
+            {/* Option 3: Downgrade from Pro Featured (R299) to Verified (R149) */}
             {currentMonthlyPrice > TiersConfig.VERIFIED.monthlyPriceZAR && (
-              <div className="p-4 rounded-xl border border-border bg-background flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="space-y-0.5">
-                  <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                    <ArrowDownCircle className="w-4 h-4 text-emerald-600" />
-                    <span>Step Down to Verified Centre (R149/mo)</span>
+              <button
+                type="button"
+                onClick={() => handleApplyRetentionOption('downgrade_verified')}
+                className="w-full p-4 rounded-xl border border-border hover:border-primary/50 bg-background text-left transition-colors flex items-start justify-between gap-3"
+              >
+                <div className="space-y-1">
+                  <div className="text-sm font-bold text-foreground flex items-center gap-2">
+                    <ArrowDownCircle className="w-4 h-4 text-primary shrink-0" />
+                    Step Down to Verified Centre (R{TiersConfig.VERIFIED.monthlyPriceZAR}/mo)
                   </div>
-                  <p className="text-[11px] text-muted-foreground">
-                    Save R241/mo while keeping your Green Verified Shield and direct WhatsApp/Email tour booking inbox.
+                  <p className="text-xs text-muted-foreground">
+                    Cut your monthly spend in half while keeping your Verified Shield and online application inbox.
                   </p>
                 </div>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleApplyRetentionOption('downgrade_verified')}
-                  className="whitespace-nowrap shrink-0 font-semibold"
-                >
-                  Switch to R149/mo
-                </Button>
-              </div>
+                <span className="text-xs font-semibold text-primary whitespace-nowrap shrink-0 mt-0.5">
+                  R149/mo
+                </span>
+              </button>
             )}
 
-            {/* Option 3: Switch to Annual & Save 15% */}
-            <div className="p-4 rounded-xl border border-border bg-background flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="space-y-0.5">
-                <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                  <Check className="w-4 h-4 text-emerald-600" />
-                  <span>Lock In 15% Off with Annual Billing</span>
+            {/* Option 4: Step down to Free Basic Listing */}
+            <button
+              type="button"
+              onClick={() => handleApplyRetentionOption('downgrade_free')}
+              className="w-full p-3.5 rounded-xl border border-border/60 hover:bg-muted/40 text-left transition-colors flex items-center justify-between gap-3"
+            >
+              <div>
+                <div className="text-xs font-semibold text-muted-foreground">
+                  Switch to Basic Unverified Directory Listing (R0/mo)
                 </div>
                 <p className="text-[11px] text-muted-foreground">
-                  Reduce your effective monthly rate by 15% for the academic year.
+                  Removes priority ranking and WhatsApp lead mirroring, but preserves your profile data.
                 </p>
               </div>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={() => handleApplyRetentionOption('switch_annual')}
-                className="whitespace-nowrap shrink-0 font-semibold"
-              >
-                Apply 15% Discount
-              </Button>
-            </div>
-
-            {/* Option 4: Downgrade to Free Public Listing */}
-            <div className="pt-2 border-t border-border flex items-center justify-between gap-3">
-              <span className="text-xs text-muted-foreground">
-                Still want to switch to an unverified R0/mo basic listing?
+              <span className="text-xs text-muted-foreground whitespace-nowrap shrink-0">
+                Downgrade
               </span>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => handleApplyRetentionOption('downgrade_free')}
-                className="text-xs text-destructive hover:text-destructive hover:bg-destructive/10 whitespace-nowrap shrink-0"
-              >
-                Downgrade to Free
-              </Button>
-            </div>
+            </button>
           </div>
         </DialogContent>
       </Dialog>

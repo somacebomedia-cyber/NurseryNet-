@@ -20,6 +20,7 @@ import InquiryModal from '@/components/directory/InquiryModal';
 import ClaimDialog from '@/components/directory/ClaimDialog';
 import EcdBenchmarksDialog from '@/components/directory/EcdBenchmarksDialog';
 import CompareSchoolsModal from '@/components/directory/CompareSchoolsModal';
+import OnlineApplicationModal from '@/components/directory/OnlineApplicationModal';
 import LiveSearchSources from '@/components/directory/LiveSearchSources';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -58,6 +59,7 @@ import {
   Clock,
   Heart,
   Scale,
+  FileText,
 } from 'lucide-react';
 import {
   Sheet,
@@ -129,12 +131,14 @@ export default function DirectoryPage() {
 
   // Modal States
   const [activeSchool, setActiveSchool] = useState<Preschool | null>(null);
+  const [applicationSchools, setApplicationSchools] = useState<Preschool[]>([]);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [tourModalOpen, setTourModalOpen] = useState(false);
   const [inquiryModalOpen, setInquiryModalOpen] = useState(false);
   const [claimModalOpen, setClaimModalOpen] = useState(false);
   const [benchmarksModalOpen, setBenchmarksModalOpen] = useState(false);
   const [compareModalOpen, setCompareModalOpen] = useState(false);
+  const [applicationModalOpen, setApplicationModalOpen] = useState(false);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
   // Reset page when any filter criteria changes
@@ -354,6 +358,14 @@ export default function DirectoryPage() {
     setActiveSchool(school);
     setDetailModalOpen(false);
     setInquiryModalOpen(true);
+  };
+
+  const handleOpenApply = (schoolsOrSingle: Preschool | Preschool[]) => {
+    const list = Array.isArray(schoolsOrSingle) ? schoolsOrSingle : [schoolsOrSingle];
+    setApplicationSchools(list);
+    setDetailModalOpen(false);
+    setCompareModalOpen(false);
+    setApplicationModalOpen(true);
   };
 
   const handleOpenClaim = (school: Preschool) => {
@@ -985,14 +997,24 @@ export default function DirectoryPage() {
             </button>
 
             {savedSchools.length > 0 && (
-              <button
-                type="button"
-                onClick={() => setCompareModalOpen(true)}
-                className="px-3 py-1 rounded-lg font-bold flex items-center gap-1.5 bg-primary/10 text-primary border border-primary/30 hover:bg-primary/20 transition-colors whitespace-nowrap shrink-0"
-              >
-                <Scale className="w-3.5 h-3.5" />
-                <span>Compare ({Math.min(4, savedSchools.length)})</span>
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={() => setCompareModalOpen(true)}
+                  className="px-3 py-1 rounded-lg font-bold flex items-center gap-1.5 bg-primary/10 text-primary border border-primary/30 hover:bg-primary/20 transition-colors whitespace-nowrap shrink-0"
+                >
+                  <Scale className="w-3.5 h-3.5" />
+                  <span>Compare ({Math.min(4, savedSchools.length)})</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOpenApply(savedSchools)}
+                  className="px-3 py-1 rounded-lg font-bold flex items-center gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm transition-colors whitespace-nowrap shrink-0"
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  <span>Apply to All ({savedSchools.length})</span>
+                </button>
+              </>
             )}
 
             <button
@@ -1279,6 +1301,7 @@ export default function DirectoryPage() {
                       preschool={school}
                       onSelect={handleOpenDetail}
                       onBookTour={handleOpenTour}
+                      onApply={handleOpenApply}
                       onClaim={handleOpenClaim}
                       isSaved={savedIdSet.has(school.id)}
                       onToggleSave={handleToggleSave}
@@ -1361,9 +1384,9 @@ export default function DirectoryPage() {
         </div>
       </div>
 
-      {/* Floating Shortlist & Side-by-Side Comparison Bar */}
+      {/* Floating Shortlist & Side-by-Side Comparison / Multi-School Apply Bar */}
       {savedSchools.length > 0 && (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[94vw] max-w-3xl p-3 rounded-2xl bg-card/95 backdrop-blur-md border border-primary/30 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[94vw] max-w-4xl p-3 rounded-2xl bg-card/95 backdrop-blur-md border border-primary/30 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-3 overflow-x-auto max-w-full">
             <div className="flex items-center gap-1.5 text-xs font-bold text-foreground shrink-0">
               <Heart className="w-4 h-4 fill-rose-500 text-rose-500" />
@@ -1394,7 +1417,7 @@ export default function DirectoryPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto justify-end shrink-0">
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end shrink-0">
             <Button
               type="button"
               variant="ghost"
@@ -1406,12 +1429,22 @@ export default function DirectoryPage() {
             </Button>
             <Button
               type="button"
+              variant="outline"
               size="sm"
               onClick={() => setCompareModalOpen(true)}
-              className="h-9 px-4 rounded-xl text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90 whitespace-nowrap"
+              className="h-9 px-3.5 rounded-xl text-xs font-bold border-primary/40 text-primary hover:bg-primary/10 whitespace-nowrap"
             >
               <Scale className="w-3.5 h-3.5 mr-1.5" />
-              Compare Side-by-Side ({Math.min(4, savedSchools.length)})
+              Compare ({Math.min(4, savedSchools.length)})
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              onClick={() => handleOpenApply(savedSchools)}
+              className="h-9 px-4 rounded-xl text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-md whitespace-nowrap"
+            >
+              <FileText className="w-3.5 h-3.5 mr-1.5" />
+              Apply to All {savedSchools.length} at Once
             </Button>
           </div>
         </div>
@@ -1424,6 +1457,7 @@ export default function DirectoryPage() {
         onClose={() => setDetailModalOpen(false)}
         onBookTour={handleOpenTour}
         onInquire={handleOpenInquiry}
+        onApply={handleOpenApply}
         onClaim={handleOpenClaim}
         isSaved={activeSchool ? savedIdSet.has(activeSchool.id) : false}
         onToggleSave={handleToggleSave}
@@ -1439,10 +1473,19 @@ export default function DirectoryPage() {
           setCompareModalOpen(false);
           handleOpenTour(school);
         }}
+        onApplySchool={(school) => handleOpenApply(school)}
+        onApplyAll={(schools) => handleOpenApply(schools)}
         onSelectDetail={(school) => {
           setCompareModalOpen(false);
           handleOpenDetail(school);
         }}
+      />
+
+      <OnlineApplicationModal
+        isOpen={applicationModalOpen}
+        onClose={() => setApplicationModalOpen(false)}
+        initialSchools={applicationSchools}
+        availablePool={[...savedSchools, ...displayedSchools]}
       />
 
       <TourBookingModal
