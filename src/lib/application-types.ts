@@ -55,6 +55,14 @@ export interface ParentEnrolmentPassport {
   childDateOfBirth: string;
   childAgeGroup: string;
   preferredStartDate: string;
+  homeLanguage: string;
+  attendancePreference: string;
+  requiresTransport: boolean;
+  previousPreschool: string;
+  pottyTrainingStatus: string;
+  dietaryPreference: string;
+  sassaOrSubsidyStatus: string;
+  siblingsAtSchool: string;
   parentFullName: string;
   parentRelationship: string;
   parentIdOrPassport: string;
@@ -64,9 +72,43 @@ export interface ParentEnrolmentPassport {
   medicalAllergies: string;
   emergencyContactName: string;
   emergencyContactPhone: string;
+  familyBioForAi: string;
   customAnswers: Record<string, string>;
   updatedAt: string;
 }
+
+export const DEFAULT_PARENT_PASSPORT: ParentEnrolmentPassport = {
+  childFullName: 'Lethabo Mokoena',
+  childDateOfBirth: '2023-05-14',
+  childAgeGroup: 'Toddler (1–3 years)',
+  preferredStartDate: 'January 2027 (Term 1)',
+  homeLanguage: 'isiZulu',
+  attendancePreference: 'Full Day (07:00 – 17:30)',
+  requiresTransport: false,
+  previousPreschool: 'First time attending crèche / preschool',
+  pottyTrainingStatus: 'Fully Toilet Trained',
+  dietaryPreference: 'Standard School Menu',
+  sassaOrSubsidyStatus: 'No – Private Tuition',
+  siblingsAtSchool: 'None',
+  parentFullName: 'Lerato Mokoena',
+  parentRelationship: 'Mother',
+  parentIdOrPassport: '9308140192081',
+  parentPhone: '082 555 1920',
+  parentEmail: 'lerato.mokoena@gmail.com',
+  residentialAddress: '18 Republic Road, Randburg, Johannesburg',
+  medicalAllergies: 'No known food allergies; Road to Health clinic card up to date',
+  emergencyContactName: 'Sipho Mokoena (Father)',
+  emergencyContactPhone: '083 441 9002',
+  familyBioForAi:
+    'We are a working family in Randburg looking for a caring, DSD-registered preschool with full-day aftercare (07:00 - 17:30) and nutritious meals included. Lethabo speaks isiZulu and English at home, is sociable, toilet trained, and has no food allergies.',
+  customAnswers: {
+    'Child’s Primary Home Language': 'isiZulu',
+    'Attendance & Aftercare Option': 'Full Day (07:00 – 17:30)',
+    'Does your child require school transport collection?': 'No',
+    'Previous Preschool / Crèche Attended (if any)': 'First time attending crèche / preschool',
+  },
+  updatedAt: new Date().toISOString(),
+};
 
 export const DEFAULT_APPLICATION_FORM_CONFIG: ApplicationFormConfig = {
   formTitle: 'Official Learner Enrolment Application Form',
@@ -166,54 +208,121 @@ export function calculateAgeGroupFromDob(dob: string): string {
   return 'Grade R / Pre-Primary (5–6 years)';
 }
 
-export function getSavedParentPassport(): ParentEnrolmentPassport | null {
-  if (typeof window === 'undefined') return null;
+/**
+ * Automatically maps a Parent's Enrolment Profile to any school's custom questions
+ * (including newly added questions from the Owner Dashboard Form Builder).
+ */
+export function mapPassportToSchoolCustomFields(
+  passport: ParentEnrolmentPassport,
+  customFields: CustomApplicationField[]
+): Record<string, string> {
+  const mapped: Record<string, string> = {};
+
+  customFields.forEach((field) => {
+    const labelLower = field.label.toLowerCase();
+
+    // 1. Exact saved match from previous applications
+    if (passport.customAnswers?.[field.label]) {
+      mapped[field.label] = passport.customAnswers[field.label];
+      return;
+    }
+
+    // 2. Semantic mapping from structured Parent Profile attributes
+    let candidateValue = '';
+    if (labelLower.includes('language') || labelLower.includes('mother tongue')) {
+      candidateValue = passport.homeLanguage || 'English';
+    } else if (
+      labelLower.includes('aftercare') ||
+      labelLower.includes('attendance') ||
+      labelLower.includes('full day') ||
+      labelLower.includes('half day') ||
+      labelLower.includes('hours')
+    ) {
+      candidateValue = passport.attendancePreference || 'Full Day (07:00 – 17:30)';
+    } else if (labelLower.includes('transport') || labelLower.includes('bus') || labelLower.includes('shuttle')) {
+      candidateValue = passport.requiresTransport ? 'Yes' : 'No';
+    } else if (labelLower.includes('previous') || labelLower.includes('crèche') || labelLower.includes('creche') || labelLower.includes('attended')) {
+      candidateValue = passport.previousPreschool || 'First time attending preschool';
+    } else if (labelLower.includes('potty') || labelLower.includes('toilet') || labelLower.includes('napp') || labelLower.includes('diaper')) {
+      candidateValue = passport.pottyTrainingStatus || 'Fully Toilet Trained';
+    } else if (labelLower.includes('diet') || labelLower.includes('halaal') || labelLower.includes('halal') || labelLower.includes('meal') || labelLower.includes('food')) {
+      candidateValue = passport.dietaryPreference || 'Standard School Menu';
+    } else if (labelLower.includes('sassa') || labelLower.includes('subsidy') || labelLower.includes('grant') || labelLower.includes('dsd')) {
+      candidateValue = passport.sassaOrSubsidyStatus || 'No – Private Tuition';
+    } else if (labelLower.includes('sibling') || labelLower.includes('brother') || labelLower.includes('sister')) {
+      candidateValue = passport.siblingsAtSchool || 'None';
+    } else if (labelLower.includes('collect') || labelLower.includes('pick up') || labelLower.includes('pickup') || labelLower.includes('authorized')) {
+      candidateValue = `${passport.parentFullName} (${passport.parentRelationship}) & ${passport.emergencyContactName}`;
+    } else if (labelLower.includes('allerg') || labelLower.includes('medical') || labelLower.includes('clinic')) {
+      candidateValue = passport.medicalAllergies || 'None reported';
+    }
+
+    if (field.type === 'checkbox') {
+      mapped[field.label] =
+        candidateValue.toLowerCase().startsWith('y') || candidateValue.toLowerCase() === 'true'
+          ? 'Yes'
+          : 'No';
+    } else if (field.type === 'select' && field.options && field.options.length > 0) {
+      const matchedOpt =
+        field.options.find((opt) => opt.toLowerCase() === candidateValue.toLowerCase()) ||
+        field.options.find(
+          (opt) =>
+            candidateValue &&
+            (opt.toLowerCase().includes(candidateValue.toLowerCase()) ||
+              candidateValue.toLowerCase().includes(opt.toLowerCase()))
+        ) ||
+        field.options[0];
+      mapped[field.label] = matchedOpt;
+    } else {
+      mapped[field.label] = candidateValue || '';
+    }
+  });
+
+  return mapped;
+}
+
+export function getSavedParentPassport(): ParentEnrolmentPassport {
+  if (typeof window === 'undefined') return DEFAULT_PARENT_PASSPORT;
   try {
     const raw = localStorage.getItem(PASSPORT_STORAGE_KEY);
     if (raw) {
-      return JSON.parse(raw);
-    }
-    // Fallback: check if parent previously booked a tour or sent an inquiry in this browser
-    const rawTours = JSON.parse(localStorage.getItem('nurserynet_tours') || '[]');
-    if (Array.isArray(rawTours) && rawTours.length > 0) {
-      const latest = rawTours[0];
+      const parsed = JSON.parse(raw);
       return {
-        childFullName: latest.childName || '',
-        childDateOfBirth: '2023-05-14',
-        childAgeGroup: latest.childAge || 'Toddler (1–3 years)',
-        preferredStartDate: 'January 2027 (Term 1)',
-        parentFullName: latest.parentName || '',
-        parentRelationship: 'Mother',
-        parentIdOrPassport: '',
-        parentPhone: latest.phone || '',
-        parentEmail: latest.email || '',
-        residentialAddress: '',
-        medicalAllergies: latest.notes || 'None reported',
-        emergencyContactName: '',
-        emergencyContactPhone: '',
-        customAnswers: {},
-        updatedAt: new Date().toISOString(),
+        ...DEFAULT_PARENT_PASSPORT,
+        ...parsed,
+        customAnswers: {
+          ...DEFAULT_PARENT_PASSPORT.customAnswers,
+          ...(parsed.customAnswers || {}),
+        },
       };
     }
-    return null;
+    return DEFAULT_PARENT_PASSPORT;
   } catch {
-    return null;
+    return DEFAULT_PARENT_PASSPORT;
   }
 }
 
-export function saveParentPassport(passport: Omit<ParentEnrolmentPassport, 'updatedAt'>): void {
-  if (typeof window === 'undefined') return;
-  try {
-    localStorage.setItem(
-      PASSPORT_STORAGE_KEY,
-      JSON.stringify({
-        ...passport,
-        updatedAt: new Date().toISOString(),
-      })
-    );
-  } catch (err) {
-    console.error('Failed to save parent enrolment passport', err);
+export function saveParentPassport(passport: Partial<ParentEnrolmentPassport>): ParentEnrolmentPassport {
+  const existing = getSavedParentPassport();
+  const merged: ParentEnrolmentPassport = {
+    ...existing,
+    ...passport,
+    customAnswers: {
+      ...existing.customAnswers,
+      ...(passport.customAnswers || {}),
+    },
+    updatedAt: new Date().toISOString(),
+  };
+
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem(PASSPORT_STORAGE_KEY, JSON.stringify(merged));
+      window.dispatchEvent(new Event('nurserynet_passport_updated'));
+    } catch (err) {
+      console.error('Failed to save parent enrolment passport', err);
+    }
   }
+  return merged;
 }
 
 export function getApplicationFormConfig(): ApplicationFormConfig {
@@ -297,7 +406,7 @@ export function submitBatchApplications(
   try {
     const existing = getSubmittedApplications();
     localStorage.setItem(APPLICATIONS_STORAGE_KEY, JSON.stringify([...created, ...existing]));
-    // Also persist to Universal Parent Enrolment Passport for future 1-click agentic autofill
+    // Sync back to Universal Parent Enrolment Profile
     saveParentPassport({
       childFullName: basePayload.childFullName,
       childDateOfBirth: basePayload.childDateOfBirth,

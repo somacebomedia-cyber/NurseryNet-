@@ -1,13 +1,16 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef } from 'react';
+import Link from 'next/link';
 import type { Preschool } from '@/data/preschools';
 import {
   ApplicationFormConfig,
   calculateAgeGroupFromDob,
   DEFAULT_APPLICATION_FORM_CONFIG,
+  DEFAULT_PARENT_PASSPORT,
   getApplicationFormConfig,
   getSavedParentPassport,
+  mapPassportToSchoolCustomFields,
   ParentEnrolmentPassport,
   PreschoolApplication,
   saveParentPassport,
@@ -30,7 +33,6 @@ import {
   User,
   Phone,
   Mail,
-  MapPin,
   HeartPulse,
   ShieldCheck,
   MessageCircle,
@@ -43,6 +45,7 @@ import {
   BookmarkCheck,
   AlertCircle,
   Zap,
+  ExternalLink,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -55,11 +58,11 @@ interface OnlineApplicationModalProps {
 
 const SAMPLE_AGENTIC_PROMPTS = [
   {
-    label: 'Sample 1: Mokoena Family (Randburg)',
+    label: 'Mokoena Family Profile',
     text: 'Hi, I am Lerato Mokoena (Mother, SA ID 9308140192081, cell 082 555 1920, lerato.mokoena@gmail.com) living at 18 Republic Road, Randburg. I am applying for my daughter Lethabo Mokoena born 2023-05-14 for January 2027. She speaks isiZulu and English, needs Full Day care (07:00 - 17:30), no transport needed, no allergies, first time in crèche. Emergency contact is her father Sipho Mokoena on 083 441 9002.',
   },
   {
-    label: 'Sample 2: Van der Merwe Family + Batch Match',
+    label: 'Van der Merwe Family + Batch Match',
     text: 'Applying for Liam van der Merwe (born 2022-02-10, 4 years old) for Immediate Enrolment. Father is David van der Merwe, ID 8911025091084, phone 083 441 9022, email david.vdm@outlook.com, living at 44 Oak Ave, Cape Town. Home language Afrikaans, Half Day care, mild peanut allergy (carries EpiPen), attended Little Stars Crèche previously. Emergency contact Sarah van der Merwe 072 819 3310. Also add 2 verified preschools to my batch application.',
   },
 ];
@@ -87,6 +90,7 @@ export default function OnlineApplicationModal({
   const [schoolSearchFilter, setSchoolSearchFilter] = useState('');
 
   // Agentic Autofill Co-Pilot States
+  const [showCustomAiPromptBox, setShowCustomAiPromptBox] = useState(false);
   const [agentPrompt, setAgentPrompt] = useState('');
   const [uploadedDocName, setUploadedDocName] = useState('');
   const [uploadedDocBase64, setUploadedDocBase64] = useState('');
@@ -99,11 +103,11 @@ export default function OnlineApplicationModal({
   const [autofilledFieldsCount, setAutofilledFieldsCount] = useState(0);
   const [isListeningVoice, setIsListeningVoice] = useState(false);
   const [autoSubmitAfterAgent, setAutoSubmitAfterAgent] = useState(false);
-  const [savedPassport, setSavedPassport] = useState<ParentEnrolmentPassport | null>(null);
+  const [savedPassport, setSavedPassport] = useState<ParentEnrolmentPassport>(DEFAULT_PARENT_PASSPORT);
 
   // Form Field States
   const [childFullName, setChildFullName] = useState('');
-  const [childDateOfBirth, setChildDateOfBirth] = useState('2023-06-15');
+  const [childDateOfBirth, setChildDateOfBirth] = useState('2023-05-14');
   const [childAgeGroup, setChildAgeGroup] = useState('Toddler (1–3 years)');
   const [preferredStartDate, setPreferredStartDate] = useState('January 2027 (Term 1)');
 
@@ -123,7 +127,7 @@ export default function OnlineApplicationModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedApps, setSubmittedApps] = useState<PreschoolApplication[] | null>(null);
 
-  // Sync initial schools, saved family passport, and school's editable form configuration when modal opens
+  // Automatically copy from the Parent's Saved Enrolment Profile into this school's custom form on open
   useEffect(() => {
     if (!isOpen) return;
     const cfg = getApplicationFormConfig();
@@ -132,19 +136,37 @@ export default function OnlineApplicationModal({
     const passport = getSavedParentPassport();
     setSavedPassport(passport);
 
-    // Initialize default custom answers
-    const initialAnswers: Record<string, string> = {};
-    cfg.customFields.forEach((field) => {
-      if (field.type === 'select' && field.options && field.options.length > 0) {
-        initialAnswers[field.label] = field.options[0];
-      } else if (field.type === 'checkbox') {
-        initialAnswers[field.label] = 'No';
-      } else {
-        initialAnswers[field.label] = '';
-      }
-    });
-    setCustomAnswers(initialAnswers);
+    // Zero-click auto-copy from Parent Profile into standard + custom fields
+    setChildFullName(passport.childFullName || '');
+    const dob = passport.childDateOfBirth || '2023-05-14';
+    setChildDateOfBirth(dob);
+    setChildAgeGroup(passport.childAgeGroup || calculateAgeGroupFromDob(dob));
+    setPreferredStartDate(passport.preferredStartDate || 'January 2027 (Term 1)');
+    setParentFullName(passport.parentFullName || '');
+    setParentRelationship(passport.parentRelationship || 'Mother');
+    setParentIdOrPassport(passport.parentIdOrPassport || '');
+    setParentPhone(passport.parentPhone || '');
+    setParentEmail(passport.parentEmail || '');
+    setResidentialAddress(passport.residentialAddress || '');
+    setMedicalAllergies(passport.medicalAllergies || 'None reported');
+    setEmergencyContactName(passport.emergencyContactName || '');
+    setEmergencyContactPhone(passport.emergencyContactPhone || '');
+
+    // Automatically map Parent Profile answers onto whatever custom questions this preschool configured
+    const mappedCustom = mapPassportToSchoolCustomFields(passport, cfg.customFields);
+    setCustomAnswers(mappedCustom);
     setDocumentsAcknowledged(cfg.requiredDocumentsChecklist);
+
+    const totalFilled = 11 + Object.keys(mappedCustom).length;
+    setAutofilledFieldsCount(totalFilled);
+    setAgentSummary(
+      `Auto-copied ${totalFilled} fields directly from your Parent Enrolment Profile (${passport.parentFullName} & ${passport.childFullName}) and matched all ${cfg.customFields.length} school-specific questions.`
+    );
+    setAgentReasoningSteps([
+      `Copied learner profile for ${passport.childFullName} (DOB ${dob} → ${passport.childAgeGroup})`,
+      `Copied guardian & emergency contact details for ${passport.parentFullName} (${passport.parentPhone})`,
+      `Matched ${cfg.customFields.length} custom school questions from your saved Parent Profile preferences`,
+    ]);
 
     // Deduplicate initial schools
     const unique: Preschool[] = [];
@@ -254,73 +276,31 @@ export default function OnlineApplicationModal({
     recognition.start();
   };
 
-  // 1-Click Recall from Saved Family Passport
-  const handleRecallSavedPassport = (passport: ParentEnrolmentPassport) => {
-    setChildFullName(passport.childFullName || '');
-    const dob = passport.childDateOfBirth || '2023-05-14';
-    setChildDateOfBirth(dob);
-    setChildAgeGroup(passport.childAgeGroup || calculateAgeGroupFromDob(dob));
-    setPreferredStartDate(passport.preferredStartDate || 'January 2027 (Term 1)');
-    setParentFullName(passport.parentFullName || '');
-    setParentRelationship(passport.parentRelationship || 'Mother');
-    setParentIdOrPassport(passport.parentIdOrPassport || '');
-    setParentPhone(passport.parentPhone || '');
-    setParentEmail(passport.parentEmail || '');
-    setResidentialAddress(passport.residentialAddress || '');
-    setMedicalAllergies(passport.medicalAllergies || 'None reported');
-    setEmergencyContactName(passport.emergencyContactName || '');
-    setEmergencyContactPhone(passport.emergencyContactPhone || '');
-
-    const mergedCustom: Record<string, string> = { ...customAnswers };
-    formConfig.customFields.forEach((field) => {
-      if (passport.customAnswers?.[field.label]) {
-        mergedCustom[field.label] = passport.customAnswers[field.label];
-      }
-    });
-    setCustomAnswers(mergedCustom);
-    setDocumentsAcknowledged(formConfig.requiredDocumentsChecklist);
-
-    const count = 11 + Object.keys(mergedCustom).length;
-    setAutofilledFieldsCount(count);
-    setAgentSummary(
-      `Instant recall complete: populated ${count} fields from your saved NurseryNet Enrolment Passport.`
-    );
-    setAgentReasoningSteps([
-      `Loaded learner profile for ${passport.childFullName || 'your child'} (${passport.childAgeGroup})`,
-      `Filled guardian contact details for ${passport.parentFullName}`,
-      `Matched ${Object.keys(mergedCustom).length} school-specific custom questions`,
-    ]);
-
-    toast({
-      title: 'Autofilled from Family Passport',
-      description: `Populated ${count} admission fields in one click.`,
-    });
-  };
-
-  // Run Server-Side Gemini Agentic Autofill
+  // Run Server-Side Gemini Agentic Autofill (either from Parent Profile or from custom prompt/document)
   const handleRunAgenticAutofill = async (overridePrompt?: string) => {
-    const promptToUse = (overridePrompt !== undefined ? overridePrompt : agentPrompt).trim();
-    if (!promptToUse && !uploadedDocBase64) {
-      toast({
-        title: 'Add a short note or document first',
-        description:
-          'Describe your child and contact details in one sentence, upload a document, or pick a sample prompt.',
-        variant: 'destructive',
-      });
-      return;
-    }
+    const defaultProfileContext = `Parent Profile:
+Child: ${savedPassport.childFullName}, DOB: ${savedPassport.childDateOfBirth}, Age Group: ${savedPassport.childAgeGroup}, Start Term: ${savedPassport.preferredStartDate}, Home Language: ${savedPassport.homeLanguage}, Attendance: ${savedPassport.attendancePreference}, Transport Required: ${savedPassport.requiresTransport ? 'Yes' : 'No'}, Previous Crèche: ${savedPassport.previousPreschool}, Potty Status: ${savedPassport.pottyTrainingStatus}, Dietary: ${savedPassport.dietaryPreference}, Subsidy/SASSA: ${savedPassport.sassaOrSubsidyStatus}.
+Parent: ${savedPassport.parentFullName} (${savedPassport.parentRelationship}), SA ID: ${savedPassport.parentIdOrPassport}, Phone: ${savedPassport.parentPhone}, Email: ${savedPassport.parentEmail}, Address: ${savedPassport.residentialAddress}.
+Medical: ${savedPassport.medicalAllergies}. Emergency Contact: ${savedPassport.emergencyContactName} (${savedPassport.emergencyContactPhone}).
+Bio: ${savedPassport.familyBioForAi}`;
+
+    const promptToUse = (
+      overridePrompt !== undefined
+        ? overridePrompt
+        : agentPrompt.trim() || defaultProfileContext
+    ).trim();
 
     setIsAgentRunning(true);
     setAgentError('');
-    setAgentStepText('1/3 Extracting learner, DOB & guardian identity...');
+    setAgentStepText('1/3 Reading Parent Enrolment Profile & learner identity...');
 
     const stepTimer1 = setTimeout(() => {
-      setAgentStepText('2/3 Calculating age placement & mapping custom school questions...');
-    }, 900);
+      setAgentStepText('2/3 Adapting profile answers to this school’s custom questions...');
+    }, 850);
 
     const stepTimer2 = setTimeout(() => {
-      setAgentStepText('3/3 Verifying required admission checklist & school matches...');
-    }, 1800);
+      setAgentStepText('3/3 Finalizing admission fields & required document checklist...');
+    }, 1600);
 
     try {
       const response = await fetch('/api/agentic-autofill', {
@@ -402,8 +382,8 @@ export default function OnlineApplicationModal({
         setSelectedSchools(nextSelectedSchools);
       }
 
-      // Save to Universal Parent Enrolment Passport
-      const newPassport: Omit<ParentEnrolmentPassport, 'updatedAt'> = {
+      // Sync updated values back to Parent Enrolment Profile
+      const updatedPassport = saveParentPassport({
         childFullName: resolvedChildName,
         childDateOfBirth: resolvedDob,
         childAgeGroup: resolvedAgeGroup,
@@ -418,32 +398,30 @@ export default function OnlineApplicationModal({
         emergencyContactName: resolvedEmergencyName,
         emergencyContactPhone: resolvedEmergencyPhone,
         customAnswers: nextCustomAnswers,
-      };
-      saveParentPassport(newPassport);
-      setSavedPassport({ ...newPassport, updatedAt: new Date().toISOString() });
+      });
+      setSavedPassport(updatedPassport);
 
       const filledCount = 11 + Object.keys(nextCustomAnswers).length;
       setAutofilledFieldsCount(filledCount);
       setAgentSummary(
         af.agentSummary ||
-          `Autofilled ${filledCount} fields across standard and school-specific questions.`
+          `AI copied & adapted ${filledCount} fields from your Parent Profile into this school's form.`
       );
       setAgentReasoningSteps(
         Array.isArray(af.agentReasoningSteps) && af.agentReasoningSteps.length > 0
           ? af.agentReasoningSteps
           : [
-              `Extracted child profile for ${resolvedChildName} (${resolvedAgeGroup})`,
-              `Populated parent details & SA contact info for ${resolvedParentName}`,
+              `Copied learner profile for ${resolvedChildName} (${resolvedAgeGroup})`,
+              `Populated guardian details for ${resolvedParentName}`,
               `Mapped answers to ${Object.keys(nextCustomAnswers).length} custom school questions`,
             ]
       );
 
       toast({
-        title: 'Agentic Autofill Complete',
+        title: 'AI Adapted Your Parent Profile',
         description: `Populated ${filledCount} application fields automatically.`,
       });
 
-      // If parent toggled "Auto-Submit After Autofill" and required fields are present, submit immediately
       if (
         autoSubmitAfterAgent &&
         resolvedChildName.trim() &&
@@ -472,9 +450,9 @@ export default function OnlineApplicationModal({
         setSubmittedApps(created);
       }
     } catch (err: any) {
-      setAgentError(err?.message || 'Could not run agentic autofill.');
+      setAgentError(err?.message || 'Could not run AI autofill.');
       toast({
-        title: 'Agentic Autofill Notice',
+        title: 'AI Autofill Notice',
         description: err?.message || 'Please check your input or API key.',
         variant: 'destructive',
       });
@@ -568,7 +546,7 @@ export default function OnlineApplicationModal({
                   : `Applied to ${submittedApps.length} Preschools at Once!`}
               </DialogTitle>
               <DialogDescription className="text-xs sm:text-sm text-muted-foreground mt-1.5 max-w-md mx-auto">
-                Your online application for <strong className="text-foreground">{childFullName}</strong> ({childAgeGroup}) has been delivered directly to each school&apos;s Owner Dashboard and saved to your Family Passport.
+                Your online application for <strong className="text-foreground">{childFullName}</strong> ({childAgeGroup}) has been delivered directly to each school&apos;s Owner Dashboard and synced with your Parent Enrolment Profile.
               </DialogDescription>
             </div>
 
@@ -613,6 +591,15 @@ export default function OnlineApplicationModal({
 
             <div className="flex flex-col sm:flex-row gap-2.5 pt-1">
               <Button
+                asChild
+                variant="outline"
+                className="flex-1 h-11 rounded-xl font-bold text-xs"
+              >
+                <Link href="/parent-profile" onClick={handleResetAndClose}>
+                  View My Parent Profile &amp; Applications
+                </Link>
+              </Button>
+              <Button
                 onClick={handleResetAndClose}
                 className="flex-1 h-11 rounded-xl font-bold text-xs bg-primary text-primary-foreground hover:bg-primary/90"
               >
@@ -626,11 +613,16 @@ export default function OnlineApplicationModal({
               <div className="flex items-center justify-between gap-2">
                 <span className="text-xs font-semibold text-primary flex items-center gap-1.5">
                   <Wand2 className="w-4 h-4" />
-                  <span>Agentic Enrolment · Autofill &amp; Multi-School Apply</span>
+                  <span>Auto-Copied from Your Parent Enrolment Profile</span>
                 </span>
-                <span className="text-[11px] font-mono text-muted-foreground">
-                  Synced with School Form Builder
-                </span>
+                <Link
+                  href="/parent-profile"
+                  onClick={handleResetAndClose}
+                  className="text-[11px] font-semibold text-primary hover:underline flex items-center gap-1"
+                >
+                  <span>Edit My Parent Profile</span>
+                  <ExternalLink className="w-3 h-3" />
+                </Link>
               </div>
               <DialogTitle className="font-heading text-xl font-bold text-foreground mt-1">
                 {formConfig.formTitle}
@@ -640,146 +632,156 @@ export default function OnlineApplicationModal({
               </DialogDescription>
             </DialogHeader>
 
-            {/* AGENTIC AUTOFILL CO-PILOT PANEL */}
-            <div className="p-4 rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-background border border-primary/30 space-y-3">
+            {/* ZERO-CLICK PARENT PROFILE AUTO-COPY BANNER + AI CUSTOM ADAPTATION */}
+            <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-500/10 via-primary/5 to-background border border-emerald-500/30 space-y-3">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
-                  <div className="flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4 text-primary" />
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <BookmarkCheck className="w-4 h-4 text-emerald-600" />
                     <h4 className="text-xs font-extrabold uppercase tracking-wider text-foreground">
-                      Agentic Enrolment Autofill
+                      Parent Profile Auto-Copied ({savedPassport.childFullName})
                     </h4>
-                    {autofilledFieldsCount > 0 && (
-                      <span className="text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400">
-                        · {autofilledFieldsCount} Fields Populated
-                      </span>
-                    )}
+                    <span className="text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                      · {autofilledFieldsCount} Fields Pasted
+                    </span>
                   </div>
                   <p className="text-[11px] text-muted-foreground mt-0.5">
-                    Paste a note, speak your details, or upload a Birth Certificate / Clinic Card—the agent maps every standard &amp; custom school question automatically.
+                    Your saved Parent Profile was automatically copied into this form and matched to all {formConfig.customFields.length} school-specific questions. Ready to submit in 1 click!
                   </p>
                 </div>
 
-                {savedPassport && savedPassport.childFullName && (
+                <div className="flex items-center gap-1.5 shrink-0">
                   <Button
                     type="button"
                     size="sm"
                     variant="outline"
-                    onClick={() => handleRecallSavedPassport(savedPassport)}
-                    className="h-8 px-3 text-xs font-bold border-emerald-600/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/10 whitespace-nowrap shrink-0"
-                  >
-                    <BookmarkCheck className="w-3.5 h-3.5 mr-1.5" />
-                    1-Click Recall: {savedPassport.childFullName}
-                  </Button>
-                )}
-              </div>
-
-              {/* 1-Click Sample Family Prompts for Instant Testing */}
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-[10px] font-semibold text-muted-foreground">
-                  Try 1-Click Agentic Demo:
-                </span>
-                {SAMPLE_AGENTIC_PROMPTS.map((sample) => (
-                  <button
-                    key={sample.label}
-                    type="button"
-                    onClick={() => {
-                      setAgentPrompt(sample.text);
-                      handleRunAgenticAutofill(sample.text);
-                    }}
                     disabled={isAgentRunning}
-                    className="px-2.5 py-1 rounded-md border border-primary/30 bg-background hover:bg-primary/10 text-[11px] font-semibold text-primary transition-colors flex items-center gap-1 whitespace-nowrap shrink-0"
+                    onClick={() => handleRunAgenticAutofill()}
+                    className="h-8 px-2.5 text-xs font-bold border-primary/40 text-primary hover:bg-primary/10 whitespace-nowrap"
                   >
-                    <Zap className="w-3 h-3" />
-                    {sample.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Natural-Language / Voice / Document Input Box */}
-              <div className="space-y-2">
-                <textarea
-                  rows={2}
-                  value={agentPrompt}
-                  onChange={(e) => setAgentPrompt(e.target.value)}
-                  placeholder="Describe your child & contact info in plain words (e.g. 'I'm Lerato Mokoena 082 555 1920, applying for my daughter Lethabo born 14 May 2023 for Jan 2027, isiZulu home language, Full Day care, no allergies...')"
-                  className="w-full px-3 py-2 text-xs rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-                />
-
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleDocumentUpload}
-                      className="hidden"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="h-8 px-2.5 text-xs whitespace-nowrap"
-                    >
-                      <Upload className="w-3.5 h-3.5 mr-1.5 text-primary" />
-                      {uploadedDocName ? `Attached: ${uploadedDocName.slice(0, 18)}` : 'Scan Birth Cert / ID'}
-                    </Button>
-
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={handleToggleVoiceDictation}
-                      className={`h-8 px-2.5 text-xs whitespace-nowrap ${
-                        isListeningVoice ? 'border-rose-500 text-rose-600 bg-rose-500/10' : ''
-                      }`}
-                    >
-                      {isListeningVoice ? (
-                        <>
-                          <MicOff className="w-3.5 h-3.5 mr-1.5 animate-pulse" />
-                          Listening...
-                        </>
-                      ) : (
-                        <>
-                          <Mic className="w-3.5 h-3.5 mr-1.5 text-primary" />
-                          Voice Dictate
-                        </>
-                      )}
-                    </Button>
-
-                    <label className="flex items-center gap-1.5 text-[11px] text-muted-foreground cursor-pointer pl-1">
-                      <input
-                        type="checkbox"
-                        checked={autoSubmitAfterAgent}
-                        onChange={(e) => setAutoSubmitAfterAgent(e.target.checked)}
-                        className="rounded border-border text-primary"
-                      />
-                      <span>Auto-submit when complete</span>
-                    </label>
-                  </div>
+                    {isAgentRunning ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />
+                        AI Adapting...
+                      </>
+                    ) : (
+                      <>
+                        <Wand2 className="w-3.5 h-3.5 mr-1" />
+                        AI Re-Adapt Form
+                      </>
+                    )}
+                  </Button>
 
                   <Button
                     type="button"
                     size="sm"
-                    disabled={isAgentRunning}
-                    onClick={() => handleRunAgenticAutofill()}
-                    className="h-8 px-4 rounded-lg text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90 whitespace-nowrap shrink-0"
+                    variant="ghost"
+                    onClick={() => setShowCustomAiPromptBox((prev) => !prev)}
+                    className="h-8 px-2.5 text-xs whitespace-nowrap"
                   >
-                    {isAgentRunning ? (
-                      <>
-                        <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
-                        Agent Autofilling...
-                      </>
-                    ) : (
-                      <>
-                        <Wand2 className="w-3.5 h-3.5 mr-1.5" />
-                        Run Agentic Autofill
-                      </>
-                    )}
+                    {showCustomAiPromptBox ? 'Hide Note / Scan' : 'Paste Note / Scan Doc'}
                   </Button>
                 </div>
               </div>
+
+              {/* Optional Expandable Note / Voice / Document Scanner */}
+              {showCustomAiPromptBox && (
+                <div className="pt-2.5 border-t border-border/60 space-y-2.5">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="text-[10px] font-semibold text-muted-foreground">
+                      Switch Demo Family Profile:
+                    </span>
+                    {SAMPLE_AGENTIC_PROMPTS.map((sample) => (
+                      <button
+                        key={sample.label}
+                        type="button"
+                        onClick={() => {
+                          setAgentPrompt(sample.text);
+                          handleRunAgenticAutofill(sample.text);
+                        }}
+                        disabled={isAgentRunning}
+                        className="px-2.5 py-1 rounded-md border border-primary/30 bg-background hover:bg-primary/10 text-[11px] font-semibold text-primary transition-colors flex items-center gap-1 whitespace-nowrap shrink-0"
+                      >
+                        <Zap className="w-3 h-3" />
+                        {sample.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <textarea
+                    rows={2}
+                    value={agentPrompt}
+                    onChange={(e) => setAgentPrompt(e.target.value)}
+                    placeholder="Or paste a new note / dictate changes for this application..."
+                    className="w-full px-3 py-2 text-xs rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                  />
+
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleDocumentUpload}
+                        className="hidden"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="h-8 px-2.5 text-xs whitespace-nowrap"
+                      >
+                        <Upload className="w-3.5 h-3.5 mr-1.5 text-primary" />
+                        {uploadedDocName ? `Attached: ${uploadedDocName.slice(0, 18)}` : 'Scan Birth Cert / ID'}
+                      </Button>
+
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleToggleVoiceDictation}
+                        className={`h-8 px-2.5 text-xs whitespace-nowrap ${
+                          isListeningVoice ? 'border-rose-500 text-rose-600 bg-rose-500/10' : ''
+                        }`}
+                      >
+                        {isListeningVoice ? (
+                          <>
+                            <MicOff className="w-3.5 h-3.5 mr-1.5 animate-pulse" />
+                            Listening...
+                          </>
+                        ) : (
+                          <>
+                            <Mic className="w-3.5 h-3.5 mr-1.5 text-primary" />
+                            Voice Dictate
+                          </>
+                        )}
+                      </Button>
+
+                      <label className="flex items-center gap-1.5 text-[11px] text-muted-foreground cursor-pointer pl-1">
+                        <input
+                          type="checkbox"
+                          checked={autoSubmitAfterAgent}
+                          onChange={(e) => setAutoSubmitAfterAgent(e.target.checked)}
+                          className="rounded border-border text-primary"
+                        />
+                        <span>Auto-submit when complete</span>
+                      </label>
+                    </div>
+
+                    <Button
+                      type="button"
+                      size="sm"
+                      disabled={isAgentRunning}
+                      onClick={() => handleRunAgenticAutofill()}
+                      className="h-8 px-3.5 rounded-lg text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90 whitespace-nowrap shrink-0"
+                    >
+                      <Wand2 className="w-3.5 h-3.5 mr-1.5" />
+                      Run AI Autofill
+                    </Button>
+                  </div>
+                </div>
+              )}
 
               {/* Live Agent Execution Status / Reasoning Trace */}
               {isAgentRunning && agentStepText && (
@@ -797,8 +799,8 @@ export default function OnlineApplicationModal({
               )}
 
               {!isAgentRunning && agentSummary && (
-                <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 space-y-1.5 text-xs">
-                  <div className="font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+                <div className="p-2.5 rounded-lg bg-background/80 border border-emerald-500/25 space-y-1 text-xs">
+                  <div className="font-semibold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                     <span>{agentSummary}</span>
                   </div>
@@ -825,7 +827,7 @@ export default function OnlineApplicationModal({
                     </span>
                   </span>
                   <p className="text-[11px] text-muted-foreground">
-                    Every selected school below receives your autofilled application on their Owner Dashboard.
+                    Every selected school below receives your pre-filled application on their Owner Dashboard.
                   </p>
                 </div>
                 {availablePool.length > 1 && (
@@ -912,7 +914,7 @@ export default function OnlineApplicationModal({
                 </h4>
                 {autofilledFieldsCount > 0 && (
                   <span className="text-[10px] font-mono font-semibold text-emerald-600">
-                    Agent Verified
+                    Copied from Parent Profile
                   </span>
                 )}
               </div>

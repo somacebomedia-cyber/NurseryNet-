@@ -182,12 +182,27 @@ export default function PreschoolCard({
         {/* Owner Claim Link / Badge */}
         <div className="my-1.5 text-[11px]">
           {preschool.isClaimed ? (
-            <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold">
-              <BadgeCheck className="w-3.5 h-3.5" />
-              <span>Listing verified & managed by school</span>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold">
+                <BadgeCheck className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">Verified &amp; managed by owner</span>
+              </div>
+              {onClaim && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onClaim(preschool);
+                  }}
+                  className="text-primary hover:underline font-bold whitespace-nowrap shrink-0"
+                >
+                  Edit / Fix Name
+                </button>
+              )}
             </div>
           ) : (
             <button
+              type="button"
               onClick={() => onClaim && onClaim(preschool)}
               className="text-primary hover:text-primary/80 font-bold flex items-center gap-1 hover:underline transition-all"
             >

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { upsertCustomPreschool } from '@/lib/preschool-pool';
+import { removeCustomPreschoolBySlug, upsertCustomPreschool } from '@/lib/preschool-pool';
 
 interface ClaimRecord {
   id: string;
@@ -23,6 +23,8 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const {
       nurserySlug,
+      previousSlug,
+      previousName,
       nurseryName,
       ownerName,
       ownerEmail,
@@ -30,11 +32,12 @@ export async function POST(req: NextRequest) {
       role,
       proofNotes,
       preschoolData,
+      replaceAllForOwner,
     } = body || {};
 
-    if (!nurserySlug || !ownerName || !ownerEmail || !ownerPhone) {
+    if (!nurserySlug) {
       return NextResponse.json(
-        { error: 'Preschool identifier, name, email and contact phone are required.' },
+        { error: 'Preschool identifier is required.' },
         { status: 400 }
       );
     }
@@ -42,29 +45,42 @@ export async function POST(req: NextRequest) {
     const claimId = `claim_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     const token = `owner_tok_${Math.random().toString(36).substring(2, 10)}`;
 
-    // Upsert the claimed/added preschool into the shared directory pool so it appears in /api/directory
+    // Upsert the claimed/updated preschool into the shared directory pool so it appears in /api/directory
+    // and replaces any previous misspelled slug
     let savedPreschool: any = null;
     if (preschoolData && typeof preschoolData === 'object') {
-      savedPreschool = upsertCustomPreschool({
-        ...preschoolData,
-        slug: nurserySlug,
-        id: nurserySlug,
-        name: preschoolData.name || nurseryName || nurserySlug,
-        phone: preschoolData.phone || ownerPhone,
-        email: preschoolData.email || ownerEmail,
-        principal: `${ownerName} (${role || 'Owner / Principal'})`,
-        isClaimed: true,
-        isVerified: true,
-      });
+      savedPreschool = upsertCustomPreschool(
+        {
+          ...preschoolData,
+          slug: nurserySlug,
+          id: nurserySlug,
+          previousSlug,
+          previousName,
+          replaceAllForOwner: Boolean(replaceAllForOwner),
+          name: preschoolData.name || nurseryName || nurserySlug,
+          phone: preschoolData.phone || ownerPhone || '',
+          email: preschoolData.email || ownerEmail || '',
+          principal: ownerName
+            ? `${ownerName} (${role || 'Owner / Principal'})`
+            : preschoolData.principal || 'Principal / Owner',
+          isClaimed: true,
+          isVerified: true,
+        },
+        previousSlug
+      );
+    }
+
+    if (previousSlug && previousSlug !== nurserySlug) {
+      claimsStore.delete(previousSlug);
     }
 
     const newClaim: ClaimRecord = {
       id: claimId,
       nurserySlug: savedPreschool?.slug || nurserySlug,
       nurseryName: savedPreschool?.name || nurseryName || nurserySlug,
-      ownerName,
-      ownerEmail,
-      ownerPhone,
+      ownerName: ownerName || 'Verified Principal',
+      ownerEmail: ownerEmail || '',
+      ownerPhone: ownerPhone || '',
       role: role || 'Owner / Principal',
       proofNotes: proofNotes || '',
       status: 'approved',
@@ -90,6 +106,21 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error('[/api/claim] error:', err);
     return NextResponse.json({ error: 'Failed to process claim submission.' }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const slug = searchParams.get('slug');
+    if (!slug) {
+      return NextResponse.json({ error: 'Slug is required' }, { status: 400 });
+    }
+    claimsStore.delete(slug);
+    removeCustomPreschoolBySlug(slug);
+    return NextResponse.json({ success: true, removedSlug: slug });
+  } catch {
+    return NextResponse.json({ error: 'Failed to remove claim' }, { status: 500 });
   }
 }
 

@@ -36,6 +36,7 @@ import {
   VOICE_ACTION_EVENT,
   VoiceAction,
 } from '@/lib/voice-types';
+import { reconcileOwnerProfileWithDirectory } from '@/lib/owner-listing-sync';
 import { Button } from '@/components/ui/button';
 import {
   Search,
@@ -110,24 +111,52 @@ export default function DirectoryPage() {
   const [savedSchools, setSavedSchools] = useState<Preschool[]>([]);
   const [claimFromLiveSearch, setClaimFromLiveSearch] = useState(false);
 
+  const [replacedSlugs, setReplacedSlugs] = useState<string[]>([]);
+
   useEffect(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('nurserynet_claimed_slugs') || '[]');
-      if (Array.isArray(stored)) {
-        setClaimedSlugs(stored);
+    const loadAndReconcile = async () => {
+      try {
+        // Automatically reconcile any preschool name correction saved in the Owner Portal
+        const {
+          customSchools: syncedCustom,
+          claimedSlugs: syncedSlugs,
+          activePlan,
+          reconciled,
+        } = await reconcileOwnerProfileWithDirectory();
+
+        setClaimedSlugs(syncedSlugs);
+        setCustomSchools(syncedCustom);
+
+        if (activePlan?.previousSlug && activePlan.previousSlug !== activePlan.schoolSlug) {
+          setReplacedSlugs((prev) =>
+            prev.includes(activePlan.previousSlug) ? prev : [...prev, activePlan.previousSlug]
+          );
+        }
+
+        const storedSaved = JSON.parse(localStorage.getItem('nurserynet_saved_schools') || '[]');
+        if (Array.isArray(storedSaved)) {
+          setSavedSchools(storedSaved);
+        }
+
+        if (reconciled && activePlan?.schoolName) {
+          toast({
+            title: 'Owner Portal Name Synced',
+            description: `Your directory listing now displays "${activePlan.schoolName}".`,
+          });
+        }
+      } catch {
+        // Ignore localStorage errors
       }
-      const storedCustom = JSON.parse(localStorage.getItem('nurserynet_custom_preschools') || '[]');
-      if (Array.isArray(storedCustom)) {
-        setCustomSchools(storedCustom);
-      }
-      const storedSaved = JSON.parse(localStorage.getItem('nurserynet_saved_schools') || '[]');
-      if (Array.isArray(storedSaved)) {
-        setSavedSchools(storedSaved);
-      }
-    } catch {
-      // Ignore localStorage errors
-    }
-  }, []);
+    };
+
+    loadAndReconcile();
+    window.addEventListener('nurserynet_directory_synced', loadAndReconcile);
+    window.addEventListener('storage', loadAndReconcile);
+    return () => {
+      window.removeEventListener('nurserynet_directory_synced', loadAndReconcile);
+      window.removeEventListener('storage', loadAndReconcile);
+    };
+  }, [toast]);
 
   // Modal States
   const [activeSchool, setActiveSchool] = useState<Preschool | null>(null);
@@ -240,7 +269,11 @@ export default function DirectoryPage() {
       return hay.includes(qNormalized) || qTokens.every((t) => hay.includes(t));
     });
 
-    const customSlugSet = new Set(matchingCustom.map((c) => c.slug || c.id));
+    const customSlugSet = new Set([
+      ...matchingCustom.map((c) => c.slug || c.id),
+      ...customSchools.map((c) => c.slug || c.id),
+      ...replacedSlugs,
+    ]);
     const baseMapped = preschools
       .filter((s) => !customSlugSet.has(s.slug || s.id))
       .map((s) => {
@@ -259,7 +292,7 @@ export default function DirectoryPage() {
       return combined.filter((s) => s.isClaimed);
     }
     return combined;
-  }, [preschools, claimedSlugs, customSchools, searchQuery, selectedProvince, selectedCity, onlyClaimed, onlySaved, savedSchools]);
+  }, [preschools, claimedSlugs, customSchools, replacedSlugs, searchQuery, selectedProvince, selectedCity, onlyClaimed, onlySaved, savedSchools]);
 
   const savedIdSet = useMemo(() => new Set(savedSchools.map((s) => s.id)), [savedSchools]);
 
@@ -387,26 +420,52 @@ export default function DirectoryPage() {
     setClaimModalOpen(true);
   };
 
-  const handleClaimSuccess = (updatedSchool: Preschool) => {
+  const handleClaimSuccess = (updatedSchool: Preschool, previousSlug?: string) => {
     const slug = updatedSchool.slug || updatedSchool.id;
     const finalized: Preschool = { ...updatedSchool, isClaimed: true, isVerified: true };
 
-    setClaimedSlugs((prev) => (prev.includes(slug) ? prev : [...prev, slug]));
+    if (previousSlug && previousSlug !== slug) {
+      setReplacedSlugs((prev) => (prev.includes(previousSlug) ? prev : [...prev, previousSlug]));
+    }
+
+    setClaimedSlugs((prev) => [
+      slug,
+      ...prev.filter((s) => s !== slug && s !== previousSlug),
+    ]);
     setCustomSchools((prev) => [
       finalized,
-      ...prev.filter((item) => (item.slug || item.id) !== slug),
+      ...prev.filter((item) => {
+        const itemSlug = item.slug || item.id;
+        return itemSlug !== slug && itemSlug !== previousSlug;
+      }),
     ]);
     setPreschools((prev) => {
-      const exists = prev.some((p) => (p.slug || p.id) === slug);
+      const cleaned = prev.filter((p) => (p.slug || p.id) !== previousSlug);
+      const exists = cleaned.some((p) => (p.slug || p.id) === slug);
       if (exists) {
-        return prev.map((p) => ((p.slug || p.id) === slug ? finalized : p));
+        return cleaned.map((p) => ((p.slug || p.id) === slug ? finalized : p));
       }
-      setTotalCount((c) => c + 1);
-      return [finalized, ...prev];
+      return [finalized, ...cleaned];
     });
-    if (activeSchool && (activeSchool.slug === slug || activeSchool.id === slug)) {
+    setSavedSchools((prev) =>
+      prev.map((s) => ((s.slug || s.id) === slug || (s.slug || s.id) === previousSlug ? finalized : s))
+    );
+    if (
+      activeSchool &&
+      (activeSchool.slug === slug ||
+        activeSchool.id === slug ||
+        activeSchool.slug === previousSlug ||
+        activeSchool.id === previousSlug)
+    ) {
       setActiveSchool(finalized);
     }
+  };
+
+  const handleRemoveClaimed = (removedSlug: string) => {
+    setReplacedSlugs((prev) => (prev.includes(removedSlug) ? prev : [...prev, removedSlug]));
+    setClaimedSlugs((prev) => prev.filter((s) => s !== removedSlug));
+    setCustomSchools((prev) => prev.filter((s) => (s.slug || s.id) !== removedSlug));
+    setPreschools((prev) => prev.filter((s) => (s.slug || s.id) !== removedSlug));
   };
 
   const handleLiveWebSearch = async (forceRefresh = false) => {
@@ -1505,6 +1564,7 @@ export default function DirectoryPage() {
         isOpen={claimModalOpen}
         onClose={() => setClaimModalOpen(false)}
         onClaimSuccess={handleClaimSuccess}
+        onRemoveClaimed={handleRemoveClaimed}
         isFromLiveSearch={claimFromLiveSearch}
       />
 

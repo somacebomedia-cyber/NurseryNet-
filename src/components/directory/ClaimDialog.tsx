@@ -4,6 +4,10 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Preschool, PROVINCES, CURRICULUMS, Province } from '@/data/preschools';
 import {
+  removeClaimedPreschoolListing,
+  syncOwnerProfileToDirectory,
+} from '@/lib/owner-listing-sync';
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -19,6 +23,7 @@ import {
   Key,
   Globe,
   LayoutDashboard,
+  Trash2,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -26,7 +31,8 @@ interface ClaimDialogProps {
   preschool: Preschool | null;
   isOpen: boolean;
   onClose: () => void;
-  onClaimSuccess?: (preschool: Preschool) => void;
+  onClaimSuccess?: (preschool: Preschool, previousSlug?: string) => void;
+  onRemoveClaimed?: (removedSlug: string) => void;
   isFromLiveSearch?: boolean;
 }
 
@@ -35,6 +41,7 @@ export default function ClaimDialog({
   isOpen,
   onClose,
   onClaimSuccess,
+  onRemoveClaimed,
   isFromLiveSearch = false,
 }: ClaimDialogProps) {
   const { toast } = useToast();
@@ -61,6 +68,7 @@ export default function ClaimDialog({
   const [publishedSchool, setPublishedSchool] = useState<Preschool | null>(null);
 
   const preschoolId = preschool?.id || '';
+  const isEditingExistingClaim = Boolean(preschool?.isClaimed);
 
   useEffect(() => {
     if (!preschool) return;
@@ -72,9 +80,12 @@ export default function ClaimDialog({
     setOperatingHours(preschool.operatingHours || '07:00 – 17:00');
     setCurriculum(preschool.curriculum || 'Play-Based');
     setWebsiteUrl(preschool.websiteUrl || '');
-    if (preschool.phone) {
-      setPhone(preschool.phone);
-    }
+    setPhone(preschool.phone || '082 555 1829');
+    setEmail(preschool.email || 'principal@school.co.za');
+    const cleanPrincipal = (preschool.principal || 'Verified Principal')
+      .replace(/\s*\(.*\)\s*$/, '')
+      .trim();
+    setOwnerName(cleanPrincipal || 'Verified Principal');
     if (preschool.websiteUrl) {
       setProofNotes(`Official website: ${preschool.websiteUrl}`);
     }
@@ -86,129 +97,49 @@ export default function ClaimDialog({
     e.preventDefault();
     setIsSubmitting(true);
 
+    const previousSlug = preschool.slug || preschool.id;
+    const previousName = preschool.name;
     const cleanName = schoolName.trim() || preschool.name;
     const cleanCity = city.trim() || preschool.city || 'South Africa';
-    const computedSlug =
-      isFromLiveSearch
-        ? `${cleanName}-${cleanCity}`
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/(^-|-$)/g, '')
-        : preschool.slug || preschool.id;
-
-    const updatedPreschoolPayload: Preschool = {
-      ...preschool,
-      id: computedSlug,
-      slug: computedSlug,
-      name: cleanName,
-      tagline: `Early childhood development centre in ${cleanCity}, ${province}`,
-      province,
-      city: cleanCity,
-      municipality: cleanCity,
-      district: cleanCity,
-      suburb: cleanCity,
-      address: address.trim() || `${cleanCity}, ${province}, South Africa`,
-      monthlyFeeZAR: Math.max(150, Number(monthlyFeeZAR) || 950),
-      operatingHours: operatingHours.trim() || '07:00 – 17:00',
-      curriculum,
-      websiteUrl: websiteUrl.trim() || undefined,
-      phone: phone.trim() || preschool.phone,
-      email: email.trim() || preschool.email,
-      principal: `${ownerName.trim()} (${role})`,
-      isClaimed: true,
-      isVerified: true,
-      claimedAt: new Date().toISOString(),
-    };
 
     try {
-      const res = await fetch('/api/claim', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nurserySlug: computedSlug,
-          nurseryName: cleanName,
-          ownerName: ownerName.trim(),
-          ownerEmail: email.trim(),
-          ownerPhone: phone.trim(),
-          role,
-          proofNotes,
-          preschoolData: updatedPreschoolPayload,
-        }),
+      const finalSchool = await syncOwnerProfileToDirectory({
+        previousSlug,
+        previousName,
+        schoolName: cleanName,
+        city: cleanCity,
+        province: String(province),
+        address: address.trim() || `${cleanCity}, ${province}, South Africa`,
+        monthlyFeeZAR: Math.max(150, Number(monthlyFeeZAR) || 950),
+        operatingHours: operatingHours.trim() || '07:00 – 17:00',
+        curriculum,
+        websiteUrl: websiteUrl.trim() || undefined,
+        whatsappPhone: phone.trim() || preschool.phone,
+        email: email.trim() || preschool.email,
+        ownerName: ownerName.trim() || 'Verified Principal',
+        role,
       });
 
-      const data = await res.json().catch(() => ({}));
+      setPublishedSchool(finalSchool);
+      setIsSent(true);
+      setClaimToken(`owner_tok_${finalSchool.id.slice(0, 10)}`);
 
-      if (res.ok) {
-        const finalSchool: Preschool = data.preschool || updatedPreschoolPayload;
-        setPublishedSchool(finalSchool);
-        setIsSent(true);
-        setClaimToken(data.token || 'owner_token_verified');
+      toast({
+        title: isEditingExistingClaim
+          ? 'Preschool Name & Listing Updated!'
+          : isFromLiveSearch
+          ? 'Preschool Added & Claimed!'
+          : 'Ownership Claim Approved!',
+        description: `${finalSchool.name} is now updated across both the Directory and your Owner Portal.`,
+      });
 
-        // Persist claimed slug, custom preschool record, and Owner Dashboard active school in localStorage
-        try {
-          const slug = finalSchool.slug || finalSchool.id;
-          const storedSlugs = JSON.parse(localStorage.getItem('nurserynet_claimed_slugs') || '[]');
-          if (Array.isArray(storedSlugs) && !storedSlugs.includes(slug)) {
-            storedSlugs.push(slug);
-            localStorage.setItem('nurserynet_claimed_slugs', JSON.stringify(storedSlugs));
-          }
-
-          const storedCustom = JSON.parse(localStorage.getItem('nurserynet_custom_preschools') || '[]');
-          const filteredCustom = Array.isArray(storedCustom)
-            ? storedCustom.filter((item: Preschool) => (item.slug || item.id) !== slug)
-            : [];
-          localStorage.setItem(
-            'nurserynet_custom_preschools',
-            JSON.stringify([finalSchool, ...filteredCustom])
-          );
-
-          // Sync to Owner Dashboard so visiting /dashboard shows this claimed school
-          const existingPlanRaw = localStorage.getItem('nurserynet_active_plan');
-          let existingPlan: any = {};
-          if (existingPlanRaw) {
-            try {
-              existingPlan = JSON.parse(existingPlanRaw) || {};
-            } catch {
-              existingPlan = {};
-            }
-          }
-          localStorage.setItem(
-            'nurserynet_active_plan',
-            JSON.stringify({
-              ...existingPlan,
-              schoolName: finalSchool.name,
-              schoolSlug: slug,
-              monthlyFeeZAR: finalSchool.monthlyFeeZAR,
-              operatingHours: finalSchool.operatingHours,
-              websiteUrl: finalSchool.websiteUrl || '',
-              city: finalSchool.city,
-              province: finalSchool.province,
-              tierName: existingPlan.tierName || 'Owner-Claimed & Verified',
-            })
-          );
-        } catch {
-          // Ignore localStorage errors
-        }
-
-        toast({
-          title: isFromLiveSearch ? 'Preschool Added & Claimed!' : 'Ownership Claim Approved!',
-          description: `${finalSchool.name} is now live in the Directory with the Owner-Claimed badge.`,
-        });
-
-        if (onClaimSuccess) {
-          onClaimSuccess(finalSchool);
-        }
-      } else {
-        toast({
-          title: 'Could not submit claim',
-          description: data.error || 'Please review your details and try again.',
-          variant: 'destructive',
-        });
+      if (onClaimSuccess) {
+        onClaimSuccess(finalSchool, previousSlug);
       }
     } catch {
       toast({
         title: 'Connection error',
-        description: 'Unable to reach the verification server. Please try again.',
+        description: 'Unable to update listing. Please try again.',
         variant: 'destructive',
       });
     } finally {
@@ -216,12 +147,23 @@ export default function ClaimDialog({
     }
   };
 
+  const handleRemoveDuplicateClaim = async () => {
+    const slugToRemove = preschool.slug || preschool.id;
+    await removeClaimedPreschoolListing(slugToRemove);
+    if (onRemoveClaimed) {
+      onRemoveClaimed(slugToRemove);
+    }
+    toast({
+      title: 'Claimed Listing Removed',
+      description: `Removed "${preschool.name}" from your custom claimed listings.`,
+    });
+    handleClose();
+  };
+
   const handleClose = () => {
     onClose();
     setTimeout(() => {
       setIsSent(false);
-      setOwnerName('');
-      setEmail('');
       setClaimToken('');
       setPublishedSchool(null);
     }, 300);
@@ -240,14 +182,18 @@ export default function ClaimDialog({
             <div>
               <DialogTitle className="font-heading text-xl font-bold text-foreground">
                 {isSent
-                  ? 'Preschool Published & Claimed!'
+                  ? 'Preschool Listing Updated & Synced!'
+                  : isEditingExistingClaim
+                  ? 'Edit Claimed Preschool Name & Details'
                   : isFromLiveSearch
                   ? 'Add & Claim Preschool in Directory'
                   : 'Is this your preschool?'}
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
                 {isSent
-                  ? 'Your listing is now live in the NurseryNet Directory with the Owner-Claimed badge.'
+                  ? 'Your corrected name and details are now live in both the Directory and Owner Portal.'
+                  : isEditingExistingClaim
+                  ? 'Fix any spelling mistake in your preschool name or update tuition, hours, and location. Changes sync immediately to the Directory and Owner Portal.'
                   : isFromLiveSearch
                   ? 'Review the pre-filled details from live search and verify ownership to publish your listing.'
                   : `Claim and manage the listing for ${preschool.name}`}
@@ -264,15 +210,11 @@ export default function ClaimDialog({
 
             <div className="space-y-2">
               <h4 className="font-heading text-lg font-bold text-foreground">
-                Congratulations, {ownerName}!
+                {isEditingExistingClaim ? 'Listing Corrected!' : `Congratulations, ${ownerName}!`}
               </h4>
               <p className="text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
                 <strong className="text-foreground">{displaySchool.name}</strong> ({displaySchool.city},{' '}
-                {displaySchool.province}) is now published in the NurseryNet Directory as{' '}
-                <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                  Owner-Claimed &amp; Verified
-                </span>
-                .
+                {displaySchool.province}) is now live in the NurseryNet Directory and synced with your Owner Portal.
               </p>
             </div>
 
@@ -285,7 +227,7 @@ export default function ClaimDialog({
                 <span className="font-mono text-primary font-bold">{claimToken}</span>
               </div>
               <p className="text-muted-foreground text-[11px]">
-                Your school profile has also been synced to your Owner Dashboard ({email}).
+                Any future edits made in the Owner Portal or Directory automatically stay in sync.
               </p>
             </div>
 
@@ -315,7 +257,7 @@ export default function ClaimDialog({
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
                   <School className="w-4 h-4 text-primary" />
-                  School Directory Details (Pre-Filled — Review or Edit)
+                  School Directory Details (Correct Spelling or Update Info)
                 </span>
                 {isFromLiveSearch && (
                   <span className="text-[11px] font-semibold text-primary flex items-center gap-1">
@@ -328,14 +270,14 @@ export default function ClaimDialog({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="sm:col-span-2">
                   <label className="text-xs font-bold text-foreground block mb-1">
-                    Preschool Name <span className="text-destructive">*</span>
+                    Preschool Name (Displayed in Directory) <span className="text-destructive">*</span>
                   </label>
                   <input
                     type="text"
                     required
                     value={schoolName}
                     onChange={(e) => setSchoolName(e.target.value)}
-                    className="w-full text-xs h-9 px-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full text-xs h-9 px-3 rounded-lg border border-border bg-background text-foreground font-semibold focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
 
@@ -506,20 +448,22 @@ export default function ClaimDialog({
               </div>
             </div>
 
-            <div>
-              <label className="text-xs font-bold text-foreground block mb-1">
-                Verification Proof / Accreditation Notes
-              </label>
-              <textarea
-                rows={2}
-                placeholder="e.g. DSD registration certificate no., school website, or official landline"
-                value={proofNotes}
-                onChange={(e) => setProofNotes(e.target.value)}
-                className="w-full text-xs p-2.5 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
+            {!isEditingExistingClaim && (
+              <div>
+                <label className="text-xs font-bold text-foreground block mb-1">
+                  Verification Proof / Accreditation Notes
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="e.g. DSD registration certificate no., school website, or official landline"
+                  value={proofNotes}
+                  onChange={(e) => setProofNotes(e.target.value)}
+                  className="w-full text-xs p-2.5 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+            )}
 
-            <div className="pt-1">
+            <div className="pt-1 flex flex-col gap-2">
               <Button
                 type="submit"
                 disabled={isSubmitting}
@@ -528,19 +472,33 @@ export default function ClaimDialog({
                 {isSubmitting ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Publishing &amp; Verifying Ownership...</span>
+                    <span>Saving &amp; Syncing to Directory...</span>
                   </>
                 ) : (
                   <>
                     <BadgeCheck className="w-4 h-4" />
                     <span>
-                      {isFromLiveSearch
+                      {isEditingExistingClaim
+                        ? 'Save Corrected Name & Update Directory Listing'
+                        : isFromLiveSearch
                         ? 'Publish & Claim Listing in Directory — Free'
                         : 'Claim Listing — Free'}
                     </span>
                   </>
                 )}
               </Button>
+
+              {isEditingExistingClaim && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={handleRemoveDuplicateClaim}
+                  className="w-full h-9 text-xs text-destructive hover:text-destructive hover:bg-destructive/10 flex items-center justify-center gap-1.5"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Remove This Claimed Listing (if duplicate)</span>
+                </Button>
+              )}
             </div>
           </form>
         )}

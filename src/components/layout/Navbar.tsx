@@ -262,7 +262,8 @@ export default function Navbar() {
 
         <nav className="hidden md:flex items-center space-x-1">
           {renderNavLinks()}
-          <NavLinkItem href="/dashboard" label="Dashboard" icon={LayoutDashboard} />
+          <NavLinkItem href="/parent-profile" label="Parent Profile" icon={FileText} />
+          <NavLinkItem href="/dashboard" label="Owner Dashboard" icon={LayoutDashboard} />
         </nav>
         
         <div className="hidden md:flex items-center space-x-2">
@@ -308,8 +309,17 @@ export default function Navbar() {
                            {renderNavLinks(true)}
                            <SheetClose asChild>
                                <NavLinkItem 
+                                   href="/parent-profile" 
+                                   label="Parent Profile" 
+                                   icon={FileText} 
+                                   onClick={closeMobileMenu} 
+                                   className="py-3 px-4 text-base"
+                               />
+                           </SheetClose>
+                           <SheetClose asChild>
+                               <NavLinkItem 
                                    href="/dashboard" 
-                                   label="Dashboard" 
+                                   label="Owner Dashboard" 
                                    icon={LayoutDashboard} 
                                    onClick={closeMobileMenu} 
                                    className="py-3 px-4 text-base"

@@ -1,7 +1,7 @@
 // src/app/dashboard/page.tsx
 "use client";
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useBrand } from '@/context/BrandContext';
@@ -21,6 +21,10 @@ import {
 } from '@/lib/application-types';
 import OnlineApplicationModal from '@/components/directory/OnlineApplicationModal';
 import SchoolMicrositeBuilder from '@/components/preschools/SchoolMicrositeBuilder';
+import {
+  reconcileOwnerProfileWithDirectory,
+  syncOwnerProfileToDirectory,
+} from '@/lib/owner-listing-sync';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -144,7 +148,7 @@ function formatSaWhatsAppNumber(rawPhone?: string): string {
   return `27${digits}`;
 }
 
-export default function DashboardPage() {
+function DashboardContent() {
   const { brand } = useBrand();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -168,10 +172,15 @@ export default function DashboardPage() {
     pauseUntilDate?: string;
     includesFreeWebsite?: boolean;
     schoolName: string;
+    schoolSlug?: string;
+    city?: string;
+    province?: string;
   } | null>(null);
 
   // Edit form & onboarding milestone states
   const [schoolName, setSchoolName] = useState('Sunshine Early Learning Centre');
+  const [schoolCity, setSchoolCity] = useState('Johannesburg');
+  const [schoolProvince, setSchoolProvince] = useState('Gauteng');
   const [monthlyFee, setMonthlyFee] = useState('1450');
   const [operatingHours, setOperatingHours] = useState('07:00 - 17:30');
   const [capacity, setCapacity] = useState('45');
@@ -211,6 +220,9 @@ export default function DashboardPage() {
 
   // Hydrate active plan, profile fields, applications, form config, and live parent tour bookings
   useEffect(() => {
+    // Reconcile any previously saved Owner Portal name fix with the public Directory listing
+    reconcileOwnerProfileWithDirectory();
+
     const loadStoredState = () => {
       if (typeof window === 'undefined') return;
 
@@ -220,6 +232,8 @@ export default function DashboardPage() {
           const parsed = JSON.parse(storedPlan);
           setActivePlan(parsed);
           if (parsed.schoolName) setSchoolName(parsed.schoolName);
+          if (parsed.city) setSchoolCity(parsed.city);
+          if (parsed.province) setSchoolProvince(parsed.province);
           if (parsed.monthlyFeeZAR) setMonthlyFee(String(parsed.monthlyFeeZAR));
           if (parsed.operatingHours) setOperatingHours(parsed.operatingHours);
           if (parsed.whatsappPhone) setWhatsappPhone(parsed.whatsappPhone);
@@ -568,12 +582,34 @@ export default function DashboardPage() {
     }));
   };
 
-  const handleSaveProfile = (e: React.FormEvent) => {
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    const cleanName = schoolName.trim() || 'Sunshine Early Learning Centre';
+    const previousName = activePlan?.schoolName;
+    const previousSlug = activePlan?.schoolSlug;
+
+    const updatedSchool = await syncOwnerProfileToDirectory({
+      previousSlug,
+      previousName,
+      schoolName: cleanName,
+      monthlyFeeZAR: Number(monthlyFee) || 1450,
+      operatingHours,
+      capacity: Number(capacity) || 45,
+      whatsappPhone,
+      npoNumber,
+      city: schoolCity,
+      province: schoolProvince,
+      tierName: activePlan?.tierName || 'Verified Centre',
+      websitePreviewed,
+    });
+
     const updatedPlan = {
       ...(activePlan || {}),
       tierName: activePlan?.tierName || 'Verified Centre',
-      schoolName,
+      schoolName: cleanName,
+      schoolSlug: updatedSchool.id,
+      city: updatedSchool.city,
+      province: updatedSchool.province,
       monthlyFeeZAR: Number(monthlyFee) || 1450,
       operatingHours,
       capacity: Number(capacity) || 45,
@@ -582,17 +618,21 @@ export default function DashboardPage() {
       websitePreviewed,
     };
     setActivePlan(updatedPlan);
-    try {
-      localStorage.setItem('nurserynet_active_plan', JSON.stringify(updatedPlan));
-    } catch {
-      // Ignore storage error
+    setSchoolName(cleanName);
+
+    // Keep custom application form header synced with the corrected school name
+    if (formConfig.schoolName && formConfig.schoolName !== cleanName) {
+      const syncedForm = { ...formConfig, schoolName: cleanName };
+      setFormConfig(syncedForm);
+      saveApplicationFormConfig(syncedForm);
     }
+
     setSavedNotice(true);
     toast({
-      title: 'School Profile Updated',
-      description: 'Your tuition fees, DSD/NPO accreditation, and WhatsApp routing are live.',
+      title: 'School Name & Directory Listing Synced',
+      description: `"${cleanName}" is now updated across your Owner Portal and the public Find Preschools directory.`,
     });
-    setTimeout(() => setSavedNotice(false), 2500);
+    setTimeout(() => setSavedNotice(false), 3500);
   };
 
   const handleApplyRetentionOption = (
@@ -1803,20 +1843,72 @@ export default function DashboardPage() {
               </div>
 
               {savedNotice && (
-                <div className="p-3 bg-emerald-50 dark:bg-emerald-950 border border-emerald-300 text-emerald-800 dark:text-emerald-200 rounded-lg text-xs flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                  <span>Changes saved! Your public directory listing and Profile Strength are updated in real time.</span>
+                <div className="p-3 bg-emerald-50 dark:bg-emerald-950 border border-emerald-300 text-emerald-800 dark:text-emerald-200 rounded-lg text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <span>
+                      Changes saved! Your school name and details have been synced directly to the public <strong>Find Preschools</strong> directory.
+                    </span>
+                  </div>
+                  <Link
+                    href="/directory"
+                    className="font-bold underline text-emerald-700 dark:text-emerald-300 whitespace-nowrap"
+                  >
+                    View in Directory →
+                  </Link>
                 </div>
               )}
 
               <div className="space-y-1.5">
-                <Label htmlFor="schoolName" className="text-xs font-semibold">School Name</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="schoolName" className="text-xs font-semibold">
+                    Official Preschool Name (Synced with Public Directory)
+                  </Label>
+                  <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+                    Auto-replaces typos in Directory
+                  </span>
+                </div>
                 <Input
                   id="schoolName"
                   value={schoolName}
                   onChange={(e) => setSchoolName(e.target.value)}
                   required
                 />
+                <p className="text-[11px] text-muted-foreground">
+                  Made a spelling mistake when claiming? Correcting your name here (or clicking <strong>Edit / Fix Name</strong> on your card in Find Preschools) automatically overwrites the old name across the directory.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="schoolCity" className="text-xs font-semibold">City / Suburb</Label>
+                  <Input
+                    id="schoolCity"
+                    value={schoolCity}
+                    onChange={(e) => setSchoolCity(e.target.value)}
+                    placeholder="e.g. Johannesburg"
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="schoolProvince" className="text-xs font-semibold">Province</Label>
+                  <select
+                    id="schoolProvince"
+                    value={schoolProvince}
+                    onChange={(e) => setSchoolProvince(e.target.value)}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  >
+                    <option value="Gauteng">Gauteng</option>
+                    <option value="Western Cape">Western Cape</option>
+                    <option value="KwaZulu-Natal">KwaZulu-Natal</option>
+                    <option value="Eastern Cape">Eastern Cape</option>
+                    <option value="Free State">Free State</option>
+                    <option value="Limpopo">Limpopo</option>
+                    <option value="Mpumalanga">Mpumalanga</option>
+                    <option value="North West">North West</option>
+                    <option value="Northern Cape">Northern Cape</option>
+                  </select>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1876,9 +1968,14 @@ export default function DashboardPage() {
                 />
               </div>
 
-              <Button type="submit" className="font-semibold">
-                <Save className="mr-2 h-4 w-4" /> Save Listing Changes
-              </Button>
+              <div className="flex flex-wrap items-center gap-3 pt-1">
+                <Button type="submit" className="font-semibold">
+                  <Save className="mr-2 h-4 w-4" /> Save &amp; Sync to Public Directory
+                </Button>
+                <Button asChild type="button" variant="outline" className="text-xs font-semibold">
+                  <Link href="/directory">View Public Directory Listing</Link>
+                </Button>
+              </div>
             </form>
           )}
 
@@ -2092,5 +2189,13 @@ export default function DashboardPage() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background" />}>
+      <DashboardContent />
+    </Suspense>
   );
 }

@@ -268,15 +268,15 @@ export default function SchoolDetailModal({
                 </Button>
               )}
 
-              {/* Claim button if not claimed */}
-              {!preschool.isClaimed && onClaim && (
+              {/* Claim or Edit Listing button */}
+              {onClaim && (
                 <Button
                   variant="outline"
                   onClick={() => onClaim(preschool)}
                   className="text-xs font-bold h-11 px-3.5 rounded-xl border-primary/40 text-primary hover:bg-primary/10 whitespace-nowrap shrink-0"
                 >
                   <BadgeCheck className="w-4 h-4 mr-1.5" />
-                  Claim School
+                  {preschool.isClaimed ? 'Edit Listing / Fix Name' : 'Claim School'}
                 </Button>
               )}
 

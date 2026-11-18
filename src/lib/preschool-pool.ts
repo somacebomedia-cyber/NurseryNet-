@@ -177,11 +177,22 @@ export function loadAllPreschools(): any[] {
   return [...customList, ...filteredBase];
 }
 
-export function upsertCustomPreschool(rawSchool: any): any {
+export function removeCustomPreschoolBySlug(slugToRemove: string): void {
+  if (!slugToRemove) return;
+  const existingCustom = loadCustomPreschoolsFromDisk();
+  const filtered = existingCustom.filter(
+    (item) => (item.slug || item.id) !== slugToRemove
+  );
+  saveCustomPreschoolsToDisk(filtered);
+}
+
+export function upsertCustomPreschool(rawSchool: any, previousSlug?: string): any {
   const name = (rawSchool.name || 'Verified Preschool').trim();
   const province = (rawSchool.province || 'KwaZulu-Natal').trim();
   const city = (rawSchool.city || rawSchool.municipality || 'South Africa').trim();
   const suburb = (rawSchool.suburb || city).trim();
+
+  // Keep a stable slug if rawSchool.slug is provided, or derive a clean slug from the corrected name
   const slugBase = (rawSchool.slug || rawSchool.id || `${name}-${city}`)
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
@@ -193,8 +204,9 @@ export function upsertCustomPreschool(rawSchool: any): any {
     name,
     tagline: rawSchool.tagline || `Verified early childhood development centre in ${city}, ${province}`,
     description:
-      rawSchool.description ||
-      `${name} is an Owner-Claimed & Verified early learning centre in ${suburb}, ${city} (${province}).`,
+      rawSchool.description && !rawSchool.description.includes(rawSchool.previousName || '__none__')
+        ? rawSchool.description
+        : `${name} is an Owner-Claimed & Verified early learning centre in ${suburb}, ${city} (${province}).`,
     province,
     district: rawSchool.district || city,
     municipality: rawSchool.municipality || city,
@@ -241,7 +253,13 @@ export function upsertCustomPreschool(rawSchool: any): any {
     principal: rawSchool.principal || 'Principal / Owner',
     reviews:
       Array.isArray(rawSchool.reviews) && rawSchool.reviews.length > 0
-        ? rawSchool.reviews
+        ? rawSchool.reviews.map((r: any) => ({
+            ...r,
+            comment:
+              rawSchool.previousName && typeof r.comment === 'string'
+                ? r.comment.replace(new RegExp(rawSchool.previousName, 'gi'), name)
+                : r.comment,
+          }))
         : [
             {
               id: `rev-${slugBase}-1`,
@@ -254,9 +272,23 @@ export function upsertCustomPreschool(rawSchool: any): any {
           ],
   };
 
-  const existingCustom = loadCustomPreschoolsFromDisk().filter(
-    (item) => (item.slug || item.id) !== slugBase
-  );
+  const slugsToReplace = new Set([slugBase]);
+  if (previousSlug) slugsToReplace.add(previousSlug);
+  if (rawSchool.previousSlug) slugsToReplace.add(rawSchool.previousSlug);
+
+  const existingCustom = loadCustomPreschoolsFromDisk().filter((item) => {
+    const itemSlug = item.slug || item.id;
+    if (slugsToReplace.has(itemSlug)) return false;
+    // Also replace if same owner email or phone and same city so correcting a typo never leaves a ghost duplicate
+    if (
+      rawSchool.replaceAllForOwner &&
+      item.city?.toLowerCase() === city.toLowerCase()
+    ) {
+      return false;
+    }
+    return true;
+  });
+
   const updatedCustom = [normalized, ...existingCustom];
   saveCustomPreschoolsToDisk(updatedCustom);
 
