@@ -2,6 +2,12 @@
 
 import Image from 'next/image';
 import { Preschool } from '@/data/preschools';
+import {
+  hasRealWebsitePhoto,
+  isSocialMediaUrl,
+  MAX_PRESCHOOL_PROFILE_PHOTOS,
+  resolveRealPreschoolImages,
+} from '@/lib/real-website-photos';
 import { Button } from '@/components/ui/button';
 import { Star, MapPin, ShieldCheck, BadgeCheck, Users, Calendar, ArrowRight, Languages, Heart, FileText } from 'lucide-react';
 
@@ -30,10 +36,20 @@ export default function PreschoolCard({
     'Waitlist Only': 'text-indigo-700 bg-indigo-50 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-800',
   }[preschool.status] || 'text-emerald-700 bg-emerald-50 border-emerald-200';
 
+  const resolvedImages = resolveRealPreschoolImages({
+    name: preschool.name,
+    slug: preschool.slug || preschool.id,
+    websiteUrl: preschool.websiteUrl,
+    images: preschool.images,
+  }).slice(0, MAX_PRESCHOOL_PROFILE_PHOTOS);
+
   const defaultImage =
-    preschool.images && preschool.images.length > 0
-      ? preschool.images[0]
+    resolvedImages.length > 0
+      ? resolvedImages[0]
       : 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=800&q=80';
+
+  const isRealWebsitePhoto = hasRealWebsitePhoto(resolvedImages);
+  const isSocialPage = isSocialMediaUrl(preschool.websiteUrl);
 
   return (
     <div className="group flex flex-col bg-card rounded-2xl border border-border/80 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden hover:border-primary/40">
@@ -73,6 +89,13 @@ export default function PreschoolCard({
                 <span>Audit Verified</span>
               </div>
             ) : null}
+
+            {isRealWebsitePhoto && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-600/90 text-white backdrop-blur-md shadow-sm">
+                <span>{isSocialPage ? 'Social Media Photo' : 'Real School Photo'}</span>
+                {resolvedImages.length > 1 ? <span>({resolvedImages.length})</span> : null}
+              </span>
+            )}
 
             {preschool.npoNumber && (
               <span className="hidden sm:inline-flex text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-black/60 text-white/90 backdrop-blur-md">

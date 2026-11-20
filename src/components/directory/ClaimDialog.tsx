@@ -1,8 +1,16 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { Preschool, PROVINCES, CURRICULUMS, Province } from '@/data/preschools';
+import {
+  hasOnlyStockPlaceholderImages,
+  hasRealWebsitePhoto,
+  isSocialMediaUrl,
+  MAX_PRESCHOOL_PROFILE_PHOTOS,
+  resolveRealPreschoolImages,
+} from '@/lib/real-website-photos';
 import {
   removeClaimedPreschoolListing,
   syncOwnerProfileToDirectory,
@@ -55,6 +63,8 @@ export default function ClaimDialog({
   const [operatingHours, setOperatingHours] = useState('07:00 – 17:00');
   const [curriculum, setCurriculum] = useState('Play-Based');
   const [websiteUrl, setWebsiteUrl] = useState('');
+  const [schoolImages, setSchoolImages] = useState<string[]>([]);
+  const [fetchingPhotos, setFetchingPhotos] = useState(false);
 
   // Owner Verification Fields
   const [ownerName, setOwnerName] = useState('');
@@ -82,16 +92,73 @@ export default function ClaimDialog({
     setWebsiteUrl(preschool.websiteUrl || '');
     setPhone(preschool.phone || '082 555 1829');
     setEmail(preschool.email || 'principal@school.co.za');
+    const resolved = resolveRealPreschoolImages({
+      name: preschool.name,
+      slug: preschool.slug || preschool.id,
+      websiteUrl: preschool.websiteUrl,
+      images: preschool.images,
+    }).slice(0, MAX_PRESCHOOL_PROFILE_PHOTOS);
+    setSchoolImages(resolved);
     const cleanPrincipal = (preschool.principal || 'Verified Principal')
       .replace(/\s*\(.*\)\s*$/, '')
       .trim();
     setOwnerName(cleanPrincipal || 'Verified Principal');
     if (preschool.websiteUrl) {
-      setProofNotes(`Official website: ${preschool.websiteUrl}`);
+      setProofNotes(`Official website / social page: ${preschool.websiteUrl}`);
     }
   }, [preschoolId, preschool]);
 
   if (!preschool) return null;
+
+  const handleFetchWebsitePhotos = async () => {
+    if (!websiteUrl.trim() && !schoolName.trim()) return;
+    setFetchingPhotos(true);
+    try {
+      const res = await fetch('/api/extract-website-photos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          websiteUrl: websiteUrl.trim(),
+          schoolName: schoolName.trim(),
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.images) && data.images.length > 0) {
+          const capped = data.images.slice(0, MAX_PRESCHOOL_PROFILE_PHOTOS);
+          setSchoolImages(capped);
+          toast({
+            title: isSocialMediaUrl(websiteUrl)
+              ? 'Social Media Photos Loaded!'
+              : 'Real Website Photos Loaded!',
+            description: `Extracted ${capped.length} real photo(s) (max ${MAX_PRESCHOOL_PROFILE_PHOTOS} per profile).`,
+          });
+          return;
+        }
+      }
+      toast({
+        title: 'No additional photos found',
+        description: 'Could not extract new photos from that URL.',
+      });
+    } catch {
+      toast({
+        title: 'Could not reach website or social page',
+        description: 'Please check the URL and try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setFetchingPhotos(false);
+    }
+  };
+
+  const handleSelectPrimaryCoverPhoto = (selectedUrl: string) => {
+    setSchoolImages((prev) =>
+      [selectedUrl, ...prev.filter((u) => u !== selectedUrl)].slice(
+        0,
+        MAX_PRESCHOOL_PROFILE_PHOTOS
+      )
+    );
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -114,6 +181,7 @@ export default function ClaimDialog({
         operatingHours: operatingHours.trim() || '07:00 – 17:00',
         curriculum,
         websiteUrl: websiteUrl.trim() || undefined,
+        images: schoolImages.length > 0 ? schoolImages : undefined,
         whatsappPhone: phone.trim() || preschool.phone,
         email: email.trim() || preschool.email,
         ownerName: ownerName.trim() || 'Verified Principal',
@@ -371,17 +439,83 @@ export default function ClaimDialog({
 
                 <div>
                   <label className="text-xs font-bold text-foreground block mb-1">
-                    Official Website URL
+                    Official Website or Social Media URL
                   </label>
-                  <input
-                    type="url"
-                    placeholder="https://www.yourschool.co.za"
-                    value={websiteUrl}
-                    onChange={(e) => setWebsiteUrl(e.target.value)}
-                    className="w-full text-xs h-9 px-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
+                  <div className="flex gap-1.5">
+                    <input
+                      type="url"
+                      placeholder="https://www.yourschool.co.za or Facebook/Instagram"
+                      value={websiteUrl}
+                      onChange={(e) => setWebsiteUrl(e.target.value)}
+                      className="w-full text-xs h-9 px-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={fetchingPhotos}
+                      onClick={handleFetchWebsitePhotos}
+                      className="h-9 px-2.5 text-[11px] font-bold shrink-0 whitespace-nowrap"
+                    >
+                      {fetchingPhotos ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        'Fetch Photos'
+                      )}
+                    </Button>
+                  </div>
                 </div>
               </div>
+
+              {/* Real Cover Photo & Website Gallery Selector */}
+              {schoolImages.length > 0 && (
+                <div className="pt-2 border-t border-border/60 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-foreground">
+                      Cover Photo &amp; Campus Gallery ({schoolImages.length} / {MAX_PRESCHOOL_PROFILE_PHOTOS} max)
+                    </span>
+                    {hasRealWebsitePhoto(schoolImages) && (
+                      <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                        {isSocialMediaUrl(websiteUrl)
+                          ? 'Real Social Media Photos Active'
+                          : 'Real Website Photos Active'}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                    {schoolImages.map((imgUrl, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => handleSelectPrimaryCoverPhoto(imgUrl)}
+                        className={`relative w-20 h-14 rounded-lg overflow-hidden shrink-0 border-2 transition-all ${
+                          idx === 0
+                            ? 'border-primary ring-2 ring-primary/30'
+                            : 'border-border/60 opacity-75 hover:opacity-100'
+                        }`}
+                        title={idx === 0 ? 'Primary Cover Photo' : 'Click to set as Primary Cover Photo'}
+                      >
+                        <Image
+                          src={imgUrl}
+                          alt={`School photo ${idx + 1}`}
+                          fill
+                          sizes="80px"
+                          className="object-cover"
+                          referrerPolicy="no-referrer"
+                        />
+                        {idx === 0 && (
+                          <span className="absolute bottom-0 inset-x-0 bg-primary/90 text-primary-foreground text-[9px] font-bold text-center py-0.5">
+                            Cover
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">
+                    Click any photo above to make it the primary cover photo on your Directory card.
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Claimant Info */}

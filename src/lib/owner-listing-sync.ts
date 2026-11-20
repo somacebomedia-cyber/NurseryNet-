@@ -1,4 +1,9 @@
 import type { Preschool } from '@/data/preschools';
+import {
+  hasOnlyStockPlaceholderImages,
+  MAX_PRESCHOOL_PROFILE_PHOTOS,
+  resolveRealPreschoolImages,
+} from '@/lib/real-website-photos';
 
 export interface OwnerProfileUpdateInput {
   previousSlug?: string;
@@ -15,6 +20,7 @@ export interface OwnerProfileUpdateInput {
   address?: string;
   curriculum?: string;
   websiteUrl?: string;
+  images?: string[];
   ownerName?: string;
   role?: string;
   tierName?: string;
@@ -66,6 +72,45 @@ export async function reconcileOwnerProfileWithDirectory(): Promise<{
     let claimedSlugs: string[] = rawSlugs ? JSON.parse(rawSlugs) : [];
     if (!Array.isArray(claimedSlugs)) claimedSlugs = [];
 
+    // First: upgrade any custom claimed schools that still have generic stock placeholder photos
+    // to their real website cover & gallery photos if available!
+    let photosUpgraded = false;
+    customSchools = customSchools.map((cs) => {
+      const resolved = resolveRealPreschoolImages({
+        name: cs.name,
+        slug: cs.slug || cs.id,
+        websiteUrl: cs.websiteUrl,
+        images: cs.images,
+      });
+      if (
+        resolved.length > 0 &&
+        hasOnlyStockPlaceholderImages(cs.images) &&
+        !hasOnlyStockPlaceholderImages(resolved)
+      ) {
+        photosUpgraded = true;
+        const upgraded = { ...cs, images: resolved };
+        fetch('/api/claim', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nurserySlug: upgraded.slug || upgraded.id,
+            nurseryName: upgraded.name,
+            ownerName: 'Verified Principal',
+            ownerPhone: upgraded.phone,
+            ownerEmail: upgraded.email,
+            replaceAllForOwner: true,
+            preschoolData: upgraded,
+          }),
+        }).catch(() => {});
+        return upgraded;
+      }
+      return cs;
+    });
+
+    if (photosUpgraded) {
+      localStorage.setItem('nurserynet_custom_preschools', JSON.stringify(customSchools));
+    }
+
     if (!activePlan || !activePlan.schoolName || typeof activePlan.schoolName !== 'string') {
       return { customSchools, claimedSlugs, activePlan, reconciled: false };
     }
@@ -113,11 +158,22 @@ export async function reconcileOwnerProfileWithDirectory(): Promise<{
       const npo = activePlan.npoNumber !== undefined ? activePlan.npoNumber : targetSchool.npoNumber;
 
       // Check if name or core profile fields in Owner Portal differ from Directory record
+      const desiredImages = resolveRealPreschoolImages({
+        name: correctedName,
+        slug: buildCleanSchoolSlug(correctedName, city),
+        websiteUrl: activePlan.websiteUrl ?? targetSchool.websiteUrl,
+        images: activePlan.images || targetSchool.images,
+      });
+      const needsImageUpgrade =
+        hasOnlyStockPlaceholderImages(targetSchool.images) &&
+        !hasOnlyStockPlaceholderImages(desiredImages);
+
       if (
         oldName !== correctedName ||
         targetSchool.monthlyFeeZAR !== fee ||
         targetSchool.operatingHours !== hours ||
-        (phone && targetSchool.phone !== phone)
+        (phone && targetSchool.phone !== phone) ||
+        needsImageUpgrade
       ) {
         const newSlug = buildCleanSchoolSlug(correctedName, city);
         const updatedSchool: Preschool = {
@@ -135,6 +191,7 @@ export async function reconcileOwnerProfileWithDirectory(): Promise<{
           phone: phone || targetSchool.phone,
           npoNumber: npo || targetSchool.npoNumber || null,
           websiteUrl: activePlan.websiteUrl ?? targetSchool.websiteUrl,
+          images: desiredImages.length > 0 ? desiredImages : targetSchool.images,
           tagline: `Early childhood development centre in ${city}, ${province}`,
           description:
             targetSchool.description && oldName && oldName !== correctedName
@@ -228,7 +285,9 @@ export async function reconcileOwnerProfileWithDirectory(): Promise<{
           }),
         }).catch(() => {});
 
-        reconciled = true;
+        if (oldName !== correctedName) {
+          reconciled = true;
+        }
       }
     } else if (
       correctedName !== 'Sunshine Early Learning Centre' &&
@@ -275,7 +334,15 @@ export async function reconcileOwnerProfileWithDirectory(): Promise<{
           'Grade R Readiness',
           'On-Site Clean Tap Water',
         ],
-        images: DEFAULT_IMAGES,
+        images: (() => {
+          const resolved = resolveRealPreschoolImages({
+            name: correctedName,
+            slug: newSlug,
+            websiteUrl: activePlan.websiteUrl,
+            images: activePlan.images || DEFAULT_IMAGES,
+          });
+          return resolved.length > 0 ? resolved : DEFAULT_IMAGES;
+        })(),
         phone: activePlan.whatsappPhone || '082 555 1829',
         email: activePlan.email || '',
         websiteUrl: activePlan.websiteUrl || '',
@@ -368,6 +435,25 @@ export async function syncOwnerProfileToDirectory(
   ).trim();
   const newSlug = buildCleanSchoolSlug(cleanName, city);
 
+  const resolvedWebsiteUrl =
+    input.websiteUrl !== undefined ? input.websiteUrl : existingSchool?.websiteUrl || '';
+
+  const resolvedImages = (() => {
+    const baseImages =
+      Array.isArray(input.images) && input.images.length > 0
+        ? input.images.slice(0, MAX_PRESCHOOL_PROFILE_PHOTOS)
+        : existingSchool?.images && existingSchool.images.length > 0
+        ? existingSchool.images.slice(0, MAX_PRESCHOOL_PROFILE_PHOTOS)
+        : DEFAULT_IMAGES;
+    const fromWebsite = resolveRealPreschoolImages({
+      name: cleanName,
+      slug: newSlug,
+      websiteUrl: resolvedWebsiteUrl,
+      images: baseImages,
+    }).slice(0, MAX_PRESCHOOL_PROFILE_PHOTOS);
+    return (fromWebsite.length > 0 ? fromWebsite : baseImages).slice(0, MAX_PRESCHOOL_PROFILE_PHOTOS);
+  })();
+
   const updatedSchool: Preschool = {
     ...(existingSchool || {
       ageRange: '18 months – 6 years',
@@ -386,7 +472,7 @@ export async function syncOwnerProfileToDirectory(
         'Grade R Readiness',
         'On-Site Clean Tap Water',
       ],
-      images: DEFAULT_IMAGES,
+      images: resolvedImages,
       reviews: [],
     }),
     id: newSlug,
@@ -419,8 +505,8 @@ export async function syncOwnerProfileToDirectory(
       input.npoNumber !== undefined
         ? input.npoNumber || null
         : existingSchool?.npoNumber || null,
-    websiteUrl:
-      input.websiteUrl !== undefined ? input.websiteUrl : existingSchool?.websiteUrl || '',
+    websiteUrl: resolvedWebsiteUrl,
+    images: resolvedImages,
     principal: input.ownerName
       ? `${input.ownerName} (${input.role || 'Owner / Principal'})`
       : existingSchool?.principal || 'Owner / Principal',

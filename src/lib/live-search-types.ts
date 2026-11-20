@@ -1,4 +1,5 @@
 import type { Preschool, Province } from '@/data/preschools';
+import { resolveRealPreschoolImages } from '@/lib/real-website-photos';
 
 export type LiveSearchMode = 'directory' | 'school' | 'funding';
 
@@ -15,6 +16,8 @@ export interface LiveSearchHighlight {
   websiteUrl?: string;
   reviewsSummary?: string;
   details: string;
+  imageUrl?: string;
+  images?: string[];
 }
 
 export interface LiveSearchResponse {
@@ -26,7 +29,7 @@ export interface LiveSearchResponse {
   searchedAt: string;
 }
 
-const CACHE_PREFIX = 'nurserynet_live_search_v2_';
+const CACHE_PREFIX = 'nurserynet_live_search_v3_';
 
 export function buildLiveCacheKey(mode: LiveSearchMode, keyParts: string[]): string {
   const normalized = keyParts
@@ -211,10 +214,26 @@ export function highlightToDraftPreschool(
       'Grade R Readiness',
       'On-Site Clean Tap Water',
     ],
-    images: [
-      'https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?auto=format&fit=crop&w=800&q=80',
-    ],
+    images: (() => {
+      const incoming =
+        Array.isArray(item.images) && item.images.length > 0
+          ? item.images
+          : item.imageUrl
+          ? [item.imageUrl]
+          : [];
+      const resolved = resolveRealPreschoolImages({
+        name: cleanName,
+        slug,
+        websiteUrl: item.websiteUrl,
+        images: incoming,
+      });
+      return resolved.length > 0
+        ? resolved
+        : [
+            'https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=800&q=80',
+            'https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?auto=format&fit=crop&w=800&q=80',
+          ];
+    })(),
     phone: extractedPhone,
     email: '',
     websiteUrl: item.websiteUrl && !item.websiteUrl.includes('google.com/maps') ? item.websiteUrl : '',

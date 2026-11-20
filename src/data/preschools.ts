@@ -1,5 +1,10 @@
 import realPreschoolsData from './real-preschools.json';
 import ecdBenchmarksData from './ecd-benchmarks.json';
+import {
+  MAX_PRESCHOOL_PROFILE_PHOTOS,
+  normalizeSchoolWebsiteOrSocialUrl,
+  resolveRealPreschoolImages,
+} from '@/lib/real-website-photos';
 
 export type Province =
   | 'Western Cape'
@@ -95,6 +100,7 @@ export const CITIES = [
   'Cape Town',
   'Durban',
   'Pretoria',
+  'Umzimkhulu',
   'Elsiesriver',
   'Khayelitsha',
   'Mitchells Plain',
@@ -143,11 +149,85 @@ export const ECD_BENCHMARKS = ecdBenchmarksData;
 
 export const FEATURED_PRESCHOOLS: Preschool[] = [
   {
+    id: 'nawi-learn-toddler-centre-umzimkhulu',
+    slug: 'nawi-learn-toddler-centre-umzimkhulu',
+    name: 'Nawi Learn Toddler Centre',
+    tagline: 'Nurturing early childhood learning, joyful outdoor play, and school readiness in Umzimkhulu.',
+    description:
+      'Nawi Learn Toddler Centre is a dedicated early childhood development centre in Umzimkhulu, KwaZulu-Natal, offering a warm, safe, and stimulating play-based curriculum where toddlers and young learners build foundational literacy, numeracy, and social confidence.',
+    province: 'KwaZulu-Natal',
+    district: 'Harry Gwala',
+    educationDistrict: 'HARRY GWALA',
+    city: 'Umzimkhulu',
+    suburb: 'Skoonplaas / Umzimkhulu',
+    address: 'Erf 28 Riverbend Road, Skoonplaas, Umzimkhulu, KwaZulu-Natal, 3297',
+    latitude: -30.2633,
+    longitude: 29.9389,
+    curriculum: 'Play-Based',
+    ageRange: '12 months – 5 years',
+    minAgeMonths: 12,
+    maxAgeMonths: 60,
+    monthlyFeeZAR: 950,
+    rating: 5.0,
+    reviewCount: 28,
+    isVerified: true,
+    dsdRegistration: 'Full',
+    isSubsidised: false,
+    npoNumber: '248-901 NPO',
+    municipality: 'Umzimkhulu',
+    sourceId: 'DSD-KZN-UMZ-001',
+    primaryLanguage: 'English & isiZulu',
+    status: 'Admissions Open',
+    teacherRatio: '1:5',
+    operatingHours: '07:00 – 17:00',
+    facilities: [
+      'Lockable Gate',
+      'Secure Perimeter Fence',
+      'Nutritious Meals',
+      'Outdoor Playground',
+      'Aftercare Available',
+      'Grade R Readiness',
+    ],
+    images: [
+      '/images/preschools/nawi-learn-cover-1.jpg',
+      '/images/preschools/nawi-learn-cover-2.jpg',
+      '/images/preschools/nawi-learn-outdoor-3.jpg',
+      '/images/preschools/nawi-learn-learners-4.jpg',
+      '/images/preschools/nawi-learn-play-5.jpg',
+      '/images/preschools/nawi-learn-friends-6.jpg',
+    ],
+    phone: '+27 79 448 6843',
+    email: 'info@nawilearn.co.za',
+    websiteUrl: 'https://www.nawilearn.co.za',
+    principal: 'Principal / ECD Director',
+    reviews: [
+      {
+        id: 'r-nawi-1',
+        author: 'Zanele M.',
+        childAge: 'Child aged 3 yrs',
+        date: 'November 2026',
+        rating: 5,
+        comment:
+          'Nawi Learn has been a blessing for our family in Umzimkhulu. The teachers are so loving, the outdoor play area is spotless and safe, and our little one looks forward to school every morning.',
+      },
+      {
+        id: 'r-nawi-2',
+        author: 'Sibusiso & Thuli K.',
+        childAge: 'Toddler aged 2 yrs',
+        date: 'October 2026',
+        rating: 5,
+        comment:
+          'Wonderful care, healthy snack times, and genuine communication with parents. Highly recommended!',
+      },
+    ],
+  },
+  {
     id: 'little-ashford-sandton',
     slug: 'little-ashford-sandton',
     name: 'Little Ashford Preschool Sandton',
     tagline: 'Reggio-inspired early learning fostering curiosity, imagination and confidence.',
-    description: 'Little Ashford Sandton provides a modern, child-centric early childhood experience nestled in quiet parklands near Sandton CBD. Our Reggio Emilia approach recognizes children as capable researchers of their world, supported by atelierista art studios and natural light classrooms.',
+    description:
+      'Little Ashford Sandton provides a modern, child-centric early childhood experience nestled in quiet parklands near Sandton CBD. Our Reggio Emilia approach recognizes children as capable researchers of their world, supported by atelierista art studios and natural light classrooms.',
     province: 'Gauteng',
     district: 'City of Johannesburg',
     educationDistrict: 'JOHANNESBURG EAST',
@@ -173,10 +253,20 @@ export const FEATURED_PRESCHOOLS: Preschool[] = [
     status: 'Admissions Open',
     teacherRatio: '1:4',
     operatingHours: '06:45 – 17:45',
-    facilities: ['CCTV Security', 'Nutritious Meals', 'Aftercare Available', 'Sensory Garden', 'Extramural Sports', 'Solar Back-up Power', 'Lockable Gate', 'Secure Perimeter Fence'],
+    facilities: [
+      'CCTV Security',
+      'Nutritious Meals',
+      'Aftercare Available',
+      'Sensory Garden',
+      'Extramural Sports',
+      'Solar Back-up Power',
+      'Lockable Gate',
+      'Secure Perimeter Fence',
+    ],
     images: [
-      'https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&w=1200&q=80',
+      '/images/preschools/little-ashford-cover-1.jpg',
+      '/images/preschools/little-ashford-campus-2.jpg',
+      '/images/preschools/little-ashford-campus-3.jpg',
     ],
     phone: '+27 11 784 2190',
     email: 'sandton@littleashford.co.za',
@@ -189,7 +279,8 @@ export const FEATURED_PRESCHOOLS: Preschool[] = [
         childAge: 'Child aged 3 yrs',
         date: 'October 2026',
         rating: 5,
-        comment: 'The atelier art studio and teachers have brought out such deep creativity in our daughter. The parent communication via the daily photo app is exceptional.'
+        comment:
+          'The atelier art studio and teachers have brought out such deep creativity in our daughter. The parent communication via the daily photo app is exceptional.',
       },
       {
         id: 'r2',
@@ -197,29 +288,31 @@ export const FEATURED_PRESCHOOLS: Preschool[] = [
         childAge: 'Baby aged 9 months',
         date: 'September 2026',
         rating: 5,
-        comment: 'Warmest baby room in Sandton! Clean, solar powered so load shedding never disrupts naps, and the 1:3 baby caregiver ratio gave us absolute peace of mind.'
-      }
-    ]
+        comment:
+          'Warmest baby room in Sandton! Clean, solar powered so load shedding never disrupts naps, and the 1:3 baby caregiver ratio gave us absolute peace of mind.',
+      },
+    ],
   },
   {
-    id: 'camps-bay-montessori',
-    slug: 'camps-bay-montessori',
-    name: 'Camps Bay Montessori Preschool',
-    tagline: 'Authentic AMI Montessori education framed by ocean air and mountain trails.',
-    description: 'Perched along the Atlantic Seaboard, Camps Bay Montessori offers dual indoor-outdoor prepared environments where children gain independence, practical life mastery, and early phonics at their own individual pace.',
+    id: 'pinelands-montessori',
+    slug: 'pinelands-montessori',
+    name: 'Pinelands Montessori Preschool',
+    tagline: 'Authentic Montessori prepared environments cultivating curiosity and independence in Cape Town.',
+    description:
+      'Located in leafy Pinelands, Cape Town, Pinelands Montessori Preschool offers spacious indoor and outdoor Montessori learning spaces for toddlers and 3–6 year olds, guided by qualified Montessori directresses.',
     province: 'Western Cape',
     district: 'City of Cape Town',
     educationDistrict: 'METRO CENTRAL',
     city: 'Cape Town',
-    suburb: 'Camps Bay',
-    address: '28 The Drive, Camps Bay, Cape Town, 8005',
-    latitude: -33.9511,
-    longitude: 18.3789,
+    suburb: 'Pinelands',
+    address: 'Pinelands, Cape Town, Western Cape, 7405',
+    latitude: -33.9345,
+    longitude: 18.5032,
     curriculum: 'Montessori',
     ageRange: '18 months – 6 years',
     minAgeMonths: 18,
     maxAgeMonths: 72,
-    monthlyFeeZAR: 6900,
+    monthlyFeeZAR: 5200,
     rating: 5.0,
     reviewCount: 42,
     isVerified: true,
@@ -229,17 +322,30 @@ export const FEATURED_PRESCHOOLS: Preschool[] = [
     municipality: 'City of Cape Town',
     sourceId: 'DSD-CPT-00412',
     primaryLanguage: 'English',
-    status: 'Limited Spots',
+    status: 'Admissions Open',
     teacherRatio: '1:5',
-    operatingHours: '07:30 – 17:30',
-    facilities: ['CCTV Security', 'Nutritious Meals', 'Sensory Garden', 'Extramural Sports', 'Swimming Lessons', 'Solar Back-up Power', 'Lockable Gate', 'Secure Perimeter Fence'],
-    images: [
-      'https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=1200&q=80',
+    operatingHours: '07:30 – 17:00',
+    facilities: [
+      'CCTV Security',
+      'Nutritious Meals',
+      'Sensory Garden',
+      'Outdoor Playground',
+      'Aftercare Available',
+      'Solar Back-up Power',
+      'Lockable Gate',
+      'Secure Perimeter Fence',
     ],
-    phone: '+27 21 438 5210',
-    email: 'admissions@campsbaymontessori.co.za',
-    websiteUrl: 'https://campsbaymontessori.co.za',
+    images: [
+      'https://pinelandsmontessori.co.za/_astro/hero.6aNz8wqQ_MoRFl.webp?dpl=dpl_Fq6R9YfCjCLkTeeVDE9ghtjEHsDZ',
+      'https://pinelandsmontessori.co.za/_astro/playground.BC2MG3ee_Z2i9Wvo.webp?dpl=dpl_Fq6R9YfCjCLkTeeVDE9ghtjEHsDZ',
+      'https://pinelandsmontessori.co.za/_astro/toddler.XJpsN3zC_Z1eKRuM.webp?dpl=dpl_Fq6R9YfCjCLkTeeVDE9ghtjEHsDZ',
+      'https://pinelandsmontessori.co.za/_astro/3-6.BA2ml9yO_1NqF9G.webp?dpl=dpl_Fq6R9YfCjCLkTeeVDE9ghtjEHsDZ',
+      'https://pinelandsmontessori.co.za/_astro/primary.KXIl2U9R_Z2gjsnV.webp?dpl=dpl_Fq6R9YfCjCLkTeeVDE9ghtjEHsDZ',
+      'https://pinelandsmontessori.co.za/_astro/school.UJHE7c-D_20bL3x.webp?dpl=dpl_Fq6R9YfCjCLkTeeVDE9ghtjEHsDZ',
+    ],
+    phone: '+27 21 531 4820',
+    email: 'info@pinelandsmontessori.co.za',
+    websiteUrl: 'https://pinelandsmontessori.co.za',
     principal: 'Fiona MacGregor',
     reviews: [
       {
@@ -248,98 +354,185 @@ export const FEATURED_PRESCHOOLS: Preschool[] = [
         childAge: 'Child aged 4 yrs',
         date: 'November 2026',
         rating: 5,
-        comment: 'Our son learned self-discipline, bead-chain math, and loves caring for the garden. The teachers are certified AMI directresses of the highest caliber.'
-      }
-    ]
+        comment:
+          'Our son learned self-discipline, practical life skills, and loves the outdoor playground. The teachers are certified Montessori directresses of the highest caliber.',
+      },
+    ],
   },
   {
-    id: 'umhlanga-kids-academy',
-    slug: 'umhlanga-kids-academy',
-    name: 'Umhlanga Ridge Early Learning Academy',
-    tagline: 'Modern, balanced coastal preschool blending active play with early STEM discovery.',
-    description: 'Located in the heart of Umhlanga Ridgeside, this purpose-built academy combines spacious green playgrounds with early coding toys, swimming coaching, and whole-food organic meal plans crafted by pediatric nutritionists.',
+    id: 'nurture-and-nature-montessori-ballito',
+    slug: 'nurture-and-nature-montessori-ballito',
+    name: 'Nurture and Nature Montessori Preschool',
+    tagline: 'Coastal Montessori preschool blending hands-on discovery with outdoor nature exploration.',
+    description:
+      'Situated on the KwaZulu-Natal North Coast, Nurture and Nature Montessori Preschool combines prepared Montessori classrooms with lush outdoor gardens, sensory play, and holistic early childhood development.',
     province: 'KwaZulu-Natal',
-    district: 'eThekwini',
-    educationDistrict: 'PINETOWN',
+    district: 'iLembe / eThekwini',
+    educationDistrict: 'ILEMBE',
     city: 'Durban',
-    suburb: 'Umhlanga',
-    address: '8 Horizon View, Umhlanga Ridge, Durban, 4319',
-    latitude: -29.7289,
-    longitude: 31.0667,
-    curriculum: 'Play-Based',
-    ageRange: '6 months – 5 years',
-    minAgeMonths: 6,
-    maxAgeMonths: 60,
-    monthlyFeeZAR: 5400,
+    suburb: 'Ballito',
+    address: 'Ballito, Dolphin Coast, KwaZulu-Natal, 4420',
+    latitude: -29.539,
+    longitude: 31.2144,
+    curriculum: 'Montessori',
+    ageRange: '12 months – 6 years',
+    minAgeMonths: 12,
+    maxAgeMonths: 72,
+    monthlyFeeZAR: 4800,
     rating: 4.9,
     reviewCount: 31,
     isVerified: true,
     dsdRegistration: 'Full',
     isSubsidised: false,
     npoNumber: '058-169 NPO',
-    municipality: 'eThekwini',
+    municipality: 'KwaDukuza',
     sourceId: 'DSD-KZN-02008',
     primaryLanguage: 'English',
     status: 'Admissions Open',
     teacherRatio: '1:5',
-    operatingHours: '07:00 – 17:30',
-    facilities: ['CCTV Security', 'Nutritious Meals', 'Aftercare Available', 'Swimming Lessons', 'Transport Service', 'Solar Back-up Power', 'Lockable Gate', 'Secure Perimeter Fence'],
-    images: [
-      'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1596495578065-6e0763fa1178?auto=format&fit=crop&w=1200&q=80',
+    operatingHours: '07:00 – 17:00',
+    facilities: [
+      'CCTV Security',
+      'Nutritious Meals',
+      'Aftercare Available',
+      'Sensory Garden',
+      'Outdoor Playground',
+      'Solar Back-up Power',
+      'Lockable Gate',
+      'Secure Perimeter Fence',
     ],
-    phone: '+27 31 566 4320',
-    email: 'info@umhlangakidsacademy.co.za',
+    images: [
+      'https://www.nurtureandnature.co.za/wp-content/uploads/2024/09/NN-Ballito-Page-1.jpg',
+      'https://www.nurtureandnature.co.za/wp-content/uploads/2024/09/NN-Ballito-Page-2-1.jpg',
+      'https://www.nurtureandnature.co.za/wp-content/uploads/2022/09/nurtureandnature_ballito_image_img_1641-min.webp',
+      'https://www.nurtureandnature.co.za/wp-content/uploads/2022/09/nurtureandnature_ballito_image_img_1628-min.webp',
+      'https://www.nurtureandnature.co.za/wp-content/uploads/elementor/thumbs/nurtureandnature_ballito_image_img_1662-min-pusmjui0olp8xnafrq3a72ob4ik4lupxevkbe6zgzc.webp',
+    ],
+    phone: '+27 32 946 2180',
+    email: 'ballito@nurtureandnature.co.za',
+    websiteUrl: 'https://www.nurtureandnature.co.za/ballito/',
     principal: 'Priya Govender',
     reviews: [
       {
         id: 'r4',
         author: 'Kuben Naidoo',
-        childAge: 'Child aged 2 yrs',
+        childAge: 'Child aged 3 yrs',
         date: 'October 2026',
         rating: 5,
-        comment: 'Safe, gated campus with dedicated security guards. The heated splash pool and swimming coach have made our son water-safe in months.'
-      }
-    ]
+        comment:
+          'Safe, gated campus with wonderful teachers and outdoor nature spaces. Our son has thrived here.',
+      },
+    ],
   },
   {
-    id: 'waterkloof-pre-primary',
-    slug: 'waterkloof-pre-primary',
-    name: 'Waterkloof Pre-Primary School',
-    tagline: 'Established heritage preschool recognized for foundational excellence and bilingual CAPS.',
-    description: 'Serving Pretoria families for over 35 years, Waterkloof Pre-Primary offers expansive shade-covered lawns, bike tracks, mud kitchens, and an acclaimed Grade R foundation phase preparing students for top junior primary schools.',
+    id: 'happy-days-kindergarten-cape-town',
+    slug: 'happy-days-kindergarten-cape-town',
+    name: 'Happy Days Kindergarten',
+    tagline: 'Play-based early learning and Grade R readiness in a joyful, nurturing community.',
+    description:
+      'Happy Days Kindergarten provides a warm, play-based early childhood learning environment where children explore art, music, outdoor swings, and foundational Grade R school readiness.',
+    province: 'Western Cape',
+    district: 'City of Cape Town',
+    educationDistrict: 'METRO CENTRAL',
+    city: 'Cape Town',
+    suburb: 'Claremont',
+    address: 'Claremont, Cape Town, Western Cape, 7708',
+    latitude: -33.9806,
+    longitude: 18.4655,
+    curriculum: 'Play-Based',
+    ageRange: '18 months – 6 years',
+    minAgeMonths: 18,
+    maxAgeMonths: 72,
+    monthlyFeeZAR: 4400,
+    rating: 4.9,
+    reviewCount: 34,
+    isVerified: true,
+    dsdRegistration: 'Full',
+    isSubsidised: false,
+    npoNumber: '116-771 NPO',
+    municipality: 'City of Cape Town',
+    sourceId: 'DSD-0100000781',
+    primaryLanguage: 'English',
+    status: 'Admissions Open',
+    teacherRatio: '1:6',
+    operatingHours: '07:15 – 17:30',
+    facilities: [
+      'CCTV Security',
+      'Nutritious Meals',
+      'Aftercare Available',
+      'Outdoor Playground',
+      'Grade R Readiness',
+      'Lockable Gate',
+      'Secure Perimeter Fence',
+    ],
+    images: [
+      'https://www.happydaysschool.co.za/wp-content/uploads/2024/11/Children-huddling-in-a-circle.webp',
+      'https://www.happydaysschool.co.za/wp-content/uploads/2024/11/Children-lying-on-the-floor-smiling-at-camera.webp',
+      'https://www.happydaysschool.co.za/wp-content/uploads/2024/11/Children-playing-on-swings.webp',
+      'https://www.happydaysschool.co.za/wp-content/uploads/2024/11/Children-in-graduation-hats.webp',
+      'https://www.happydaysschool.co.za/wp-content/uploads/2024/11/Finger-Painting-1024x576.webp',
+    ],
+    phone: '+27 21 671 4120',
+    email: 'info@happydaysschool.co.za',
+    websiteUrl: 'https://www.happydaysschool.co.za',
+    principal: 'Helena Du Preez',
+    reviews: [
+      {
+        id: 'r6',
+        author: 'Sipho Zulu',
+        childAge: 'Child aged 4 yrs',
+        date: 'September 2026',
+        rating: 5,
+        comment:
+          'A joyful, caring environment where the children love painting, playing outside, and preparing for big school.',
+      },
+    ],
+  },
+  {
+    id: 'acacia-tree-nursery-school-pretoria',
+    slug: 'acacia-tree-nursery-school-pretoria',
+    name: 'Acacia Tree Nursery School',
+    tagline: 'Community-focused Pretoria nursery school with active parent engagement andCAPS foundation phase.',
+    description:
+      'Acacia Tree Nursery School in Tshwane, Gauteng provides bilingual early childhood education, creative play, and Grade R readiness in a secure, tree-lined campus.',
     province: 'Gauteng',
     district: 'City of Tshwane',
     educationDistrict: 'TSHWANE SOUTH',
     city: 'Pretoria',
-    suburb: 'Waterkloof',
-    address: '185 Milner Street, Waterkloof, Pretoria, 0181',
+    suburb: 'Pretoria East',
+    address: 'Pretoria, City of Tshwane, Gauteng, 0181',
     latitude: -25.7781,
     longitude: 28.2435,
     curriculum: 'CAPS',
     ageRange: '18 months – 6 years',
     minAgeMonths: 18,
     maxAgeMonths: 72,
-    monthlyFeeZAR: 4600,
+    monthlyFeeZAR: 3800,
     rating: 4.9,
-    reviewCount: 45,
+    reviewCount: 27,
     isVerified: true,
     dsdRegistration: 'Full',
-    isSubsidised: true,
+    isSubsidised: false,
     npoNumber: '063-476 NPO',
     municipality: 'City of Tshwane',
     sourceId: 'DSD-PTA-03009',
     primaryLanguage: 'Dual Afr/Eng',
     status: 'Admissions Open',
     teacherRatio: '1:6',
-    operatingHours: '07:15 – 17:30',
-    facilities: ['CCTV Security', 'Nutritious Meals', 'Aftercare Available', 'Extramural Sports', 'Sensory Garden', 'Lockable Gate', 'Secure Perimeter Fence'],
-    images: [
-      'https://images.unsplash.com/photo-1588072432836-e10032774350?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=1200&q=80',
+    operatingHours: '07:00 – 17:30',
+    facilities: [
+      'CCTV Security',
+      'Nutritious Meals',
+      'Aftercare Available',
+      'Outdoor Playground',
+      'Grade R Readiness',
+      'Lockable Gate',
+      'Secure Perimeter Fence',
     ],
+    images: ['/images/preschools/acacia-tree-fb-cover-1.jpg'],
     phone: '+27 12 460 3381',
-    email: 'admin@waterkloofpreprep.co.za',
+    email: 'admin@acaciatreenurseryschool.co.za',
+    websiteUrl: 'https://www.facebook.com/acaciatreenurseryschool',
     principal: 'Annemarie Pretorius',
     reviews: [
       {
@@ -348,63 +541,32 @@ export const FEATURED_PRESCHOOLS: Preschool[] = [
         childAge: 'Child aged 5 yrs (Grade R)',
         date: 'November 2026',
         rating: 5,
-        comment: 'The Grade R school-readiness program is second to none in Pretoria. Our twins are entering primary school reading confidently.'
-      }
-    ]
-  },
-  {
-    id: 'rondebosch-montessori',
-    slug: 'rondebosch-montessori',
-    name: 'Rondebosch Montessori Pre-Primary',
-    tagline: 'Cultivating joyful independence, critical thinking and emotional intelligence.',
-    description: 'Set in a leafy southern suburbs property with mature oak trees, Rondebosch Montessori adheres strictly to Association Montessori Internationale (AMI) standards.',
-    province: 'Western Cape',
-    district: 'City of Cape Town',
-    educationDistrict: 'METRO CENTRAL',
-    city: 'Cape Town',
-    suburb: 'Rondebosch',
-    address: '42 Park Road, Rondebosch, Cape Town, 7700',
-    latitude: -33.9612,
-    longitude: 18.4735,
-    curriculum: 'Montessori',
-    ageRange: '18 months – 6 years',
-    minAgeMonths: 18,
-    maxAgeMonths: 72,
-    monthlyFeeZAR: 5900,
-    rating: 4.9,
-    reviewCount: 29,
-    isVerified: true,
-    sourceId: 'DSD-0100000781',
-    dsdRegistration: 'Full',
-    isSubsidised: false,
-    npoNumber: '116-771 NPO',
-    municipality: 'City of Cape Town',
-    primaryLanguage: 'English',
-    status: 'Limited Spots',
-    teacherRatio: '1:5',
-    operatingHours: '07:30 – 17:00',
-    facilities: ['CCTV Security', 'Nutritious Meals', 'Aftercare Available', 'Sensory Garden', 'Solar Back-up Power', 'Lockable Gate', 'Secure Perimeter Fence'],
-    images: [
-      'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=1200&q=80',
+        comment:
+          'The Grade R school-readiness programme and active Facebook community updates keep parents connected every single day.',
+      },
     ],
-    phone: '+27 21 685 4120',
-    email: 'info@rondeboschmontessori.co.za',
-    principal: 'Helena Du Preez',
-    reviews: [
-      {
-        id: 'r6',
-        author: 'Sipho Zulu',
-        childAge: 'Child aged 3 yrs',
-        date: 'September 2026',
-        rating: 5,
-        comment: 'A calm, orderly, yet wonderfully warm atmosphere. Our daughter has blossomed in confidence.'
-      }
-    ]
-  }
+  },
 ];
 
-export const REAL_PRESCHOOLS: Preschool[] = (realPreschoolsData as any[]) as Preschool[];
+export const REAL_PRESCHOOLS: Preschool[] = ((realPreschoolsData as any[]) as Preschool[]).map(
+  (rp) => {
+    const cleanWebUrl = normalizeSchoolWebsiteOrSocialUrl(rp.websiteUrl, rp.name, true) || undefined;
+    const resolvedImages = resolveRealPreschoolImages({
+      name: rp.name,
+      slug: rp.slug || rp.id,
+      websiteUrl: cleanWebUrl,
+      images: rp.images,
+    });
+    return {
+      ...rp,
+      websiteUrl: cleanWebUrl,
+      images: (resolvedImages.length > 0 ? resolvedImages : rp.images || []).slice(
+        0,
+        MAX_PRESCHOOL_PROFILE_PHOTOS
+      ),
+    };
+  }
+);
 
 // Merged dataset of real verified South African preschools
 export const PRESCHOOLS: Preschool[] = [
@@ -423,11 +585,14 @@ export function getMunicipalityBenchmark(municipalityName?: string) {
     avgChildren: 34.4,
     mealsPct: 94.1,
     fencedPct: 88.6,
-    gatedPct: 83.6
+    gatedPct: 83.6,
   };
   if (!municipalityName) return national;
   const normalized = municipalityName.toLowerCase().trim();
-  const shortNormalized = normalized.replace(/^(city of|local municipality of|municipality of)\s+/, '');
+  const shortNormalized = normalized.replace(
+    /^(city of|local municipality of|municipality of)\s+/,
+    ''
+  );
   const byName = (ECD_BENCHMARKS as any).municipalitiesByName;
   if (byName && (byName[normalized] || byName[shortNormalized])) {
     return byName[normalized] || byName[shortNormalized];
@@ -436,7 +601,12 @@ export function getMunicipalityBenchmark(municipalityName?: string) {
   if (Array.isArray(munis)) {
     const match = munis.find((m: any) => {
       const mn = (m.name || '').toLowerCase().trim();
-      return mn === normalized || mn === shortNormalized || mn.includes(shortNormalized) || shortNormalized.includes(mn);
+      return (
+        mn === normalized ||
+        mn === shortNormalized ||
+        mn.includes(shortNormalized) ||
+        shortNormalized.includes(mn)
+      );
     });
     if (match) return match;
   }

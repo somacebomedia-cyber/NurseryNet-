@@ -1,5 +1,13 @@
 import fs from 'fs';
 import path from 'path';
+import { FEATURED_PRESCHOOLS } from '@/data/preschools';
+import {
+  hasOnlyStockPlaceholderImages,
+  hasRealWebsitePhoto,
+  MAX_PRESCHOOL_PROFILE_PHOTOS,
+  normalizeSchoolWebsiteOrSocialUrl,
+  resolveRealPreschoolImages,
+} from '@/lib/real-website-photos';
 
 let allPreschoolsCache: any[] | null = null;
 const CUSTOM_PRESCHOOLS_FILE = '/tmp/nurserynet-custom-preschools.json';
@@ -19,7 +27,42 @@ function loadCustomPreschoolsFromDisk(): any[] {
     if (fs.existsSync(CUSTOM_PRESCHOOLS_FILE)) {
       const raw = fs.readFileSync(CUSTOM_PRESCHOOLS_FILE, 'utf-8');
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) return parsed;
+      if (Array.isArray(parsed)) {
+        let upgradedAny = false;
+        const enriched = parsed.map((school) => {
+          const cleanWebsiteUrl = normalizeSchoolWebsiteOrSocialUrl(
+            school.websiteUrl,
+            school.name,
+            false
+          );
+          const resolved = resolveRealPreschoolImages({
+            name: school.name,
+            slug: school.slug || school.id,
+            websiteUrl: cleanWebsiteUrl,
+            images: school.images,
+          }).slice(0, MAX_PRESCHOOL_PROFILE_PHOTOS);
+          if (
+            resolved.length > 0 &&
+            ((hasOnlyStockPlaceholderImages(school.images) &&
+              !hasOnlyStockPlaceholderImages(resolved)) ||
+              (Array.isArray(school.images) &&
+                school.images.length > MAX_PRESCHOOL_PROFILE_PHOTOS))
+          ) {
+            upgradedAny = true;
+            return { ...school, websiteUrl: cleanWebsiteUrl || school.websiteUrl, images: resolved };
+          }
+          return {
+            ...school,
+            images: Array.isArray(school.images)
+              ? school.images.slice(0, MAX_PRESCHOOL_PROFILE_PHOTOS)
+              : resolved,
+          };
+        });
+        if (upgradedAny) {
+          saveCustomPreschoolsToDisk(enriched);
+        }
+        return enriched;
+      }
     }
   } catch {
     // ignore disk read errors
@@ -54,6 +97,7 @@ function transformRawListing(item: any, idx: number): any {
   const npo = dsdObj.npoNumber || null;
   const curriculum = CURRICULUMS[idx % CURRICULUMS.length];
   const ratio = RATIOS[idx % RATIOS.length];
+  const cleanWebUrl = normalizeSchoolWebsiteOrSocialUrl(item.website, name, true);
 
   return {
     id,
@@ -92,13 +136,18 @@ function transformRawListing(item: any, idx: number): any {
       'Grade R Readiness',
       'On-Site Clean Tap Water',
     ],
-    images: [
-      DEFAULT_PHOTOS[idx % DEFAULT_PHOTOS.length],
-      DEFAULT_PHOTOS[(idx + 1) % DEFAULT_PHOTOS.length],
-    ],
+    images: resolveRealPreschoolImages({
+      name,
+      slug: id,
+      websiteUrl: cleanWebUrl,
+      images: [
+        DEFAULT_PHOTOS[idx % DEFAULT_PHOTOS.length],
+        DEFAULT_PHOTOS[(idx + 1) % DEFAULT_PHOTOS.length],
+      ],
+    }).slice(0, MAX_PRESCHOOL_PROFILE_PHOTOS),
     phone: item.phone || null,
     email: item.email || null,
-    websiteUrl: item.website || null,
+    websiteUrl: cleanWebUrl || undefined,
     principal: 'Principal / ECD Supervisor',
     reviews: [
       {
@@ -113,6 +162,42 @@ function transformRawListing(item: any, idx: number): any {
   };
 }
 
+function enrichBaseListWithRealPhotos(list: any[]): any[] {
+  const featuredIds = new Set(FEATURED_PRESCHOOLS.map((f) => f.slug || f.id));
+  const withRealPhotos: any[] = [];
+  const standardListings: any[] = [];
+
+  for (const s of list) {
+    if (featuredIds.has(s.slug || s.id)) continue;
+    const cleanWebUrl = normalizeSchoolWebsiteOrSocialUrl(s.websiteUrl, s.name, true);
+    const resolved = resolveRealPreschoolImages({
+      name: s.name,
+      slug: s.slug || s.id,
+      websiteUrl: cleanWebUrl,
+      images: s.images,
+    }).slice(0, MAX_PRESCHOOL_PROFILE_PHOTOS);
+
+    const enrichedItem = {
+      ...s,
+      websiteUrl: cleanWebUrl || undefined,
+      images:
+        resolved.length > 0
+          ? resolved
+          : Array.isArray(s.images)
+          ? s.images.slice(0, MAX_PRESCHOOL_PROFILE_PHOTOS)
+          : [],
+    };
+
+    if (hasRealWebsitePhoto(enrichedItem.images)) {
+      withRealPhotos.push(enrichedItem);
+    } else {
+      standardListings.push(enrichedItem);
+    }
+  }
+
+  return [...FEATURED_PRESCHOOLS, ...withRealPhotos, ...standardListings];
+}
+
 function loadBasePreschools(): any[] {
   // 1. Try public/data/preschools-all.json
   try {
@@ -121,7 +206,7 @@ function loadBasePreschools(): any[] {
       const data = fs.readFileSync(fullDataPath, 'utf-8');
       const parsed = JSON.parse(data);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed;
+        return enrichBaseListWithRealPhotos(parsed);
       }
     }
   } catch {
@@ -141,7 +226,7 @@ function loadBasePreschools(): any[] {
       const data = fs.readFileSync(rawAssetPath, 'utf-8');
       const rawList = JSON.parse(data);
       if (Array.isArray(rawList) && rawList.length > 0) {
-        return rawList.map((item, idx) => transformRawListing(item, idx));
+        return enrichBaseListWithRealPhotos(rawList.map((item, idx) => transformRawListing(item, idx)));
       }
     }
   } catch {
@@ -153,13 +238,13 @@ function loadBasePreschools(): any[] {
     const fallbackPath = path.join(process.cwd(), 'src', 'data', 'real-preschools.json');
     if (fs.existsSync(fallbackPath)) {
       const data = fs.readFileSync(fallbackPath, 'utf-8');
-      return JSON.parse(data) || [];
+      return enrichBaseListWithRealPhotos(JSON.parse(data) || []);
     }
   } catch {
     // return empty array if all sources fail
   }
 
-  return [];
+  return [...FEATURED_PRESCHOOLS];
 }
 
 export function loadAllPreschools(): any[] {
@@ -243,13 +328,25 @@ export function upsertCustomPreschool(rawSchool: any, previousSlug?: string): an
             'Grade R Readiness',
             'On-Site Clean Tap Water',
           ],
-    images:
-      Array.isArray(rawSchool.images) && rawSchool.images.length > 0
-        ? rawSchool.images
-        : [DEFAULT_PHOTOS[0], DEFAULT_PHOTOS[1]],
+    images: (() => {
+      const candidateImages =
+        Array.isArray(rawSchool.images) && rawSchool.images.length > 0
+          ? rawSchool.images.slice(0, MAX_PRESCHOOL_PROFILE_PHOTOS)
+          : [DEFAULT_PHOTOS[0], DEFAULT_PHOTOS[1]];
+      const resolved = resolveRealPreschoolImages({
+        name,
+        slug: slugBase,
+        websiteUrl: rawSchool.websiteUrl,
+        images: candidateImages,
+      }).slice(0, MAX_PRESCHOOL_PROFILE_PHOTOS);
+      return resolved.length > 0 ? resolved : candidateImages;
+    })(),
     phone: rawSchool.phone || '',
     email: rawSchool.email || '',
-    websiteUrl: rawSchool.websiteUrl || '',
+    websiteUrl:
+      normalizeSchoolWebsiteOrSocialUrl(rawSchool.websiteUrl, name, false) ||
+      rawSchool.websiteUrl ||
+      '',
     principal: rawSchool.principal || 'Principal / Owner',
     reviews:
       Array.isArray(rawSchool.reviews) && rawSchool.reviews.length > 0

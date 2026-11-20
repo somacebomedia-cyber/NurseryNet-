@@ -9,6 +9,8 @@ import {
   LiveSearchResponse,
   LiveSearchSource,
 } from '@/lib/live-search-types';
+import { extractPhotosFromWebsiteHtml } from '@/lib/website-photo-extractor';
+import { resolveRealPreschoolImages } from '@/lib/real-website-photos';
 
 interface LiveSearchRequestBody {
   mode: LiveSearchMode;
@@ -28,6 +30,8 @@ interface ScrapedWebItem {
   subtitle?: string;
   details?: string;
   isOfficialDomain?: boolean;
+  imageUrl?: string;
+  images?: string[];
 }
 
 function decodeHtmlEntities(str: string): string {
@@ -262,6 +266,12 @@ async function probeOfficialSchoolWebsites(rawQuery: string): Promise<ScrapedWeb
           detailParts.unshift(metaDesc);
         }
 
+        const extractedImages = await extractPhotosFromWebsiteHtml(
+          html,
+          canonicalUrl,
+          schemaData?.name || pageTitle
+        );
+
         found.push({
           title: schemaData?.name ? `${schemaData.name} (Official Website)` : pageTitle,
           url: canonicalUrl,
@@ -275,6 +285,8 @@ async function probeOfficialSchoolWebsites(rawQuery: string): Promise<ScrapedWeb
             detailParts.join(' · ') ||
             `Verified live official South African preschool website (${canonicalUrl}).`,
           isOfficialDomain: true,
+          imageUrl: extractedImages[0],
+          images: extractedImages,
         });
       } catch {
         // Ignore unreachable candidate domains
@@ -502,6 +514,11 @@ async function runLiveWebFallback(body: LiveSearchRequestBody): Promise<LiveSear
 
     if (webItems.length > 0) {
       const topWeb = webItems[0];
+      const resolvedPhotos = resolveRealPreschoolImages({
+        name: cleanName,
+        websiteUrl: topWeb.url,
+        images: topWeb.images,
+      });
       highlights.push({
         title: topWeb.isOfficialDomain ? topWeb.title : cleanName,
         subtitle: topWeb.subtitle || locationLabel,
@@ -525,11 +542,18 @@ async function runLiveWebFallback(body: LiveSearchRequestBody): Promise<LiveSear
                 }.`
               : `Local municipality (${muniStats.name}) records ${muniStats.dsdRegisteredPct}% DSD registration across ${muniStats.centres} centres.`
           }`,
+        imageUrl: resolvedPhotos[0] || topWeb.imageUrl,
+        images: resolvedPhotos.length > 0 ? resolvedPhotos : topWeb.images,
       });
     } else {
       const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(
         `${cleanName} ${locationLabel} preschool`
       )}`;
+      const resolvedPhotos = resolveRealPreschoolImages({
+        name: cleanName,
+        websiteUrl: primaryLocal?.websiteUrl,
+        images: primaryLocal?.images,
+      });
       highlights.push({
         title: cleanName,
         subtitle: locationLabel,
@@ -544,6 +568,8 @@ async function runLiveWebFallback(body: LiveSearchRequestBody): Promise<LiveSear
             }"`
           : `Benchmarked against ${muniStats.centres} ECD centres in ${muniStats.name} (${muniStats.mealsPct}% serve daily meals, ${muniStats.fencedPct}% securely fenced).`,
         details: `${cleanName} in ${locationLabel}${npoNumber ? ` (NPO #${npoNumber})` : ''} is benchmarked against official South African DSD/DBE ECD Census records.`,
+        imageUrl: resolvedPhotos[0],
+        images: resolvedPhotos,
       });
     }
 
@@ -664,6 +690,11 @@ async function runLiveWebFallback(body: LiveSearchRequestBody): Promise<LiveSear
 
   // 1. Include direct live web results (with official .co.za domains and extracted Schema.org JSON-LD first!)
   for (const w of webItems.slice(0, 3)) {
+    const resolvedPhotos = resolveRealPreschoolImages({
+      name: w.title,
+      websiteUrl: w.url,
+      images: w.images,
+    });
     highlights.push({
       title: w.title,
       subtitle: w.subtitle || areaParts || 'South Africa (Live Web Result)',
@@ -674,6 +705,8 @@ async function runLiveWebFallback(body: LiveSearchRequestBody): Promise<LiveSear
       details:
         w.details ||
         `Discovered via live web search for "${searchTerms}". Click Website to view the external listing directly.`,
+      imageUrl: resolvedPhotos[0] || w.imageUrl,
+      images: resolvedPhotos.length > 0 ? resolvedPhotos : w.images,
     });
   }
 
@@ -687,6 +720,9 @@ async function runLiveWebFallback(body: LiveSearchRequestBody): Promise<LiveSear
     const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
       `${cleanQuery} ${areaParts}`
     )}`;
+    const resolvedPhotos = resolveRealPreschoolImages({
+      name: cleanQuery,
+    });
     highlights.push({
       title: `${cleanQuery} (Live Web & Maps Lookup)`,
       subtitle: areaParts,
@@ -695,6 +731,8 @@ async function runLiveWebFallback(body: LiveSearchRequestBody): Promise<LiveSear
       websiteUrl: mapsUrl,
       reviewsSummary: `Not yet listed under this exact name in the 2021 National ECD Census (20,291 centres); may be a newly opened private centre or registered under an NPO trading name.`,
       details: `Use the Website link to open live Google Maps & business listings for "${cleanQuery}", or compare with verified nearby South African ECD centres below.`,
+      imageUrl: resolvedPhotos[0],
+      images: resolvedPhotos,
     });
   }
 
@@ -704,6 +742,12 @@ async function runLiveWebFallback(body: LiveSearchRequestBody): Promise<LiveSear
     const schoolMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
       `${s.name} ${s.municipality || s.city}, ${s.province}, South Africa`
     )}`;
+    const resolvedPhotos = resolveRealPreschoolImages({
+      name: s.name,
+      slug: s.slug || s.id,
+      websiteUrl: s.websiteUrl,
+      images: s.images,
+    });
     highlights.push({
       title: s.name,
       subtitle: `${s.municipality || s.city}, ${s.province} · DSD: ${s.dsdRegistration || 'Verified'}`,
@@ -716,6 +760,8 @@ async function runLiveWebFallback(body: LiveSearchRequestBody): Promise<LiveSear
       details:
         s.description ||
         `${s.name} is a verified South African ECD centre in ${s.municipality || s.city}, ${s.province}.`,
+      imageUrl: resolvedPhotos[0],
+      images: resolvedPhotos,
     });
   }
 
@@ -942,15 +988,24 @@ export async function POST(req: NextRequest) {
         ? parsed.highlights
             .filter((h) => h && typeof h.title === 'string' && h.title.trim().length > 0)
             .slice(0, 6)
-            .map((h) => ({
-              title: h.title.trim(),
-              subtitle: (h.subtitle || '').trim(),
-              feeOrAmount: h.feeOrAmount ? String(h.feeOrAmount).trim() : undefined,
-              hoursOrDeadline: h.hoursOrDeadline ? String(h.hoursOrDeadline).trim() : undefined,
-              websiteUrl: normalizeUrl(h.websiteUrl),
-              reviewsSummary: h.reviewsSummary ? String(h.reviewsSummary).trim() : undefined,
-              details: (h.details || '').trim(),
-            }))
+            .map((h) => {
+              const normUrl = normalizeUrl(h.websiteUrl);
+              const resolvedPhotos = resolveRealPreschoolImages({
+                name: h.title.trim(),
+                websiteUrl: normUrl,
+              });
+              return {
+                title: h.title.trim(),
+                subtitle: (h.subtitle || '').trim(),
+                feeOrAmount: h.feeOrAmount ? String(h.feeOrAmount).trim() : undefined,
+                hoursOrDeadline: h.hoursOrDeadline ? String(h.hoursOrDeadline).trim() : undefined,
+                websiteUrl: normUrl,
+                reviewsSummary: h.reviewsSummary ? String(h.reviewsSummary).trim() : undefined,
+                details: (h.details || '').trim(),
+                imageUrl: resolvedPhotos[0],
+                images: resolvedPhotos.length > 0 ? resolvedPhotos : undefined,
+              };
+            })
         : [];
 
       const summary =

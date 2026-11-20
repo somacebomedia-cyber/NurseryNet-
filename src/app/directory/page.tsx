@@ -1,6 +1,11 @@
 "use client";
 
 import { useState, useMemo, useEffect } from 'react';
+import Image from 'next/image';
+import {
+   hasRealWebsitePhoto,
+  resolveRealPreschoolImages,
+} from '@/lib/real-website-photos';
 import {
   PRESCHOOLS,
   PROVINCES,
@@ -297,21 +302,22 @@ export default function DirectoryPage() {
   const savedIdSet = useMemo(() => new Set(savedSchools.map((s) => s.id)), [savedSchools]);
 
   const handleToggleSave = (school: Preschool) => {
-    setSavedSchools((prev) => {
-      const exists = prev.some((s) => s.id === school.id);
-      const next = exists ? prev.filter((s) => s.id !== school.id) : [school, ...prev];
-      try {
-        localStorage.setItem('nurserynet_saved_schools', JSON.stringify(next));
-      } catch {
-        // Ignore storage error
-      }
-      toast({
-        title: exists ? 'Removed from Shortlist' : 'Saved to Shortlist',
-        description: exists
-          ? `${school.name} was removed from your saved comparison list.`
-          : `${school.name} added to your shortlist (${next.length} saved).`,
-      });
-      return next;
+    const exists = savedSchools.some((s) => s.id === school.id);
+    const next = exists
+      ? savedSchools.filter((s) => s.id !== school.id)
+      : [school, ...savedSchools];
+
+    setSavedSchools(next);
+    try {
+      localStorage.setItem('nurserynet_saved_schools', JSON.stringify(next));
+    } catch {
+      // Ignore storage error
+    }
+    toast({
+      title: exists ? 'Removed from Shortlist' : 'Saved to Shortlist',
+      description: exists
+        ? `${school.name} was removed from your saved comparison list.`
+        : `${school.name} added to your shortlist (${next.length} saved).`,
     });
   };
 
@@ -1213,11 +1219,63 @@ export default function DirectoryPage() {
                                   ds.name.toLowerCase() === draftForCheck.name.toLowerCase())
                             );
 
+                          const cardPhotos = resolveRealPreschoolImages({
+                            name: draftForCheck.name,
+                            slug: draftForCheck.slug,
+                            websiteUrl: item.websiteUrl,
+                            images:
+                              item.images && item.images.length > 0
+                                ? item.images
+                                : item.imageUrl
+                                ? [item.imageUrl]
+                                : draftForCheck.images,
+                          });
+                          const hasRealPhoto = hasRealWebsitePhoto(cardPhotos);
+
                           return (
                             <div
                               key={idx}
-                              className="p-4 rounded-xl bg-background border border-border/80 flex flex-col justify-between gap-3"
+                              className="rounded-xl bg-background border border-border/80 overflow-hidden flex flex-col justify-between"
                             >
+                              {cardPhotos.length > 0 && (
+                                <div className="relative w-full h-44 bg-muted overflow-hidden">
+                                  <Image
+                                    src={cardPhotos[0]}
+                                    alt={item.title}
+                                    fill
+                                    sizes="(max-width: 768px) 100vw, 50vw"
+                                    className="object-cover"
+                                    referrerPolicy="no-referrer"
+                                  />
+                                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent pointer-events-none" />
+                                  {hasRealPhoto && (
+                                    <span className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-600/95 text-white shadow-sm backdrop-blur-md">
+                                      Real Photo from School Website
+                                      {cardPhotos.length > 1 ? ` (${cardPhotos.length})` : ''}
+                                    </span>
+                                  )}
+                                  {cardPhotos.length > 1 && (
+                                    <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/55 backdrop-blur-md p-1 rounded-lg">
+                                      {cardPhotos.slice(0, 4).map((thumb, tIdx) => (
+                                        <div
+                                          key={tIdx}
+                                          className="relative w-8 h-6 rounded overflow-hidden border border-white/40"
+                                        >
+                                          <Image
+                                            src={thumb}
+                                            alt={`${item.title} photo ${tIdx + 1}`}
+                                            fill
+                                            sizes="32px"
+                                            className="object-cover"
+                                            referrerPolicy="no-referrer"
+                                          />
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                              <div className="p-4 flex flex-col justify-between gap-3 flex-1">
                               <div className="space-y-1.5">
                                 <div className="flex items-start justify-between gap-2">
                                   <h3 className="font-heading text-sm font-bold text-foreground leading-snug">
@@ -1297,6 +1355,7 @@ export default function DirectoryPage() {
                                     <span>Add &amp; Claim Listing</span>
                                   </Button>
                                 )}
+                              </div>
                               </div>
                             </div>
                           );

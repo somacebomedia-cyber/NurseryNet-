@@ -4,6 +4,14 @@ import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { Preschool, ECD_BENCHMARKS, getMunicipalityBenchmark } from '@/data/preschools';
 import {
+  findVerifiedWebsitePhotoSet,
+  hasOnlyStockPlaceholderImages,
+  hasRealWebsitePhoto,
+  isSocialMediaUrl,
+  MAX_PRESCHOOL_PROFILE_PHOTOS,
+  resolveRealPreschoolImages,
+} from '@/lib/real-website-photos';
+import {
   buildLiveCacheKey,
   getCachedLiveSearch,
   LiveSearchResponse,
@@ -64,18 +72,22 @@ export default function SchoolDetailModal({
   onToggleSave,
 }: SchoolDetailModalProps) {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [autoExtractedImages, setAutoExtractedImages] = useState<string[]>([]);
   const [liveData, setLiveData] = useState<LiveSearchResponse | null>(null);
   const [liveLoading, setLiveLoading] = useState(false);
   const [liveError, setLiveError] = useState<string | null>(null);
 
   const schoolId = preschool?.id || '';
+  const schoolSlug = preschool?.slug || preschool?.id || '';
   const schoolName = preschool?.name || '';
+  const schoolWebsiteUrl = preschool?.websiteUrl || '';
   const schoolMunicipality = preschool?.municipality || preschool?.city || preschool?.suburb || '';
   const schoolProvince = preschool?.province || '';
   const schoolNpo = preschool?.npoNumber || null;
 
   useEffect(() => {
     setActiveImageIndex(0);
+    setAutoExtractedImages([]);
     setLiveError(null);
     if (!schoolId && !schoolName) {
       setLiveData(null);
@@ -85,6 +97,40 @@ export default function SchoolDetailModal({
     const cached = getCachedLiveSearch(cacheKey);
     setLiveData(cached);
   }, [schoolId, schoolName, schoolMunicipality]);
+
+  useEffect(() => {
+    if (!isOpen || !schoolWebsiteUrl || !schoolName) return;
+    const currentResolved = resolveRealPreschoolImages({
+      name: schoolName,
+      slug: schoolSlug,
+      websiteUrl: schoolWebsiteUrl,
+      images: preschool?.images,
+    });
+    if (!hasOnlyStockPlaceholderImages(currentResolved)) {
+      return;
+    }
+
+    let cancelled = false;
+    fetch('/api/extract-website-photos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        websiteUrl: schoolWebsiteUrl,
+        schoolName,
+      }),
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && Array.isArray(data?.images) && data.images.length > 0) {
+          setAutoExtractedImages(data.images.slice(0, MAX_PRESCHOOL_PROFILE_PHOTOS));
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, schoolWebsiteUrl, schoolName, schoolSlug, preschool?.images]);
 
   if (!preschool) return null;
 
@@ -133,9 +179,41 @@ export default function SchoolDetailModal({
     }
   };
 
-  const images = preschool.images && preschool.images.length > 0
-    ? preschool.images
-    : ['https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=1200&q=80'];
+  const liveExtractedImages =
+    liveData?.highlights?.[0]?.images && liveData.highlights[0].images.length > 0
+      ? liveData.highlights[0].images
+      : liveData?.highlights?.[0]?.imageUrl
+      ? [liveData.highlights[0].imageUrl]
+      : [];
+
+  const effectiveWebsiteUrl = preschool.websiteUrl || liveData?.highlights?.[0]?.websiteUrl;
+
+  const resolvedImages = resolveRealPreschoolImages({
+    name: preschool.name,
+    slug: preschool.slug || preschool.id,
+    websiteUrl: effectiveWebsiteUrl,
+    images:
+      autoExtractedImages.length > 0
+        ? [...autoExtractedImages, ...liveExtractedImages, ...(preschool.images || [])]
+        : liveExtractedImages.length > 0
+        ? [...liveExtractedImages, ...(preschool.images || [])]
+        : preschool.images,
+  }).slice(0, MAX_PRESCHOOL_PROFILE_PHOTOS);
+
+  const images = (
+    resolvedImages.length > 0
+      ? resolvedImages
+      : ['https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=1200&q=80']
+  ).slice(0, MAX_PRESCHOOL_PROFILE_PHOTOS);
+
+  const isRealWebsitePhoto = hasRealWebsitePhoto(images);
+  const isSocialPage = isSocialMediaUrl(effectiveWebsiteUrl);
+  const verifiedPhotoSet = findVerifiedWebsitePhotoSet({
+    name: preschool.name,
+    slug: preschool.slug || preschool.id,
+    websiteUrl: effectiveWebsiteUrl,
+  });
+  const activePhotoCaption = verifiedPhotoSet?.captions?.[activeImageIndex] || null;
 
   const muniStats = getMunicipalityBenchmark(preschool.municipality || preschool.city || preschool.district);
   const hasFencing = preschool.facilities.some(f => f.toLowerCase().includes('fence') || f.toLowerCase().includes('security'));
@@ -196,11 +274,19 @@ export default function SchoolDetailModal({
             <span className="px-3 py-1 rounded-full text-xs font-bold bg-primary text-primary-foreground shadow-md">
               {preschool.curriculum}
             </span>
+
+            {isRealWebsitePhoto && (
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-purple-600/95 text-white shadow-md backdrop-blur-md">
+                {isSocialPage
+                  ? `Official Social Media Photos (${images.length})`
+                  : `Official Website Photos (${images.length})`}
+              </span>
+            )}
           </div>
 
           {/* Multi-Photo Switcher Dots */}
           {images.length > 1 && (
-            <div className="absolute top-4 right-4 flex gap-1.5 bg-black/50 backdrop-blur-md p-1.5 rounded-full z-10">
+            <div className="absolute top-4 right-14 flex gap-1.5 bg-black/50 backdrop-blur-md p-1.5 rounded-full z-10">
               {images.map((_, idx) => (
                 <button
                   key={idx}
@@ -216,6 +302,11 @@ export default function SchoolDetailModal({
 
           {/* Bottom Title Scrim */}
           <div className="absolute bottom-4 left-4 right-4 text-white z-10">
+            {activePhotoCaption && (
+              <div className="inline-block mb-1.5 px-2.5 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-[11px] font-medium text-white/95">
+                {activePhotoCaption}
+              </div>
+            )}
             <h2 className="font-heading text-2xl sm:text-3xl font-extrabold drop-shadow-md">
               {preschool.name}
             </h2>
@@ -231,6 +322,39 @@ export default function SchoolDetailModal({
             </div>
           </div>
         </div>
+
+        {/* Real Website Photo Thumbnail Strip */}
+        {images.length > 1 && (
+          <div className="px-6 pt-3 pb-1 bg-muted/30 border-b border-border/60 flex items-center gap-2 overflow-x-auto">
+            {images.map((imgSrc, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => setActiveImageIndex(idx)}
+                className={`relative w-16 h-11 rounded-lg overflow-hidden shrink-0 border-2 transition-all ${
+                  idx === activeImageIndex
+                    ? 'border-primary ring-2 ring-primary/30 scale-105'
+                    : 'border-transparent opacity-70 hover:opacity-100'
+                }`}
+                title={verifiedPhotoSet?.captions?.[idx] || `Campus photo ${idx + 1}`}
+              >
+                <Image
+                  src={imgSrc}
+                  alt={`${preschool.name} photo ${idx + 1}`}
+                  fill
+                  sizes="64px"
+                  className="object-cover"
+                  referrerPolicy="no-referrer"
+                />
+              </button>
+            ))}
+            {isRealWebsitePhoto && (
+              <span className="text-[11px] text-muted-foreground font-medium ml-2 whitespace-nowrap">
+                Real photos from {preschool.websiteUrl ? preschool.websiteUrl.replace(/^https?:\/\//, '') : 'school website'}
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Modal Body Content */}
         <div className="p-6 space-y-6">
@@ -667,7 +791,7 @@ export default function SchoolDetailModal({
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-background text-foreground hover:border-primary transition-colors font-medium"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
-                  <span>Official Website</span>
+                  <span>{isSocialPage ? 'Official Social Page' : 'Official Website'}</span>
                 </a>
               )}
             </div>

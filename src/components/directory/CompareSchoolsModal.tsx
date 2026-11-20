@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { Preschool, getMunicipalityBenchmark } from '@/data/preschools';
+import { resolveRealPreschoolImages } from '@/lib/real-website-photos';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -105,9 +106,15 @@ export default function CompareSchoolsModal({
                     Preschool Details
                   </th>
                   {compared.map((school) => {
+                    const resolved = resolveRealPreschoolImages({
+                      name: school.name,
+                      slug: school.slug || school.id,
+                      websiteUrl: school.websiteUrl,
+                      images: school.images,
+                    });
                     const defaultImage =
-                      school.images && school.images.length > 0
-                        ? school.images[0]
+                      resolved.length > 0
+                        ? resolved[0]
                         : 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=800&q=80';
                     return (
                       <th key={school.id} className="p-3 align-top min-w-[190px] max-w-[240px]">

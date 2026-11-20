@@ -1,0 +1,875 @@
+[
+  {
+    "domain": "nawilearn.co.za",
+    "namePattern": "nawi\\\\s*learn",
+    "websiteUrl": "https://www.nawilearn.co.za",
+    "sourceType": "website",
+    "images": [
+      "/images/preschools/nawi-learn-cover-1.jpg",
+      "/images/preschools/nawi-learn-cover-2.jpg",
+      "/images/preschools/nawi-learn-outdoor-3.jpg",
+      "/images/preschools/nawi-learn-learners-4.jpg",
+      "/images/preschools/nawi-learn-play-5.jpg",
+      "/images/preschools/nawi-learn-friends-6.jpg"
+    ],
+    "captions": [
+      "Nurturing Care — Dedicated staff at Nawi Learn Toddler Centre",
+      "Fun & Connection — Building bonds through play",
+      "Outdoor Socializing — Fresh air and snacks in our secure outdoor area",
+      "Ready to Learn — Learners arriving excited to explore",
+      "Outdoor Play — Safe outdoor play in all seasons",
+      "Building Friendships — Sharing moments, snacks, and smiles"
+    ],
+    "coverPhoto": "/images/preschools/nawi-learn-cover-1.jpg"
+  },
+  {
+    "domain": "littleashford.co.za",
+    "namePattern": "little\\\\s*ashford",
+    "websiteUrl": "https://littleashford.co.za",
+    "sourceType": "website",
+    "images": [
+      "/images/preschools/little-ashford-cover-1.jpg",
+      "/images/preschools/little-ashford-campus-2.jpg",
+      "/images/preschools/little-ashford-campus-3.jpg"
+    ],
+    "captions": [
+      "Little Ashford Preschool — Early childhood learning environment",
+      "Little Ashford Campus — Purpose-built Reggio Emilia facilities",
+      "Little Ashford Outdoor Campus — Safe green play areas"
+    ],
+    "coverPhoto": "/images/preschools/little-ashford-cover-1.jpg"
+  },
+  {
+    "domain": "abrahamkriel.org",
+    "namePattern": "johana\\\\s*malan|abraham\\\\s*kriel",
+    "websiteUrl": "https://www.abrahamkriel.org",
+    "sourceType": "website",
+    "images": [
+      "/images/preschools/johana-malan-cover-1.jpg",
+      "/images/preschools/johana-malan-cover-2.jpg"
+    ],
+    "captions": [
+      "Johana Malan Early Childhood Development Centre — Campus & learners",
+      "Healthy Foundations — Early childhood development programme"
+    ],
+    "coverPhoto": "/images/preschools/johana-malan-cover-1.jpg"
+  },
+  {
+    "domain": "facebook.com/acaciatreenurseryschool",
+    "namePattern": "acacia\\\\s*tree\\\\s*nursery",
+    "websiteUrl": "https://www.facebook.com/acaciatreenurseryschool",
+    "sourceType": "social",
+    "images": [
+      "/images/preschools/acacia-tree-fb-cover-1.jpg"
+    ],
+    "captions": [
+      "Acacia Tree Nursery School — Official Facebook Page Photo"
+    ],
+    "coverPhoto": "/images/preschools/acacia-tree-fb-cover-1.jpg"
+  },
+  {
+    "domain": "pinelandsmontessori.co.za",
+    "namePattern": "pinelands\\\\s*montessori",
+    "websiteUrl": "https://pinelandsmontessori.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://pinelandsmontessori.co.za/_astro/hero.6aNz8wqQ_MoRFl.webp?dpl=dpl_Fq6R9YfCjCLkTeeVDE9ghtjEHsDZ",
+      "https://pinelandsmontessori.co.za/_astro/playground.BC2MG3ee_Z2i9Wvo.webp?dpl=dpl_Fq6R9YfCjCLkTeeVDE9ghtjEHsDZ",
+      "https://pinelandsmontessori.co.za/_astro/toddler.XJpsN3zC_Z1eKRuM.webp?dpl=dpl_Fq6R9YfCjCLkTeeVDE9ghtjEHsDZ",
+      "https://pinelandsmontessori.co.za/_astro/3-6.BA2ml9yO_1NqF9G.webp?dpl=dpl_Fq6R9YfCjCLkTeeVDE9ghtjEHsDZ",
+      "https://pinelandsmontessori.co.za/_astro/primary.KXIl2U9R_Z2gjsnV.webp?dpl=dpl_Fq6R9YfCjCLkTeeVDE9ghtjEHsDZ",
+      "https://pinelandsmontessori.co.za/_astro/school.UJHE7c-D_20bL3x.webp?dpl=dpl_Fq6R9YfCjCLkTeeVDE9ghtjEHsDZ"
+    ],
+    "coverPhoto": "https://pinelandsmontessori.co.za/_astro/hero.6aNz8wqQ_MoRFl.webp?dpl=dpl_Fq6R9YfCjCLkTeeVDE9ghtjEHsDZ"
+  },
+  {
+    "domain": "happydaysschool.co.za",
+    "namePattern": "happy\\\\s*days\\\\s*kindergarten",
+    "websiteUrl": "https://www.happydaysschool.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://www.happydaysschool.co.za/wp-content/uploads/2024/11/Children-huddling-in-a-circle.webp",
+      "https://www.happydaysschool.co.za/wp-content/uploads/2024/11/Children-lying-on-the-floor-smiling-at-camera.webp",
+      "https://www.happydaysschool.co.za/wp-content/uploads/2024/11/Children-playing-on-swings.webp",
+      "https://www.happydaysschool.co.za/wp-content/uploads/2024/11/Children-in-graduation-hats.webp",
+      "https://www.happydaysschool.co.za/wp-content/uploads/2024/11/Finger-Painting-1024x576.webp"
+    ],
+    "coverPhoto": "https://www.happydaysschool.co.za/wp-content/uploads/2024/11/Children-huddling-in-a-circle.webp"
+  },
+  {
+    "domain": "splendidkids.co.za",
+    "namePattern": "splendid\\\\s*kids",
+    "websiteUrl": "https://brackenfell.splendidkids.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://brackenfell.splendidkids.co.za/wp-content/uploads/2021/10/splendid-gallery-16.jpg",
+      "https://brackenfell.splendidkids.co.za/wp-content/uploads/2021/10/splendid-gallery-01.jpg",
+      "https://brackenfell.splendidkids.co.za/wp-content/uploads/2025/11/IMG-20251102-WA0014-1024x1024.jpg",
+      "https://brackenfell.splendidkids.co.za/wp-content/uploads/2025/11/IMG-20251102-WA0015-1024x1024.jpg",
+      "https://brackenfell.splendidkids.co.za/wp-content/uploads/2025/11/IMG-20251102-WA0016-1024x1024.jpg",
+      "https://brackenfell.splendidkids.co.za/wp-content/uploads/2025/11/IMG-20251102-WA0017-1024x1024.jpg"
+    ],
+    "coverPhoto": "https://brackenfell.splendidkids.co.za/wp-content/uploads/2021/10/splendid-gallery-16.jpg"
+  },
+  {
+    "domain": "kleuterkampushermanus.co.za",
+    "namePattern": "kleuterkampus",
+    "websiteUrl": "https://kleuterkampushermanus.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://kleuterkampushermanus.co.za/wp-content/uploads/2026/09/Hermanus-Kleuterkampus-Beste-Kleuterskool-in-Hermanus-015.jpg",
+      "https://kleuterkampushermanus.co.za/wp-content/uploads/2026/09/Hermanus-Kleuterkampus-Beste-Kleuterskool-in-Hermanus-018.jpg",
+      "https://kleuterkampushermanus.co.za/wp-content/uploads/2026/09/Hermanus-Kleuterkampus-Beste-Kleuterskool-in-Hermanus-045.jpg",
+      "https://kleuterkampushermanus.co.za/wp-content/uploads/2023/11/Kleuterkampus-Hermanus-Kleuterskool-Beste-Kleuterskool-in-Hermanus-033.jpg",
+      "https://kleuterkampushermanus.co.za/wp-content/uploads/2023/11/Kleuterkampus-Hermanus-Kleuterskool-Beste-Kleuterskool-in-Hermanus-026.jpg",
+      "https://kleuterkampushermanus.co.za/wp-content/uploads/2023/11/Kleuterkampus-Hermanus-Kleuterskool-Beste-Kleuterskool-in-Hermanus-022.jpg"
+    ],
+    "coverPhoto": "https://kleuterkampushermanus.co.za/wp-content/uploads/2026/09/Hermanus-Kleuterkampus-Beste-Kleuterskool-in-Hermanus-015.jpg"
+  },
+  {
+    "domain": "littleearth.co.za",
+    "namePattern": "little\\\\s*earth\\\\s*pre",
+    "websiteUrl": "https://www.littleearth.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://www.littleearth.co.za/wp-content/themes/Little%20Earth/img/the_boy.jpg",
+      "https://www.littleearth.co.za/wp-content/uploads/2024/10/entrance.jpg",
+      "https://www.littleearth.co.za/wp-content/uploads/2024/10/contact.jpg",
+      "https://www.littleearth.co.za/wp-content/themes/Little%20Earth/img/mom_and_me.jpeg",
+      "https://www.littleearth.co.za/wp-content/themes/Little%20Earth/img/mom_family.jpg",
+      "https://www.littleearth.co.za/wp-content/themes/Little%20Earth/img/logo_overlay.png"
+    ],
+    "coverPhoto": "https://www.littleearth.co.za/wp-content/themes/Little%20Earth/img/the_boy.jpg"
+  },
+  {
+    "domain": "kaydee.co.za",
+    "namePattern": "kay-?dee\\\\s*educare",
+    "websiteUrl": "https://www.kaydee.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://www.kaydee.co.za/portals/34/Educare-Centre.jpg",
+      "https://www.kaydee.co.za/portals/34/Kay-Dee-School-Aftercare.jpg?ver=2016-02-15-111107-767",
+      "https://www.kaydee.co.za/portals/34/babycare-creche.jpg?ver=2016-02-15-111813-803",
+      "https://www.kaydee.co.za/Portals/34//SunBlogNuke/352/how-to-choose-an-early-childhood-educare-centre-Cape-Town-1.jpg",
+      "https://www.kaydee.co.za/Portals/34//SunBlogNuke/-1/how-can-i-help-my-two-year-old-with-language-development-2mf.jpg",
+      "https://www.kaydee.co.za/Portals/34//SunBlogNuke/-1/what-is-executive-function-27.jpg"
+    ],
+    "coverPhoto": "https://www.kaydee.co.za/portals/34/Educare-Centre.jpg"
+  },
+  {
+    "domain": "shereensmontessori.co.za",
+    "namePattern": "shereens?\\\\s*montessori",
+    "websiteUrl": "https://shereensmontessori.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://shereensmontessori.co.za/wp-content/uploads/2023/06/upright-scaled.jpg",
+      "https://shereensmontessori.co.za/wp-content/uploads/2023/06/20210805_144445.jpg",
+      "https://shereensmontessori.co.za/wp-content/uploads/2023/06/20210805_144353-scaled.jpg",
+      "https://shereensmontessori.co.za/wp-content/uploads/2025/01/shereensmontessori-1024x967.png",
+      "https://shereensmontessori.co.za/wp-content/uploads/2023/03/feat02-1024x967.jpg",
+      "https://shereensmontessori.co.za/wp-content/uploads/2023/03/feat03-1024x967.jpg"
+    ],
+    "coverPhoto": "https://shereensmontessori.co.za/wp-content/uploads/2023/06/upright-scaled.jpg"
+  },
+  {
+    "domain": "rooha.org",
+    "namePattern": "rooha\\\\s*preprimary",
+    "websiteUrl": "https://www.rooha.org",
+    "sourceType": "website",
+    "images": [
+      "https://static.wixstatic.com/media/200853_efdf1ac27bf949b1b4ecdca206241d39~mv2.jpeg",
+      "https://static.wixstatic.com/media/200853_c150d2baf3cc481db9a9bccda429bec8~mv2.jpeg",
+      "https://static.wixstatic.com/media/200853_9a35ceb094dd48659202410045ec3bac~mv2.jpeg",
+      "https://static.wixstatic.com/media/200853_652a168a107d4039b4cbe0eddbce6a17~mv2.jpg",
+      "https://static.wixstatic.com/media/200853_2a3aa925f26d499188e5897df955a07b~mv2.jpg",
+      "https://static.wixstatic.com/media/200853_07cb362cf08c419a8c4cedd5e4d374e2~mv2.jpeg"
+    ],
+    "coverPhoto": "https://static.wixstatic.com/media/200853_efdf1ac27bf949b1b4ecdca206241d39~mv2.jpeg"
+  },
+  {
+    "domain": "nurtureandnature.co.za",
+    "namePattern": "nurture\\\\s*and\\\\s*nature",
+    "websiteUrl": "https://www.nurtureandnature.co.za/ballito/",
+    "sourceType": "website",
+    "images": [
+      "https://www.nurtureandnature.co.za/wp-content/uploads/2024/09/NN-Ballito-Page-1.jpg",
+      "https://www.nurtureandnature.co.za/wp-content/uploads/2024/09/NN-Ballito-Page-2-1.jpg",
+      "https://www.nurtureandnature.co.za/wp-content/uploads/2022/09/nurtureandnature_ballito_image_img_1641-min.webp",
+      "https://www.nurtureandnature.co.za/wp-content/uploads/2022/09/nurtureandnature_ballito_image_img_1628-min.webp",
+      "https://www.nurtureandnature.co.za/wp-content/uploads/elementor/thumbs/nurtureandnature_ballito_image_img_1662-min-pusmjui0olp8xnafrq3a72ob4ik4lupxevkbe6zgzc.webp"
+    ],
+    "coverPhoto": "https://www.nurtureandnature.co.za/wp-content/uploads/2024/09/NN-Ballito-Page-1.jpg"
+  },
+  {
+    "domain": "curiousminds.co.za",
+    "namePattern": "curious\\\\s*minds",
+    "websiteUrl": "https://curiousminds.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://curiousminds.co.za/images/for-concert-98_snapseed.webp",
+      "https://curiousminds.co.za/images/olga-kitchen-hero.webp",
+      "https://curiousminds.co.za/images/summermenu.jpg",
+      "https://curiousminds.co.za/images/aftercare.webp",
+      "https://curiousminds.co.za/images/cmweb-final-3_snapseed.webp"
+    ],
+    "coverPhoto": "https://curiousminds.co.za/images/for-concert-98_snapseed.webp"
+  },
+  {
+    "domain": "littlelights.co.za",
+    "namePattern": "little\\\\s*lights\\\\s*pre",
+    "websiteUrl": "https://www.littlelights.co.za",
+    "sourceType": "website",
+    "images": [
+      "http://www.littlelights.co.za/wp-content/uploads/2024/06/2-Grade-R-scaled-e1718627000420.jpg",
+      "http://www.littlelights.co.za/wp-content/uploads/2024/06/5-Activities-scaled-e1718627386592.jpg",
+      "http://www.littlelights.co.za/wp-content/uploads/2024/06/three-boys-scaled-e1718627670483.jpg",
+      "http://www.littlelights.co.za/wp-content/uploads/2024/06/2-Sports-Day-e1718627840654.jpg",
+      "http://www.littlelights.co.za/wp-content/uploads/2024/06/Little-Lights-Pre-School-2024.png"
+    ],
+    "coverPhoto": "http://www.littlelights.co.za/wp-content/uploads/2024/06/2-Grade-R-scaled-e1718627000420.jpg"
+  },
+  {
+    "domain": "noagsearkie.co.za",
+    "namePattern": "noag\\\\s*se\\\\s*arkie",
+    "websiteUrl": "https://www.noagsearkie.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://www.noagsearkie.co.za/wp-content/uploads/2025/04/Noag-se-arkie-speel-mirror-me-1024x683.jpg",
+      "https://www.noagsearkie.co.za/wp-content/uploads/2014/08/2013-11-20_10.53.22.jpg",
+      "https://www.noagsearkie.co.za/wp-content/uploads/2014/08/2014-01-24_10.29.00.jpg",
+      "https://www.noagsearkie.co.za/wp-content/uploads/2014/08/020.jpg"
+    ],
+    "coverPhoto": "https://www.noagsearkie.co.za/wp-content/uploads/2025/04/Noag-se-arkie-speel-mirror-me-1024x683.jpg"
+  },
+  {
+    "domain": "pinocchiocreche.co.za",
+    "namePattern": "pinocchio\\\\s*creche",
+    "websiteUrl": "https://www.pinocchiocreche.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://www.pinocchiocreche.co.za/wp-content/uploads/2025/06/PC_Web-images_3.jpg",
+      "https://www.pinocchiocreche.co.za/wp-content/uploads/2025/07/PC_Web-images_HealthySnacks.jpg",
+      "https://www.pinocchiocreche.co.za/wp-content/uploads/2025/07/PC_Web-images_Babyroom.jpg",
+      "https://www.pinocchiocreche.co.za/wp-content/uploads/2025/06/PC_Web-images_4.jpg",
+      "https://www.pinocchiocreche.co.za/wp-content/uploads/2020/12/foreword_img.png"
+    ],
+    "coverPhoto": "https://www.pinocchiocreche.co.za/wp-content/uploads/2025/06/PC_Web-images_3.jpg"
+  },
+  {
+    "domain": "kidscovegordonsbay.co.za",
+    "namePattern": "kids\\\\s*cove",
+    "websiteUrl": "https://www.kidscovegordonsbay.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://kidscovegordonsbay.co.za/wp-content/uploads/2023/07/Premise-Featured-Image-2-Kids-Cove.jpg",
+      "https://kidscovegordonsbay.co.za/wp-content/uploads/2023/08/Preschool-Nursery-Aftercare-Class-In-Gordons-Bay-Western-Cape-South-Africa-Kids-Cove.png",
+      "https://kidscovegordonsbay.co.za/wp-content/uploads/2023/08/Preschool-Nursery-Aftercare-Class-In-Gordons-Bay-Kids-Cove.png",
+      "https://kidscovegordonsbay.co.za/wp-content/uploads/2023/08/Preschool-Nursery-Aftercare-Class-In-Gordons-Bay-Western-Cape-Kids-Cove.png"
+    ],
+    "coverPhoto": "https://kidscovegordonsbay.co.za/wp-content/uploads/2023/07/Premise-Featured-Image-2-Kids-Cove.jpg"
+  },
+  {
+    "domain": "littlelambs.org.za",
+    "namePattern": "little\\\\s*lambs\\\\s*creche",
+    "websiteUrl": "https://www.littlelambs.org.za",
+    "sourceType": "website",
+    "images": [
+      "https://images.squarespace-cdn.com/content/v1/60cc721b701da40345ac845b/36830dd3-2e57-4bc7-a02d-1001e53c5c45/IMG_0146.jpg",
+      "https://images.squarespace-cdn.com/content/v1/60cc721b701da40345ac845b/1ddfc410-cdc1-4937-a84d-9895d107c04a/IMG_0830.jpg",
+      "https://images.squarespace-cdn.com/content/v1/60cc721b701da40345ac845b/5af93af3-c4fb-4163-af6c-ca80ce73ad72/IMG_1525.jpg"
+    ],
+    "coverPhoto": "https://images.squarespace-cdn.com/content/v1/60cc721b701da40345ac845b/36830dd3-2e57-4bc7-a02d-1001e53c5c45/IMG_0146.jpg"
+  },
+  {
+    "domain": "firststepsdaycare.co.za",
+    "namePattern": "first\\\\s*steps?\\\\s*daycare",
+    "websiteUrl": "https://firststepsdaycare.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://firststepsdaycare.co.za/wp-content/uploads/2025/03/WhatsApp-Image-2025-03-04-at-18.48.44-1024x1024.jpeg",
+      "https://firststepsdaycare.co.za/wp-content/uploads/2025/03/Screenshot-2025-03-06-at-20.39.44.png",
+      "https://firststepsdaycare.co.za/wp-content/uploads/2025/03/Screenshot-2025-03-06-at-20.38.32.png",
+      "https://firststepsdaycare.co.za/wp-content/uploads/2025/03/Screenshot-2025-03-06-at-20.42.51.png"
+    ],
+    "coverPhoto": "https://firststepsdaycare.co.za/wp-content/uploads/2025/03/WhatsApp-Image-2025-03-04-at-18.48.44-1024x1024.jpeg"
+  },
+  {
+    "domain": "barklyhouse.co.za",
+    "namePattern": "barkle?y\\\\s*house",
+    "websiteUrl": "https://barklyhouse.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://barklyhouse.co.za/images/800x800/22504652/IMG_0008-Large-1024x768-fed9HIag54MbgOA8NpTf_Q.jpg",
+      "https://barklyhouse.co.za/images/800x800/22504648/IMG_0015-Large-e1543342338499-1024x768-P-GIxJNMmiGxBaYhDWdv-g.jpg",
+      "https://barklyhouse.co.za/images/800x800/22504641/IMG_3734-e1572892272340-1024x768-gUcQs3d5hxqx0QhyS3LUKw.jpeg",
+      "https://barklyhouse.co.za/images/800x800/22504624/IMG_4409-Large-e1540190329376-1024x768-jWlZGXL6UOev43GPmaGvjQ.jpg",
+      "https://barklyhouse.co.za/images/1200x630/21737329/a-diverse-collection-of-art-supplies-in-metallic-buckets-on-a-wooden-table-VUhOLkCr8DK1Rfpj74IXNg.jpeg"
+    ],
+    "coverPhoto": "https://barklyhouse.co.za/images/800x800/22504652/IMG_0008-Large-1024x768-fed9HIag54MbgOA8NpTf_Q.jpg"
+  },
+  {
+    "domain": "vpgrey.co.za",
+    "namePattern": "victoria\\\\s*park\\\\s*grey",
+    "websiteUrl": "https://www.vpgrey.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://www.vpgrey.co.za/sitepad-data/uploads/2025/10/image-2.jpeg",
+      "https://www.vpgrey.co.za/sitepad-data/uploads/2025/10/IMG_0012.jpg",
+      "https://www.vpgrey.co.za/sitepad-data/uploads/2026/08/IMG_0548.jpg",
+      "https://www.vpgrey.co.za/sitepad-data/uploads/2025/10/IMG_0953.jpg",
+      "https://www.vpgrey.co.za/sitepad-data/uploads/2025/10/IMG_0548-1.jpg",
+      "https://www.vpgrey.co.za/sitepad-data/uploads/2025/10/IMG_0961-1.jpg"
+    ],
+    "coverPhoto": "https://www.vpgrey.co.za/sitepad-data/uploads/2025/10/image-2.jpeg"
+  },
+  {
+    "domain": "airliecountrypreschool.com",
+    "namePattern": "airlie\\\\s*country\\\\s*pre",
+    "websiteUrl": "https://www.airliecountrypreschool.com",
+    "sourceType": "website",
+    "images": [
+      "https://static.wixstatic.com/media/3dd25e_4c95cb12872142358c454805c05e64b5~mv2.jpg",
+      "https://static.wixstatic.com/media/3dd25e_a5caf97f385f4e7d90e0eccabed51679~mv2.jpg",
+      "https://static.wixstatic.com/media/3dd25e_914d97ee62e243948569ea97c07a9ac3~mv2.jpg",
+      "https://static.wixstatic.com/media/3dd25e_44967930a0d3412c99facfe2bc2b1a08~mv2.jpg",
+      "https://static.wixstatic.com/media/3dd25e_b3621f505bbf411c85899e4543bb1afe~mv2.jpg"
+    ],
+    "coverPhoto": "https://static.wixstatic.com/media/3dd25e_4c95cb12872142358c454805c05e64b5~mv2.jpg"
+  },
+  {
+    "domain": "elkanah.co.za",
+    "namePattern": "elkanah\\\\s*house",
+    "websiteUrl": "https://www.elkanah.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://irp.cdn-website.com//f1c72268/dms3rep/multi/opt/Our+History+3-1920w.jpg",
+      "https://irp.cdn-website.com//f1c72268/dms3rep/multi/opt/Our+Ethos-1920w.jpg",
+      "https://irp.cdn-website.com//f1c72268/dms3rep/multi/opt/Homepage+Admissions-1920w.jpg",
+      "https://lirp.cdn-website.com/f1c72268/dms3rep/multi/opt/senior+high+corridor+-+LR-1920w.jpg"
+    ],
+    "coverPhoto": "https://irp.cdn-website.com//f1c72268/dms3rep/multi/opt/Our+History+3-1920w.jpg"
+  },
+  {
+    "domain": "wuct.org.za",
+    "namePattern": "emmanuel\\\\s*educare",
+    "websiteUrl": "https://www.wuct.org.za",
+    "sourceType": "website",
+    "images": [
+      "https://www.wuct.org.za/wp-content/uploads/2026/06/Mask-Group-27@2x.jpg",
+      "https://www.wuct.org.za/wp-content/uploads/2026/07/Mask-Group-38@2x.jpg",
+      "https://www.wuct.org.za/wp-content/uploads/2026/07/Mask-Group-42@2x.jpg",
+      "https://www.wuct.org.za/wp-content/uploads/2026/07/Mask-Group-39@2x.jpg",
+      "https://www.wuct.org.za/wp-content/uploads/2026/06/Our-Community.jpg",
+      "https://www.wuct.org.za/wp-content/uploads/2026/09/Jodean-edited.jpg"
+    ],
+    "coverPhoto": "https://www.wuct.org.za/wp-content/uploads/2026/06/Mask-Group-27@2x.jpg"
+  },
+  {
+    "domain": "bokkienaskool.co.za",
+    "namePattern": "bokkie\\\\s*naskool",
+    "websiteUrl": "https://www.bokkienaskool.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://www.bokkienaskool.co.za/media/b53b8e1e/db201fdc642b2f972175fd0c48a2cbcc.jpg",
+      "https://www.bokkienaskool.co.za/media/b53b8e1e/e6388dbed7d42b537cceafa5711a991e.jpg",
+      "https://www.bokkienaskool.co.za/media/b53b8e1e/2be5ccf5fd8f1e0cb4cbc70e6c2c9df6.png",
+      "https://www.bokkienaskool.co.za/media/b53b8e1e/41c2cc8481392c53b227976a5aec572c.jpg",
+      "https://www.bokkienaskool.co.za/media/b53b8e1e/7d13296b9522208711b2ceeece52dc52.jpg",
+      "https://www.bokkienaskool.co.za/media/b53b8e1e/0cc644c2a9e2534b2e16738de8a10b71.png"
+    ],
+    "coverPhoto": "https://www.bokkienaskool.co.za/media/b53b8e1e/db201fdc642b2f972175fd0c48a2cbcc.jpg"
+  },
+  {
+    "domain": "stmartinikindergarten.org.za",
+    "namePattern": "st\\\\.?\\\\s*martini\\\\s*kindergarten",
+    "websiteUrl": "https://www.stmartinikindergarten.org.za",
+    "sourceType": "website",
+    "images": [
+      "https://www.stmartinikindergarten.org.za/wp-content/uploads/2016/06/new-about.png",
+      "https://www.stmartinikindergarten.org.za/wp-content/uploads/2025/09/19-300x300.jpg",
+      "https://www.stmartinikindergarten.org.za/wp-content/uploads/2022/11/Corinna-Coco-Wopker-e1668065609452-300x300.jpg",
+      "https://www.stmartinikindergarten.org.za/wp-content/uploads/2025/09/2-300x300.jpg",
+      "https://www.stmartinikindergarten.org.za/wp-content/uploads/2025/09/28-300x300.jpg",
+      "https://www.stmartinikindergarten.org.za/wp-content/uploads/2025/09/20-300x300.jpg"
+    ],
+    "coverPhoto": "https://www.stmartinikindergarten.org.za/wp-content/uploads/2016/06/new-about.png"
+  },
+  {
+    "domain": "eduzone.biz",
+    "namePattern": "eduzone\\\\s*nursery",
+    "websiteUrl": "https://eduzone.biz",
+    "sourceType": "website",
+    "images": [
+      "https://eduzone.biz/wp-content/uploads/2020/11/eduzone-4.jpg",
+      "https://eduzone.biz/wp-content/uploads/2020/11/eduzone-11.jpg",
+      "https://eduzone.biz/wp-content/uploads/2020/11/EDZ-17.jpg",
+      "https://eduzone.biz/wp-content/uploads/2026/03/5a2aef28db68181c8f184dcb.png"
+    ],
+    "coverPhoto": "https://eduzone.biz/wp-content/uploads/2020/11/eduzone-4.jpg"
+  },
+  {
+    "domain": "cambridgemontessori.co.za",
+    "namePattern": "cambridge\\\\s*montessori",
+    "websiteUrl": "https://cambridgemontessori.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://cambridgemontessori.co.za/wp-content/uploads/2015/12/home_kindergarten_pic1.png",
+      "https://cambridgemontessori.co.za/wp-content/uploads/2015/12/home_kindergarten_pic2.png",
+      "https://cambridgemontessori.co.za/wp-content/uploads/2015/12/home_kindergarten_section_bg1.png",
+      "https://cambridgemontessori.co.za/wp-content/uploads/2015/12/home_kindergarten_section_bg2.png"
+    ],
+    "coverPhoto": "https://cambridgemontessori.co.za/wp-content/uploads/2015/12/home_kindergarten_pic1.png"
+  },
+  {
+    "domain": "ithembaschool.co.za",
+    "namePattern": "ithemba\\\\s*pre-?school",
+    "websiteUrl": "https://www.ithembaschool.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://static.wixstatic.com/media/7ad8a5_ac09bd6349f847d094aee833d15eae97~mv2.jpg",
+      "https://static.wixstatic.com/media/7ad8a5_9575db8966a1466a973e911f6efffe44~mv2.jpg",
+      "https://static.wixstatic.com/media/7ad8a5_40539ce5192c47588355e4902c69ca18~mv2.jpg"
+    ],
+    "coverPhoto": "https://static.wixstatic.com/media/7ad8a5_ac09bd6349f847d094aee833d15eae97~mv2.jpg"
+  },
+  {
+    "domain": "poohbeareducare.co.za",
+    "namePattern": "pooh\\\\s*bear",
+    "websiteUrl": "https://www.poohbeareducare.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://www.poohbeareducare.co.za/images/new-premises.jpg",
+      "https://www.poohbeareducare.co.za/images/Raats-Drive-Premises.png"
+    ],
+    "coverPhoto": "https://www.poohbeareducare.co.za/images/new-premises.jpg"
+  },
+  {
+    "domain": "steppingstoneschildrenscentre.org.za",
+    "namePattern": "stepping\\\\s*stones\\\\s*for\\\\s*children",
+    "websiteUrl": "https://steppingstoneschildrenscentre.org.za",
+    "sourceType": "website",
+    "images": [
+      "http://steppingstoneschildrenscentre.org.za/wp/wp-content/uploads/2019/09/stepping-stones-play-1.jpg",
+      "http://steppingstoneschildrenscentre.org.za/wp/wp-content/uploads/2019/09/stepping-stones-play.jpg",
+      "https://steppingstoneschildrenscentre.org.za/wp/wp-content/uploads/2019/09/stepping-stones-logo.jpg"
+    ],
+    "coverPhoto": "http://steppingstoneschildrenscentre.org.za/wp/wp-content/uploads/2019/09/stepping-stones-play-1.jpg"
+  },
+  {
+    "domain": "villamariaeducare.co.za",
+    "namePattern": "villa\\\\s*maria\\\\s*pre",
+    "websiteUrl": "https://www.villamariaeducare.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://cdn.prod.website-files.com/691d743724393672b9ae3960/69370580b58b3eb002f0f529_pexels-yankrukov-8613319.jpg",
+      "https://cdn.prod.website-files.com/691d743724393672b9ae3960/69370553549c93bc25570672_pexels-pnw-prod-7678213.jpg",
+      "https://cdn.prod.website-files.com/691d743724393672b9ae3960/693705431427cac811424e04_pexels-mccutcheon-1149022.jpg",
+      "https://cdn.prod.website-files.com/691d743724393672b9ae3960/6937056ee6c8f1e51c4447c5_pexels-goumbik-296302.jpg"
+    ],
+    "coverPhoto": "https://cdn.prod.website-files.com/691d743724393672b9ae3960/69370580b58b3eb002f0f529_pexels-yankrukov-8613319.jpg"
+  },
+  {
+    "domain": "wonderlandeducare.com",
+    "namePattern": "wonderland\\\\s*educare",
+    "websiteUrl": "http://www.wonderlandeducare.com",
+    "sourceType": "website",
+    "images": [
+      "http://www.wonderlandeducare.com/system-files/wonderland-educare---1621586318.jpg",
+      "http://www.wonderlandeducare.com/images/media.jpg"
+    ],
+    "coverPhoto": "http://www.wonderlandeducare.com/system-files/wonderland-educare---1621586318.jpg"
+  },
+  {
+    "domain": "yomelelani.co.za",
+    "namePattern": "yomelelani",
+    "websiteUrl": "https://www.yomelelani.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://www.yomelelani.co.za/wp-content/uploads/2015/01/slider_new_03-1120x400.jpg",
+      "https://www.yomelelani.co.za/wp-content/gallery/side-gallery/thumbs/thumbs_20151127_143504.jpg",
+      "https://www.yomelelani.co.za/wp-content/gallery/side-gallery/thumbs/thumbs_20151127_143528.jpg",
+      "https://www.yomelelani.co.za/wp-content/gallery/side-gallery/thumbs/thumbs_8882358467B7C2F8D.png"
+    ],
+    "coverPhoto": "https://www.yomelelani.co.za/wp-content/uploads/2015/01/slider_new_03-1120x400.jpg"
+  },
+  {
+    "domain": "newberryhouse.com",
+    "namePattern": "newberry\\\\s*house",
+    "websiteUrl": "https://www.newberryhouse.com",
+    "sourceType": "website",
+    "images": [
+      "https://www.newberryhouse.com/assets/newberry-environment2-800x255.jpg",
+      "https://www.newberryhouse.com/assets/Newberry-House-Montessori-Logo-Transparent-338x100.png"
+    ],
+    "coverPhoto": "https://www.newberryhouse.com/assets/newberry-environment2-800x255.jpg"
+  },
+  {
+    "domain": "peakchild.co.za",
+    "namePattern": "peak\\\\s*child",
+    "websiteUrl": "https://www.peakchild.co.za/nimble",
+    "sourceType": "website",
+    "images": [
+      "https://static.wixstatic.com/media/4b478a_12ef9584013746579cc9a3697496fcb5~mv2.jpg",
+      "https://static.wixstatic.com/media/4972bc97a3da4931ba6c18a6cf8df7e1.jpg"
+    ],
+    "coverPhoto": "https://static.wixstatic.com/media/4b478a_12ef9584013746579cc9a3697496fcb5~mv2.jpg"
+  },
+  {
+    "domain": "infanticare.co.za",
+    "namePattern": "infanticare",
+    "websiteUrl": "https://www.infanticare.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://static.wixstatic.com/media/48be43_fbce626770db4ed092438e5e65125b3d.jpg",
+      "https://static.wixstatic.com/media/48be43_6b34ae7637b64cc4afd65ef56fe2f266~mv2.jpg"
+    ],
+    "coverPhoto": "https://static.wixstatic.com/media/48be43_fbce626770db4ed092438e5e65125b3d.jpg"
+  },
+  {
+    "domain": "bubbleguppiesprivatedaycare.co.za",
+    "namePattern": "bubble\\\\s*guppies",
+    "websiteUrl": "https://www.bubbleguppiesprivatedaycare.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://www.bubbleguppiesprivatedaycare.co.za/gallery_gen/0f5b8b90aa1b136a082387b27ed166b9_fit.png?ts=1751558377",
+      "https://www.bubbleguppiesprivatedaycare.co.za/gallery_gen/bb88aa712e69b5dca922a1992679c718_fit.jpeg?ts=1751558377",
+      "https://www.bubbleguppiesprivatedaycare.co.za/gallery_gen/ae3ea882316bbda5c16ed737c9ae31ab_600x450_fit.png?ts=1751558378"
+    ],
+    "coverPhoto": "https://www.bubbleguppiesprivatedaycare.co.za/gallery_gen/0f5b8b90aa1b136a082387b27ed166b9_fit.png?ts=1751558377"
+  },
+  {
+    "domain": "happyfeetplayschool.co.za",
+    "namePattern": "happy\\\\s*feet\\\\s*playschool",
+    "websiteUrl": "https://happyfeetplayschool.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://happyfeetplayschool.co.za/images/feet.jpg",
+      "https://happyfeetplayschool.co.za/images/rainbow.jpg"
+    ],
+    "coverPhoto": "https://happyfeetplayschool.co.za/images/feet.jpg"
+  },
+  {
+    "domain": "maplehouse.co.za",
+    "namePattern": "maple\\\\s*house\\\\s*pre",
+    "websiteUrl": "http://www.maplehouse.co.za",
+    "sourceType": "website",
+    "images": [
+      "http://www.maplehouse.co.za/collage.jpg",
+      "http://www.maplehouse.co.za/banner1.png"
+    ],
+    "coverPhoto": "http://www.maplehouse.co.za/collage.jpg"
+  },
+  {
+    "domain": "bumblebeeplayschool.co.za",
+    "namePattern": "bumble\\\\s*bee",
+    "websiteUrl": "https://www.bumblebeeplayschool.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://www.bumblebeeplayschool.co.za/sitepad-data/uploads/2026/07/2-1.jpg",
+      "https://www.bumblebeeplayschool.co.za/sitepad-data/uploads/2026/07/Gold-Registration.jpg"
+    ],
+    "coverPhoto": "https://www.bumblebeeplayschool.co.za/sitepad-data/uploads/2026/07/2-1.jpg"
+  },
+  {
+    "domain": "harvestschool.co.za",
+    "namePattern": "harvest\\\\s*christian\\\\s*pre",
+    "websiteUrl": "https://www.harvestschool.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://www.harvestschool.co.za/wp-content/uploads/elementor/thumbs/IMG_2673-rnoe8p2gawlajwlshhixhdzuirvqhxm32j8d2m3riw.jpg"
+    ],
+    "coverPhoto": "https://www.harvestschool.co.za/wp-content/uploads/elementor/thumbs/IMG_2673-rnoe8p2gawlajwlshhixhdzuirvqhxm32j8d2m3riw.jpg"
+  },
+  {
+    "domain": "bambikleuters.co.za",
+    "namePattern": "bambie?\\\\s*pre-?primary",
+    "websiteUrl": "http://bambikleuters.co.za",
+    "sourceType": "website",
+    "images": [
+      "http://bambikleuters.co.za/wp-content/uploads/2025/03/Bambi-Kids-Academy-01-1024x629-1.png"
+    ],
+    "coverPhoto": "http://bambikleuters.co.za/wp-content/uploads/2025/03/Bambi-Kids-Academy-01-1024x629-1.png"
+  },
+  {
+    "domain": "kidstown.co.za",
+    "namePattern": "kidz?\\\\s*town",
+    "websiteUrl": "https://www.kidstown.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://www.kidstown.co.za/images/banner1.jpg",
+      "https://www.kidstown.co.za/images/banner2.jpg",
+      "https://www.kidstown.co.za/images/banner3.jpg",
+      "https://www.kidstown.co.za/images/sky2.jpg"
+    ],
+    "coverPhoto": "https://www.kidstown.co.za/images/banner1.jpg"
+  },
+  {
+    "domain": "ecdc.co.za",
+    "namePattern": "sinoxolo",
+    "websiteUrl": "https://www.ecdc.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://static.wixstatic.com/media/ee01a9_5511f95989554f258ed633c18dbeb138~mv2.jpg",
+      "https://static.wixstatic.com/media/06ccb1_7b2c678482a84a9abcacc000d0c926a1~mv2.jpg",
+      "https://static.wixstatic.com/media/06ccb1_14f52a45b31f4d6488c34c45d685b95f~mv2.jpg",
+      "https://static.wixstatic.com/media/06ccb1_fb19372ca9a7496aa2bc3a4eb29d4b7b~mv2.jpg"
+    ],
+    "coverPhoto": "https://static.wixstatic.com/media/ee01a9_5511f95989554f258ed633c18dbeb138~mv2.jpg"
+  },
+  {
+    "domain": "shiloh.org.za",
+    "namePattern": "shiloh\\\\s*creche",
+    "websiteUrl": "https://www.shiloh.org.za",
+    "sourceType": "website",
+    "images": [
+      "https://static.wixstatic.com/media/0412bc_8c956ccd17d640159527539030ddd8d6~mv2.jpg"
+    ],
+    "coverPhoto": "https://static.wixstatic.com/media/0412bc_8c956ccd17d640159527539030ddd8d6~mv2.jpg"
+  },
+  {
+    "domain": "philani.org.za",
+    "namePattern": "philani",
+    "websiteUrl": "https://www.philani.org.za",
+    "sourceType": "website",
+    "images": [
+      "https://www.philani.org.za/wp-content/uploads/2024/11/Mama-Beja-Funele-2-scaled-e1731932355878.jpg"
+    ],
+    "coverPhoto": "https://www.philani.org.za/wp-content/uploads/2024/11/Mama-Beja-Funele-2-scaled-e1731932355878.jpg"
+  },
+  {
+    "domain": "cbcstjohns.co.za",
+    "namePattern": "cbc\\\\s*st\\\\.?\\\\s*johns",
+    "websiteUrl": "https://www.cbcstjohns.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://www.cbcstjohns.co.za/wp-content/uploads/2022/12/CBC-OG_01Home.png",
+      "https://www.cbcstjohns.co.za/wp-content/uploads/2022/12/SAINTS1_1.png",
+      "https://www.cbcstjohns.co.za/wp-content/uploads/2022/12/SAINTS2_2.png"
+    ],
+    "coverPhoto": "https://www.cbcstjohns.co.za/wp-content/uploads/2022/12/CBC-OG_01Home.png"
+  },
+  {
+    "domain": "dibber.co.za",
+    "namePattern": "dibber\\\\s*international",
+    "websiteUrl": "https://www.dibber.co.za/branches/fourways",
+    "sourceType": "website",
+    "images": [
+      "https://static.wixstatic.com/media/fc9d19_5bdaf761348b421ab257ac3029857a0f~mv2.png",
+      "https://static.wixstatic.com/media/a4f150_79e33f10b4934d32bea1b2ebf5d64e2b~mv2.png",
+      "https://static.wixstatic.com/media/a4f150_e0760a795eff40c49a387dbe21b40c0b~mv2.png",
+      "https://static.wixstatic.com/media/a4f150_1bc846898cc74b8d94b0118119eeac24~mv2.png"
+    ],
+    "coverPhoto": "https://static.wixstatic.com/media/fc9d19_5bdaf761348b421ab257ac3029857a0f~mv2.png"
+  },
+  {
+    "domain": "academia.org.za",
+    "namePattern": "kiddies\\\\s*academy",
+    "websiteUrl": "https://academia.org.za",
+    "sourceType": "website",
+    "images": [
+      "https://lh7-us.googleusercontent.com/sitesv-images-rt/APXyLQeobag13qfy-e_Ai4bd134ZCua4lI6_RZ2YNMOd_9u8J9rKUgNDt-m00N6JVGQlS26W4VvG3CcPlROcDNkMs4rU4zvSZMLqcfYPbrwcn3b7xfnzsNP0qW4AHyVzjM9od9fINvbH3c7uRk3ydFLWyXg5m2O9bdRyzOxGrlkOdlrVqx6PmYNIob_ixA=w16383",
+      "https://lh7-us.googleusercontent.com/sitesv-images-rt/APXyLQfRUzx0K7ZkFv7-SF76geRDoYaUI2WR2jlzYI5dxmGlj1k2iVQ4y_i-1vR2ioOoZzV-6H43504HZlJuwh7ARqh2IuObJPheGAokLYAXNLrHiHrRs1DzvZUYSOUpPHPq3Hl-Lk79s2UL-6fMqVKN9NnNn4JnlFlBa4-IpgOJA5jmPqa2XnO2CiE38zCyn4Cu7XLu0fr5U1xxHCKTAKBixSAMuNTUFsPVBDLblXRpxKo=w1280",
+      "https://lh7-us.googleusercontent.com/sitesv-images-rt/APXyLQew6wkw2jobFmqfIIfdBiaXr65icjnZlR5cUV3jFDNbJdN7EY4ESBOmkcrI8F9bU0SXx9l_Z3HjpQNCPKzgXyHiVPYZaNT1WMwQVjrrcaoa7WzR_etdpBGYDptViePcStn3hGDlqViVVKvABh2U1NKJ4bYHO49cyXUdRhXJJcDZRCWhngp4Jf8FNJQqjha4-vqQLpGmyldAsfUtkcHcbO6daglo00A0YHiVPqO6_MA=w1280",
+      "https://lh7-us.googleusercontent.com/sitesv-images-rt/APXyLQejaemJnwo6bosuJr924ruzNMSm8U5gJxuE3dTbSMVm4Ad_an90awIU3OzADO30iUDLo1iTVJCoTxov-Eop64dsQ2E7b8OgieVHb3BT-f9lCz9_fjhURJmEMEGEDJdEFXBrV2EezRMqsJYUcz5WWX8MsWTHBZtPHFL7JQWKB4sJeLlDFGe7Qeu4R4vZBEK4Lu4m6LuLR3I3hbBdhUHpJSeQO01ezCQyRrZGCCnQc6U=w1280"
+    ],
+    "coverPhoto": "https://lh7-us.googleusercontent.com/sitesv-images-rt/APXyLQeobag13qfy-e_Ai4bd134ZCua4lI6_RZ2YNMOd_9u8J9rKUgNDt-m00N6JVGQlS26W4VvG3CcPlROcDNkMs4rU4zvSZMLqcfYPbrwcn3b7xfnzsNP0qW4AHyVzjM9od9fINvbH3c7uRk3ydFLWyXg5m2O9bdRyzOxGrlkOdlrVqx6PmYNIob_ixA=w16383"
+  },
+  {
+    "domain": "nomzamo.co.za",
+    "namePattern": "nomzamo\\\\s*educare",
+    "websiteUrl": "https://www.nomzamo.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://www.nomzamo.co.za/img/chilling-cafe-01.jpg"
+    ],
+    "coverPhoto": "https://www.nomzamo.co.za/img/chilling-cafe-01.jpg"
+  },
+  {
+    "domain": "saheti.co.za",
+    "namePattern": "saheti\\\\s*nursery",
+    "websiteUrl": "https://www.saheti.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://www.saheti.co.za/wp-content/uploads/2026/06/Sport-Centre-2026-2.jpg",
+      "https://i0.wp.com/www.saheti.co.za/wp-content/uploads/2023/02/SAHETI-School-Logo.png?fit=300%2C300&ssl=1"
+    ],
+    "coverPhoto": "https://www.saheti.co.za/wp-content/uploads/2026/06/Sport-Centre-2026-2.jpg"
+  },
+  {
+    "domain": "riebie.co.za",
+    "namePattern": "hasie\\\\s*kwassie",
+    "websiteUrl": "https://www.riebie.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://riebie.co.za/images/compressed/images/2023/landing/riebie.webp",
+      "https://riebie.co.za/images/compressed/images/2023/landing/rubie.webp",
+      "https://riebie.co.za/images/compressed/images/golfdag/golf-day-small.webp"
+    ],
+    "coverPhoto": "https://riebie.co.za/images/compressed/images/2023/landing/riebie.webp"
+  },
+  {
+    "domain": "kleutermaatjies.co.za",
+    "namePattern": "kleutermaatjies",
+    "websiteUrl": "https://www.kleutermaatjies.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://static.wixstatic.com/media/d5f135_9fb075f48f4943f68f50be52c8a0de65%7Emv2.png/v1/fit/w_2500,h_1330,al_c/d5f135_9fb075f48f4943f68f50be52c8a0de65%7Emv2.png",
+      "https://static.wixstatic.com/media/11062b_aa462dec54ab4841a29876a45f404bf9f000.jpg"
+    ],
+    "coverPhoto": "https://static.wixstatic.com/media/d5f135_9fb075f48f4943f68f50be52c8a0de65%7Emv2.png/v1/fit/w_2500,h_1330,al_c/d5f135_9fb075f48f4943f68f50be52c8a0de65%7Emv2.png"
+  },
+  {
+    "domain": "standrews.co.za",
+    "namePattern": "st\\\\.?\\\\s*andrews\\\\s*nursery",
+    "websiteUrl": "https://www.standrews.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://standrews.co.za/wp-content/uploads/2022/04/174857.png",
+      "https://www.standrews.co.za/wp-content/uploads/2019/07/St-Andrews-School-for-Girls-landscape-logo-01.png"
+    ],
+    "coverPhoto": "https://standrews.co.za/wp-content/uploads/2022/04/174857.png"
+  },
+  {
+    "domain": "curro.co.za",
+    "namePattern": "curro\\\\s*rosen\\\\s*castle|bidi\\\\s*bidi",
+    "websiteUrl": "https://www.curro.co.za/schools/curro-rosen-castle-preschool",
+    "sourceType": "website",
+    "images": [
+      "https://www.curro.co.za/media/kgphifpk/untitled-design.png",
+      "https://www.curro.co.za/media/curro-logo-1.png"
+    ],
+    "coverPhoto": "https://www.curro.co.za/media/kgphifpk/untitled-design.png"
+  },
+  {
+    "domain": "amangwe.org.za",
+    "namePattern": "amangwe\\\\s*village",
+    "websiteUrl": "https://www.amangwe.org.za",
+    "sourceType": "website",
+    "images": [
+      "https://www.amangwe.org.za/images/logo1.png"
+    ],
+    "coverPhoto": "https://www.amangwe.org.za/images/logo1.png"
+  },
+  {
+    "domain": "ikhayalethemba.org.za",
+    "namePattern": "khayalethemba\\\\s*aftercare",
+    "websiteUrl": "https://www.ikhayalethemba.org.za",
+    "sourceType": "website",
+    "images": [
+      "https://images.squarespace-cdn.com/content/v1/5ce4d8abcb86580001f610b5/f4acde34-9c9c-4471-a4b3-76f665eff6d7/Cycle+Tour+Web+Banner+2027.B.png",
+      "https://images.squarespace-cdn.com/content/v1/5ce4d8abcb86580001f610b5/b7948120-8e95-43c9-aeda-910ed64a8af6/ikhaya+logo_New.jpg"
+    ],
+    "coverPhoto": "https://images.squarespace-cdn.com/content/v1/5ce4d8abcb86580001f610b5/f4acde34-9c9c-4471-a4b3-76f665eff6d7/Cycle+Tour+Web+Banner+2027.B.png"
+  },
+  {
+    "domain": "sinaiacademy.co.za",
+    "namePattern": "sinai\\\\s*academy",
+    "websiteUrl": "http://www.sinaiacademy.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://static.wixstatic.com/media/bf74d5_7f4cb860e6b44780a63cbb2e45241511%7Emv2.png/v1/fit/w_2500,h_1330,al_c/bf74d5_7f4cb860e6b44780a63cbb2e45241511%7Emv2.png",
+      "https://static.wixstatic.com/media/0a9133_fd07db9eb100417b9dee8112f84b1990~mv2.jpg",
+      "https://static.wixstatic.com/media/0a9133_b10dae781d4343768b5848ccebab05df~mv2.png"
+    ],
+    "coverPhoto": "https://static.wixstatic.com/media/bf74d5_7f4cb860e6b44780a63cbb2e45241511%7Emv2.png/v1/fit/w_2500,h_1330,al_c/bf74d5_7f4cb860e6b44780a63cbb2e45241511%7Emv2.png"
+  },
+  {
+    "domain": "capitalparkpreschool.co.za",
+    "namePattern": "capital\\\\s*park\\\\s*pre",
+    "websiteUrl": "http://capitalparkpreschool.co.za",
+    "sourceType": "website",
+    "images": [
+      "http://capitalparkpreschool.co.za/images/pre_school_unafraid.png",
+      "http://capitalparkpreschool.co.za/images/preschool_creche_classes.png",
+      "http://capitalparkpreschool.co.za/images/preschool_creche_hours.png",
+      "http://capitalparkpreschool.co.za/images/preschool_creche_fees.png"
+    ],
+    "coverPhoto": "http://capitalparkpreschool.co.za/images/pre_school_unafraid.png"
+  },
+  {
+    "domain": "juniorakademie.co.za",
+    "namePattern": "junior\\\\s*akademie",
+    "websiteUrl": "https://www.juniorakademie.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://static.wixstatic.com/media/5978d0_4aaf1c16919747c294dc4617cec29e71~mv2.png"
+    ],
+    "coverPhoto": "https://static.wixstatic.com/media/5978d0_4aaf1c16919747c294dc4617cec29e71~mv2.png"
+  },
+  {
+    "domain": "babin.netlify.app",
+    "namePattern": "^babin$",
+    "websiteUrl": "https://babin.netlify.app",
+    "sourceType": "website",
+    "images": [
+      "https://babin.netlify.app/assets/img/8.png",
+      "https://babin.netlify.app/assets/img/BabinMap.png",
+      "https://babin.netlify.app/assets/img/babinHead.PNG"
+    ],
+    "coverPhoto": "https://babin.netlify.app/assets/img/8.png"
+  },
+  {
+    "domain": "cleverkidsaftercare.co.za",
+    "namePattern": "clever\\\\s*kids\\\\s*aftercare",
+    "websiteUrl": "https://cleverkidsaftercare.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://cleverkidsaftercare.co.za/img/Aftercare-left.png",
+      "https://cleverkidsaftercare.co.za/img/Aftercare-right.png",
+      "https://cleverkidsaftercare.co.za/downloads/Map.jpg"
+    ],
+    "coverPhoto": "https://cleverkidsaftercare.co.za/img/Aftercare-left.png"
+  },
+  {
+    "domain": "kidskingdom.co.za",
+    "namePattern": "kid.?s\\\\s*kingdom\\\\s*pre",
+    "websiteUrl": "https://kidskingdom.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://kidskingdom.co.za/wp-content/uploads/2022/07/Kids-Kingdom-Logo.png"
+    ],
+    "coverPhoto": "https://kidskingdom.co.za/wp-content/uploads/2022/07/Kids-Kingdom-Logo.png"
+  },
+  {
+    "domain": "devrijezee.co.za",
+    "namePattern": "de\\\\s*vrije\\\\s*zee",
+    "websiteUrl": "https://devrijezee.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://devrijezee.co.za/wp-content/uploads/2019/03/cropped-logo-header-2.png"
+    ],
+    "coverPhoto": "https://devrijezee.co.za/wp-content/uploads/2019/03/cropped-logo-header-2.png"
+  },
+  {
+    "domain": "thokozani.com",
+    "namePattern": "iminathi",
+    "websiteUrl": "https://www.thokozani.com",
+    "sourceType": "website",
+    "images": [
+      "https://www.thokozani.com/sites/default/files/smallthokozani.jpg"
+    ],
+    "coverPhoto": "https://www.thokozani.com/sites/default/files/smallthokozani.jpg"
+  },
+  {
+    "domain": "akkerdoppies.co.za",
+    "namePattern": "akkerdoppies",
+    "websiteUrl": "https://akkerdoppies.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://akkerdoppies.co.za/wp-content/uploads/2021/10/logo-menu.png",
+      "https://akkerdoppies.co.za/wp-content/uploads/2021/10/reading-eggs.png"
+    ],
+    "coverPhoto": "https://akkerdoppies.co.za/wp-content/uploads/2021/10/logo-menu.png"
+  },
+  {
+    "domain": "amathole.co.za",
+    "namePattern": "amathole\\\\s*ecd",
+    "websiteUrl": "https://www.amathole.co.za",
+    "sourceType": "website",
+    "images": [
+      "https://www.amathole.co.za/images/sibo2.jpg",
+      "https://www.amathole.co.za/images/DAM.png"
+    ],
+    "coverPhoto": "https://www.amathole.co.za/images/sibo2.jpg"
+  }
+]
