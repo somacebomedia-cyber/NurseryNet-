@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { FEATURED_PRESCHOOLS } from '@/data/preschools';
+import { isPrimarySchoolGradeR } from '@/data/primary-grade-r-schools';
 import {
   hasOnlyStockPlaceholderImages,
   hasRealWebsitePhoto,
@@ -177,8 +178,39 @@ function enrichBaseListWithRealPhotos(list: any[]): any[] {
       images: s.images,
     }).slice(0, MAX_PRESCHOOL_PROFILE_PHOTOS);
 
+    const isPrimaryGr = isPrimarySchoolGradeR(s);
+    const baseFacilities = Array.isArray(s.facilities) ? s.facilities : [];
+    const enrichedFacilities = isPrimaryGr
+      ? Array.from(
+          new Set([
+            'Dedicated Grade R Reception Unit',
+            'Grade 1 Feeder Priority',
+            'Primary School Sports & Extramurals',
+            ...baseFacilities,
+          ])
+        )
+      : baseFacilities;
+
     const enrichedItem = {
       ...s,
+      institutionType: isPrimaryGr ? 'primary-grade-r' : s.institutionType || 'preschool',
+      gradeRDetails: isPrimaryGr
+        ? s.gradeRDetails || {
+            hasDedicatedReceptionUnit: true,
+            receptionUnitName: `${s.name} — Grade R Reception Unit`,
+            parentPrimarySchoolName: s.name,
+            grade1FeederPriority: true,
+            feederPolicySummary: `Enrolled Grade R learners receive priority feeder progression into Grade 1 at ${s.name}.`,
+            primarySportsAndExtramurals: [
+              'Primary School Sports Fields & Physical Education',
+              'Perceptual Motor & Foundation Phase Library',
+              'On-Campus Aftercare & Extramural Activities',
+            ],
+            aftercareIncluded: true,
+            governingBody: 'Public Primary School',
+          }
+        : s.gradeRDetails,
+      facilities: enrichedFacilities,
       websiteUrl: cleanWebUrl || undefined,
       images:
         resolved.length > 0
@@ -283,11 +315,33 @@ export function upsertCustomPreschool(rawSchool: any, previousSlug?: string): an
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
 
+  const isPrimaryGr = isPrimarySchoolGradeR(rawSchool);
   const normalized = {
     id: slugBase,
     slug: slugBase,
     name,
-    tagline: rawSchool.tagline || `Verified early childhood development centre in ${city}, ${province}`,
+    institutionType: isPrimaryGr ? 'primary-grade-r' : rawSchool.institutionType || 'preschool',
+    gradeRDetails: isPrimaryGr
+      ? rawSchool.gradeRDetails || {
+          hasDedicatedReceptionUnit: true,
+          receptionUnitName: `${name} — Grade R Reception Unit`,
+          parentPrimarySchoolName: name,
+          grade1FeederPriority: true,
+          feederPolicySummary: `Enrolled Grade R learners receive priority feeder progression into Grade 1 at ${name}.`,
+          primarySportsAndExtramurals: [
+            'Primary School Sports Fields & Ball Skills',
+            'Foundation Phase Perceptual Motor & Media Library',
+            'On-Campus Aftercare & Extramural Programme',
+          ],
+          aftercareIncluded: true,
+          governingBody: 'Public Section 21 / Quintile 5',
+        }
+      : rawSchool.gradeRDetails,
+    tagline:
+      rawSchool.tagline ||
+      (isPrimaryGr
+        ? `Primary School Grade R Reception Unit in ${city}, ${province}`
+        : `Verified early childhood development centre in ${city}, ${province}`),
     description:
       rawSchool.description && !rawSchool.description.includes(rawSchool.previousName || '__none__')
         ? rawSchool.description
@@ -301,9 +355,11 @@ export function upsertCustomPreschool(rawSchool: any, previousSlug?: string): an
     address: rawSchool.address || `${suburb}, ${city}, ${province}, South Africa`,
     latitude: typeof rawSchool.latitude === 'number' ? rawSchool.latitude : -29.8587,
     longitude: typeof rawSchool.longitude === 'number' ? rawSchool.longitude : 31.0218,
-    curriculum: rawSchool.curriculum || 'Play-Based',
-    ageRange: rawSchool.ageRange || '18 months – 6 years',
-    minAgeMonths: typeof rawSchool.minAgeMonths === 'number' ? rawSchool.minAgeMonths : 12,
+    curriculum: rawSchool.curriculum || (isPrimaryGr ? 'CAPS' : 'Play-Based'),
+    ageRange:
+      rawSchool.ageRange ||
+      (isPrimaryGr ? '5 – 6 years (Grade R / Reception Year)' : '18 months – 6 years'),
+    minAgeMonths: typeof rawSchool.minAgeMonths === 'number' ? rawSchool.minAgeMonths : isPrimaryGr ? 54 : 12,
     maxAgeMonths: typeof rawSchool.maxAgeMonths === 'number' ? rawSchool.maxAgeMonths : 72,
     monthlyFeeZAR: Math.max(150, Number(rawSchool.monthlyFeeZAR) || 950),
     rating: typeof rawSchool.rating === 'number' ? rawSchool.rating : 4.9,

@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { Preschool, ECD_BENCHMARKS, getMunicipalityBenchmark } from '@/data/preschools';
+import { isPrimarySchoolGradeR } from '@/data/primary-grade-r-schools';
 import {
   findVerifiedWebsitePhotoSet,
   hasOnlyStockPlaceholderImages,
@@ -46,6 +47,9 @@ import {
   RefreshCw,
   Heart,
   FileText,
+  GraduationCap,
+  Trophy,
+  Building2,
 } from 'lucide-react';
 
 interface SchoolDetailModalProps {
@@ -216,10 +220,7 @@ export default function SchoolDetailModal({
   const activePhotoCaption = verifiedPhotoSet?.captions?.[activeImageIndex] || null;
 
   const muniStats = getMunicipalityBenchmark(preschool.municipality || preschool.city || preschool.district);
-  const hasFencing = preschool.facilities.some(f => f.toLowerCase().includes('fence') || f.toLowerCase().includes('security'));
-  const hasGate = preschool.facilities.some(f => f.toLowerCase().includes('gate') || f.toLowerCase().includes('security'));
-  const hasWater = true; // In South Africa verified registered schools meet sanitation standards
-  const hasPlayground = preschool.facilities.some(f => f.toLowerCase().includes('playground') || f.toLowerCase().includes('garden') || f.toLowerCase().includes('sports'));
+  const isPrimaryGradeR = isPrimarySchoolGradeR(preschool);
 
   return (
     <Dialog open={isOpen} onOpenChange={(open: boolean) => !open && onClose()}>
@@ -455,6 +456,67 @@ export default function SchoolDetailModal({
               <span className="text-sm font-bold text-foreground mt-0.5 block truncate">{preschool.operatingHours}</span>
             </div>
           </div>
+
+          {/* Primary School Grade R & Reception Unit Spotlight Section */}
+          {isPrimaryGradeR && (
+            <div className="p-5 rounded-xl bg-indigo-500/5 border border-indigo-500/25 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <GraduationCap className="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0" />
+                  <div>
+                    <h4 className="font-heading text-sm font-bold text-foreground">
+                      Primary School Grade R &amp; Reception Unit Profile
+                    </h4>
+                    <span className="text-xs text-muted-foreground">
+                      {preschool.gradeRDetails?.parentPrimarySchoolName || preschool.name} ·{' '}
+                      {preschool.gradeRDetails?.governingBody || 'DBE Foundation Phase Accredited'}
+                    </span>
+                  </div>
+                </div>
+                <span className="text-xs font-bold text-indigo-700 dark:text-indigo-300">
+                  Grade R in Primary School
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                <div className="p-3.5 rounded-xl bg-background border border-border/80 space-y-1">
+                  <div className="flex items-center gap-1.5 font-bold text-emerald-700 dark:text-emerald-400">
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
+                    <span>Grade 1 Feeder Priority</span>
+                  </div>
+                  <p className="text-muted-foreground leading-relaxed">
+                    {preschool.gradeRDetails?.feederPolicySummary ||
+                      `Enrolled Grade R learners receive priority feeder progression into Grade 1 at ${preschool.name}.`}
+                  </p>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-background border border-border/80 space-y-1">
+                  <div className="flex items-center gap-1.5 font-bold text-indigo-700 dark:text-indigo-300">
+                    <Building2 className="w-4 h-4 shrink-0" />
+                    <span>Dedicated Reception Unit</span>
+                  </div>
+                  <p className="text-muted-foreground leading-relaxed">
+                    {preschool.gradeRDetails?.receptionUnitName
+                      ? `${preschool.gradeRDetails.receptionUnitName} — separate, age-appropriate Reception campus and playground.`
+                      : 'Dedicated separate Grade R Reception Unit campus and play precinct inside the primary school.'}
+                  </p>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-background border border-border/80 space-y-1">
+                  <div className="flex items-center gap-1.5 font-bold text-amber-700 dark:text-amber-400">
+                    <Trophy className="w-4 h-4 shrink-0" />
+                    <span>Primary Sports &amp; Aftercare</span>
+                  </div>
+                  <p className="text-muted-foreground leading-relaxed">
+                    {preschool.gradeRDetails?.primarySportsAndExtramurals &&
+                    preschool.gradeRDetails.primarySportsAndExtramurals.length > 0
+                      ? preschool.gradeRDetails.primarySportsAndExtramurals.join(' · ')
+                      : 'Full access to primary school sports fields, aquatics, extramurals, and supervised aftercare.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Department of Social Development (DSD) Registration & NPO Accreditation Card */}
           <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 space-y-3">

@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { Preschool, getMunicipalityBenchmark } from '@/data/preschools';
+import { isPrimarySchoolGradeR } from '@/data/primary-grade-r-schools';
 import { resolveRealPreschoolImages } from '@/lib/real-website-photos';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,6 +22,7 @@ import {
   CheckCircle2,
   MapPin,
   FileText,
+  GraduationCap,
 } from 'lucide-react';
 
 interface CompareSchoolsModalProps {
@@ -176,6 +178,42 @@ export default function CompareSchoolsModal({
                 </tr>
               </thead>
               <tbody className="divide-y divide-border text-xs">
+                <tr>
+                  <td className="p-3 font-semibold text-muted-foreground">Institution &amp; Grade 1 Feeder</td>
+                  {compared.map((school) => {
+                    const isPrimaryGr = isPrimarySchoolGradeR(school);
+                    return (
+                      <td key={school.id} className="p-3">
+                        {isPrimaryGr ? (
+                          <div className="space-y-1">
+                            <span className="inline-flex items-center gap-1 font-bold text-indigo-700 dark:text-indigo-300">
+                              <GraduationCap className="w-3.5 h-3.5 shrink-0" />
+                              <span>Primary School Grade R</span>
+                            </span>
+                            <span className="block text-[11px] text-emerald-700 dark:text-emerald-400 font-semibold">
+                              {school.gradeRDetails?.grade1FeederPriority !== false
+                                ? 'Grade 1 Feeder Priority Included'
+                                : 'Dedicated Reception Unit'}
+                            </span>
+                            <span className="block text-[11px] text-muted-foreground truncate">
+                              {school.gradeRDetails?.receptionUnitName || 'Primary School Campus'}
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="space-y-1">
+                            <span className="font-semibold text-foreground block">
+                              Preschool / ECD Centre
+                            </span>
+                            <span className="text-[11px] text-muted-foreground block">
+                              Independent Early Learning
+                            </span>
+                          </div>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+
                 <tr>
                   <td className="p-3 font-semibold text-muted-foreground">Monthly Tuition</td>
                   {compared.map((school) => {

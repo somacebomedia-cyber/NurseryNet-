@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { loadAllPreschools } from '@/lib/preschool-pool';
+import { isPrimarySchoolGradeR } from '@/data/primary-grade-r-schools';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -7,6 +8,7 @@ export async function GET(request: NextRequest) {
   const query = (searchParams.get('q') || '').trim().toLowerCase();
   const province = (searchParams.get('province') || '').trim();
   const municipality = (searchParams.get('municipality') || '').trim().toLowerCase();
+  const institutionType = (searchParams.get('institutionType') || 'All').trim();
   const dsd = (searchParams.get('dsd') || '').trim();
   const subsidised = searchParams.get('subsidised');
   const curriculum = (searchParams.get('curriculum') || '').trim();
@@ -23,15 +25,34 @@ export async function GET(request: NextRequest) {
 
   const pool = loadAllPreschools();
 
-  // Compute province counts from full pool
+  // Compute province counts and institutionType counts from full pool
   const provinceCounts: Record<string, number> = {};
+  const institutionCounts: Record<string, number> = {
+    all: pool.length,
+    preschool: 0,
+    'primary-grade-r': 0,
+  };
+
   for (const s of pool) {
     if (s.province) {
       provinceCounts[s.province] = (provinceCounts[s.province] || 0) + 1;
     }
+    if (isPrimarySchoolGradeR(s)) {
+      institutionCounts['primary-grade-r'] += 1;
+    } else {
+      institutionCounts.preschool += 1;
+    }
   }
 
   let filtered = pool;
+
+  if (institutionType && institutionType !== 'All') {
+    if (institutionType === 'primary-grade-r') {
+      filtered = filtered.filter((s) => isPrimarySchoolGradeR(s));
+    } else if (institutionType === 'preschool') {
+      filtered = filtered.filter((s) => !isPrimarySchoolGradeR(s));
+    }
+  }
 
   if (province && province !== 'All') {
     filtered = filtered.filter((s) => s.province === province);
@@ -85,7 +106,9 @@ export async function GET(request: NextRequest) {
   }
 
   if (query) {
-    const queryNorm = query.replace(/\bcenter\b/g, 'centre');
+    const queryNorm = query
+      .replace(/\bcenter\b/g, 'centre')
+      .replace(/\./g, '');
     const queryTokens = queryNorm.split(/\s+/).filter((t) => t.length >= 2);
     filtered = filtered.filter((s) => {
       const name = (s.name || '').toLowerCase();
@@ -95,10 +118,16 @@ export async function GET(request: NextRequest) {
       const npo = (s.npoNumber || '').toLowerCase();
       const phone = (s.phone || '').toLowerCase();
       const curr = (s.curriculum || '').toLowerCase();
-      const hayNorm = `${name} ${suburb} ${muni} ${city} ${npo} ${phone} ${curr}`.replace(
-        /\bcenter\b/g,
-        'centre'
-      );
+      const tagline = (s.tagline || '').toLowerCase();
+      const receptionUnit = (s.gradeRDetails?.receptionUnitName || '').toLowerCase();
+      const parentPrimary = (s.gradeRDetails?.parentPrimarySchoolName || '').toLowerCase();
+      const instLabel = isPrimarySchoolGradeR(s)
+        ? 'primary school grade r reception unit prep preparatory'
+        : 'preschool ecd creche';
+      const hayRaw = `${name} ${suburb} ${muni} ${city} ${npo} ${phone} ${curr} ${tagline} ${receptionUnit} ${parentPrimary} ${instLabel}`;
+      const hayNorm = hayRaw
+        .replace(/\bcenter\b/g, 'centre')
+        .replace(/\./g, '');
       return (
         name.includes(query) ||
         suburb.includes(query) ||
@@ -132,6 +161,12 @@ export async function GET(request: NextRequest) {
     if (sortBy === 'fee-desc') return b.monthlyFeeZAR - a.monthlyFeeZAR;
     if (sortBy === 'reviews') return b.reviewCount - a.reviewCount;
     if (sortBy === 'name') return a.name.localeCompare(b.name);
+    // Prioritize verified flagship Primary School Grade R units when filtering by primary-grade-r or matching rating
+    if (institutionType === 'primary-grade-r') {
+      const aHasCustomDetails = a.gradeRDetails?.feederPolicySummary ? 1 : 0;
+      const bHasCustomDetails = b.gradeRDetails?.feederPolicySummary ? 1 : 0;
+      if (bHasCustomDetails !== aHasCustomDetails) return bHasCustomDetails - aHasCustomDetails;
+    }
     return b.rating - a.rating; // default 'rating'
   });
 
@@ -147,6 +182,7 @@ export async function GET(request: NextRequest) {
     totalPages,
     results,
     provinceCounts,
+    institutionCounts,
     availableCities,
   });
 }

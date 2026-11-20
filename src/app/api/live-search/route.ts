@@ -388,6 +388,7 @@ function findMatchingLocalPreschools(
 
   const allTokens = rawQuery
     .toLowerCase()
+    .replace(/\./g, '')
     .replace(/[^a-z0-9\s]/g, ' ')
     .split(/\s+/)
     .filter((t) => t.length >= 2);
@@ -399,6 +400,7 @@ function findMatchingLocalPreschools(
   const muniFilter = municipality && municipality !== 'All' ? municipality.toLowerCase() : '';
 
   const scored: { item: any; score: number }[] = [];
+  const rawQueryNorm = rawQuery.trim().toLowerCase().replace(/\./g, '');
 
   for (const s of pool) {
     const sProv = (s.province || '').toLowerCase();
@@ -408,15 +410,16 @@ function findMatchingLocalPreschools(
     if (muniFilter && !sMuni.includes(muniFilter)) continue;
 
     const nameLower = (s.name || '').toLowerCase();
-    const fullText = `${nameLower} ${sMuni} ${sProv} ${(s.curriculum || '').toLowerCase()} ${(s.npoNumber || '').toLowerCase()}`;
+    const nameNorm = nameLower.replace(/\./g, '');
+    const fullText = `${nameNorm} ${sMuni} ${sProv} ${(s.curriculum || '').toLowerCase()} ${(s.npoNumber || '').toLowerCase()} ${(s.gradeRDetails?.receptionUnitName || '').toLowerCase()}`;
 
     let score = 0;
-    if (rawQuery.trim() && nameLower.includes(rawQuery.trim().toLowerCase())) {
+    if (rawQueryNorm && nameNorm.includes(rawQueryNorm)) {
       score += 50;
     }
 
     for (const token of searchTokens) {
-      if (nameLower.includes(token)) {
+      if (nameNorm.includes(token)) {
         score += 15;
       } else if (fullText.includes(token)) {
         score += 6;

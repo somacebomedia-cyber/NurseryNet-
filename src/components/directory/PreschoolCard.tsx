@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { Preschool } from '@/data/preschools';
+import { isPrimarySchoolGradeR } from '@/data/primary-grade-r-schools';
 import {
   hasRealWebsitePhoto,
   isSocialMediaUrl,
@@ -9,7 +10,7 @@ import {
   resolveRealPreschoolImages,
 } from '@/lib/real-website-photos';
 import { Button } from '@/components/ui/button';
-import { Star, MapPin, ShieldCheck, BadgeCheck, Users, Calendar, ArrowRight, Languages, Heart, FileText } from 'lucide-react';
+import { Star, MapPin, ShieldCheck, BadgeCheck, Users, Calendar, Languages, Heart, FileText, GraduationCap, Building2, Trophy } from 'lucide-react';
 
 interface PreschoolCardProps {
   preschool: Preschool;
@@ -50,6 +51,7 @@ export default function PreschoolCard({
 
   const isRealWebsitePhoto = hasRealWebsitePhoto(resolvedImages);
   const isSocialPage = isSocialMediaUrl(preschool.websiteUrl);
+  const isPrimaryGradeR = isPrimarySchoolGradeR(preschool);
 
   return (
     <div className="group flex flex-col bg-card rounded-2xl border border-border/80 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden hover:border-primary/40">
@@ -156,6 +158,18 @@ export default function PreschoolCard({
       <div className="p-5 flex flex-col flex-grow">
         {/* Title & Tagline */}
         <div className="mb-2">
+          {isPrimaryGradeR && (
+            <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-bold text-indigo-700 dark:text-indigo-300 mb-1">
+              <GraduationCap className="w-3.5 h-3.5 shrink-0" />
+              <span>Primary School Grade R</span>
+              <span aria-hidden="true" className="text-muted-foreground/40">·</span>
+              <span className="text-emerald-700 dark:text-emerald-400">
+                {preschool.gradeRDetails?.grade1FeederPriority !== false
+                  ? 'Grade 1 Feeder Priority'
+                  : 'Reception Unit'}
+              </span>
+            </div>
+          )}
           <h3
             onClick={() => onSelect(preschool)}
             className="font-heading text-lg font-bold text-foreground group-hover:text-primary transition-colors cursor-pointer line-clamp-1"
@@ -166,6 +180,25 @@ export default function PreschoolCard({
             {preschool.tagline}
           </p>
         </div>
+
+        {/* Dedicated Primary School Grade R Reception Unit Spotlight */}
+        {isPrimaryGradeR && (
+          <div className="my-2 p-2.5 rounded-xl bg-indigo-500/5 border border-indigo-500/20 space-y-1 text-[11px]">
+            <div className="flex items-center gap-1.5 text-foreground font-semibold">
+              <Building2 className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
+              <span className="truncate">
+                {preschool.gradeRDetails?.receptionUnitName || 'Dedicated Separate Reception Unit Campus'}
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 text-muted-foreground">
+              <Trophy className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+              <span className="truncate">
+                {preschool.gradeRDetails?.primarySportsAndExtramurals?.slice(0, 2).join(' · ') ||
+                  'Primary school sports, extramurals & aftercare access'}
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Unboxed Metadata with dot separators */}
         <div className="flex flex-wrap items-center gap-y-1.5 gap-x-2 text-xs text-muted-foreground/90 my-2 pt-2 border-t border-border/60">

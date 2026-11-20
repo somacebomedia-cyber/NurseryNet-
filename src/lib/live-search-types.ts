@@ -1,4 +1,5 @@
 import type { Preschool, Province } from '@/data/preschools';
+import { isPrimarySchoolGradeR } from '@/data/primary-grade-r-schools';
 import { resolveRealPreschoolImages } from '@/lib/real-website-photos';
 
 export type LiveSearchMode = 'directory' | 'school' | 'funding';
@@ -173,11 +174,35 @@ export function highlightToDraftPreschool(
       ? item.reviewsSummary
       : `${cleanName} offers a nurturing, creative, and safe environment for early childhood development in ${city}, ${province}.`;
 
+  const isPrimaryGr = isPrimarySchoolGradeR({
+    name: cleanName,
+    description: `${item.subtitle || ''} ${item.details || ''} ${item.reviewsSummary || ''}`,
+  });
+
   return {
     id: slug,
     slug,
     name: cleanName || context?.query || 'Verified Preschool',
-    tagline: `Early childhood development centre in ${city}, ${province}`,
+    institutionType: isPrimaryGr ? 'primary-grade-r' : 'preschool',
+    gradeRDetails: isPrimaryGr
+      ? {
+          hasDedicatedReceptionUnit: true,
+          receptionUnitName: `${cleanName} — Grade R Reception Unit`,
+          parentPrimarySchoolName: cleanName,
+          grade1FeederPriority: true,
+          feederPolicySummary: `Enrolled Grade R learners receive priority feeder progression into Grade 1 at ${cleanName}.`,
+          primarySportsAndExtramurals: [
+            'Primary School Sports Fields & Physical Education',
+            'Foundation Phase Perceptual Motor & Media Library',
+            'On-Campus Aftercare & Extramural Activities',
+          ],
+          aftercareIncluded: true,
+          governingBody: 'Public Section 21 / Quintile 5',
+        }
+      : undefined,
+    tagline: isPrimaryGr
+      ? `Primary School Grade R Reception Unit in ${city}, ${province}`
+      : `Early childhood development centre in ${city}, ${province}`,
     description: cleanDescription,
     province,
     district: city,
@@ -191,9 +216,9 @@ export function highlightToDraftPreschool(
         : `${suburb}, ${city}, ${province}, South Africa`,
     latitude: -30.26,
     longitude: 29.94,
-    curriculum: 'Play-Based',
-    ageRange: '18 months – 6 years',
-    minAgeMonths: 18,
+    curriculum: isPrimaryGr ? 'CAPS' : 'Play-Based',
+    ageRange: isPrimaryGr ? '5 – 6 years (Grade R / Reception Year)' : '18 months – 6 years',
+    minAgeMonths: isPrimaryGr ? 54 : 18,
     maxAgeMonths: 72,
     monthlyFeeZAR,
     rating: 4.9,
@@ -204,16 +229,27 @@ export function highlightToDraftPreschool(
     isSubsidised: false,
     npoNumber: null,
     status: 'Admissions Open',
-    teacherRatio: '1:6',
+    teacherRatio: isPrimaryGr ? '1:8' : '1:6',
     operatingHours: cleanHours || '07:00 – 17:00',
-    facilities: [
-      'Lockable Gate',
-      'Secure Perimeter Fence',
-      'Nutritious Meals',
-      'Outdoor Playground',
-      'Grade R Readiness',
-      'On-Site Clean Tap Water',
-    ],
+    facilities: isPrimaryGr
+      ? [
+          'Dedicated Grade R Reception Unit',
+          'Grade 1 Feeder Priority',
+          'Primary School Sports & Extramurals',
+          'Lockable Gate',
+          'Secure Perimeter Fence',
+          'Outdoor Playground',
+          'Grade R Readiness',
+          'Aftercare Available',
+        ]
+      : [
+          'Lockable Gate',
+          'Secure Perimeter Fence',
+          'Nutritious Meals',
+          'Outdoor Playground',
+          'Grade R Readiness',
+          'On-Site Clean Tap Water',
+        ],
     images: (() => {
       const incoming =
         Array.isArray(item.images) && item.images.length > 0

@@ -1,5 +1,6 @@
 import realPreschoolsData from './real-preschools.json';
 import ecdBenchmarksData from './ecd-benchmarks.json';
+import { PRIMARY_SCHOOL_GRADE_R_UNITS } from './primary-grade-r-schools';
 import {
   MAX_PRESCHOOL_PROFILE_PHOTOS,
   normalizeSchoolWebsiteOrSocialUrl,
@@ -30,6 +31,19 @@ export type Curriculum =
 
 export type EnrollmentStatus = 'Admissions Open' | 'Limited Spots' | 'Waitlist Only';
 
+export type InstitutionType = 'preschool' | 'primary-grade-r';
+
+export interface GradeRDetails {
+  hasDedicatedReceptionUnit: boolean;
+  receptionUnitName?: string;
+  parentPrimarySchoolName?: string;
+  grade1FeederPriority: boolean;
+  feederPolicySummary?: string;
+  primarySportsAndExtramurals: string[];
+  aftercareIncluded?: boolean;
+  governingBody?: 'Public Section 21 / Quintile 5' | 'Independent / IEB' | 'Public Primary School' | string;
+}
+
 export interface ParentReview {
   id: string;
   author: string;
@@ -45,6 +59,8 @@ export interface Preschool {
   name: string;
   tagline: string;
   description: string;
+  institutionType?: InstitutionType;
+  gradeRDetails?: GradeRDetails;
   province?: Province | string;
   district?: string;
   educationDistrict?: string;
@@ -131,6 +147,10 @@ export const CURRICULUMS: Curriculum[] = [
 ];
 
 export const ALL_FACILITIES = [
+  'Dedicated Grade R Reception Unit',
+  'Grade 1 Feeder Priority',
+  'Primary School Sports & Extramurals',
+  'Grade R Readiness',
   'CCTV Security',
   'Nutritious Meals',
   'Aftercare Available',
@@ -142,12 +162,12 @@ export const ALL_FACILITIES = [
   'Lockable Gate',
   'Secure Perimeter Fence',
   'Outdoor Playground',
-  'Grade R Readiness',
 ];
 
 export const ECD_BENCHMARKS = ecdBenchmarksData;
 
 export const FEATURED_PRESCHOOLS: Preschool[] = [
+  ...PRIMARY_SCHOOL_GRADE_R_UNITS,
   {
     id: 'nawi-learn-toddler-centre-umzimkhulu',
     slug: 'nawi-learn-toddler-centre-umzimkhulu',

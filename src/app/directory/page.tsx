@@ -18,6 +18,7 @@ import {
   Curriculum,
   Preschool,
 } from '@/data/preschools';
+import { isPrimarySchoolGradeR } from '@/data/primary-grade-r-schools';
 import PreschoolCard from '@/components/directory/PreschoolCard';
 import SchoolDetailModal from '@/components/directory/SchoolDetailModal';
 import TourBookingModal from '@/components/directory/TourBookingModal';
@@ -66,6 +67,7 @@ import {
   Heart,
   Scale,
   FileText,
+  GraduationCap,
 } from 'lucide-react';
 import {
   Sheet,
@@ -82,6 +84,7 @@ export default function DirectoryPage() {
 
   // Filter States
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedInstitutionType, setSelectedInstitutionType] = useState<'All' | 'preschool' | 'primary-grade-r'>('All');
   const [selectedProvince, setSelectedProvince] = useState<Province | 'All'>('All');
   const [selectedCity, setSelectedCity] = useState<City | 'All'>('All');
   const [selectedCurriculum, setSelectedCurriculum] = useState<Curriculum | 'All'>('All');
@@ -96,11 +99,12 @@ export default function DirectoryPage() {
   const [sortBy, setSortBy] = useState<'rating' | 'fee-asc' | 'fee-desc' | 'reviews' | 'name'>('rating');
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Full 20,291 National Database State
+  // Full National Database State
   const [preschools, setPreschools] = useState<Preschool[]>(() => PRESCHOOLS.slice(0, 24));
-  const [totalCount, setTotalCount] = useState<number>(20291);
-  const [totalPages, setTotalPages] = useState<number>(Math.ceil(20291 / ITEMS_PER_PAGE));
+  const [totalCount, setTotalCount] = useState<number>(20305);
+  const [totalPages, setTotalPages] = useState<number>(Math.ceil(20305 / ITEMS_PER_PAGE));
   const [provinceCounts, setProvinceCounts] = useState<Record<string, number>>({});
+  const [institutionCounts, setInstitutionCounts] = useState<Record<string, number>>({});
   const [availableCities, setAvailableCities] = useState<{ name: string; count: number }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -180,6 +184,7 @@ export default function DirectoryPage() {
     setCurrentPage(1);
   }, [
     searchQuery,
+    selectedInstitutionType,
     selectedProvince,
     selectedCity,
     selectedCurriculum,
@@ -192,7 +197,7 @@ export default function DirectoryPage() {
     sortBy,
   ]);
 
-  // Query Server API across all 20,291 records for page & active filters
+  // Query Server API across all national records for page & active filters
   useEffect(() => {
     let isMounted = true;
     setIsLoading(true);
@@ -201,6 +206,7 @@ export default function DirectoryPage() {
       try {
         const params = new URLSearchParams();
         if (searchQuery.trim()) params.set('q', searchQuery.trim());
+        if (selectedInstitutionType !== 'All') params.set('institutionType', selectedInstitutionType);
         if (selectedProvince !== 'All') params.set('province', selectedProvince);
         if (selectedCity !== 'All') params.set('municipality', selectedCity);
         if (selectedDsd !== 'All') params.set('dsd', selectedDsd);
@@ -218,9 +224,10 @@ export default function DirectoryPage() {
         if (res.ok && isMounted) {
           const data = await res.json();
           setPreschools(data.results || []);
-          setTotalCount(typeof data.total === 'number' ? data.total : 20291);
-          setTotalPages(typeof data.totalPages === 'number' ? data.totalPages : Math.ceil(20291 / ITEMS_PER_PAGE));
+          setTotalCount(typeof data.total === 'number' ? data.total : 20305);
+          setTotalPages(typeof data.totalPages === 'number' ? data.totalPages : Math.ceil(20305 / ITEMS_PER_PAGE));
           if (data.provinceCounts) setProvinceCounts(data.provinceCounts);
+          if (data.institutionCounts) setInstitutionCounts(data.institutionCounts);
           if (Array.isArray(data.availableCities)) setAvailableCities(data.availableCities);
         }
       } catch (err) {
@@ -238,6 +245,7 @@ export default function DirectoryPage() {
     };
   }, [
     searchQuery,
+    selectedInstitutionType,
     selectedProvince,
     selectedCity,
     selectedDsd,
@@ -258,6 +266,8 @@ export default function DirectoryPage() {
     const qNormalized = q.replace(/\bcenter\b/g, 'centre');
 
     const matchingCustom = customSchools.filter((cs) => {
+      if (selectedInstitutionType === 'primary-grade-r' && !isPrimarySchoolGradeR(cs)) return false;
+      if (selectedInstitutionType === 'preschool' && isPrimarySchoolGradeR(cs)) return false;
       if (selectedProvince !== 'All' && cs.province !== selectedProvince) return false;
       if (
         selectedCity !== 'All' &&
@@ -269,9 +279,11 @@ export default function DirectoryPage() {
       if (!q) return true;
       const hay = `${cs.name} ${cs.city} ${cs.suburb} ${cs.province} ${cs.websiteUrl || ''}`
         .toLowerCase()
-        .replace(/\bcenter\b/g, 'centre');
-      const qTokens = qNormalized.split(/\s+/).filter((t) => t.length >= 2);
-      return hay.includes(qNormalized) || qTokens.every((t) => hay.includes(t));
+        .replace(/\bcenter\b/g, 'centre')
+        .replace(/\./g, '');
+      const qClean = qNormalized.replace(/\./g, '');
+      const qTokens = qClean.split(/\s+/).filter((t) => t.length >= 2);
+      return hay.includes(qClean) || qTokens.every((t) => hay.includes(t));
     });
 
     const customSlugSet = new Set([
@@ -297,7 +309,7 @@ export default function DirectoryPage() {
       return combined.filter((s) => s.isClaimed);
     }
     return combined;
-  }, [preschools, claimedSlugs, customSchools, replacedSlugs, searchQuery, selectedProvince, selectedCity, onlyClaimed, onlySaved, savedSchools]);
+  }, [preschools, claimedSlugs, customSchools, replacedSlugs, searchQuery, selectedInstitutionType, selectedProvince, selectedCity, onlyClaimed, onlySaved, savedSchools]);
 
   const savedIdSet = useMemo(() => new Set(savedSchools.map((s) => s.id)), [savedSchools]);
 
@@ -352,6 +364,7 @@ export default function DirectoryPage() {
 
   const resetFilters = () => {
     setSearchQuery('');
+    setSelectedInstitutionType('All');
     setSelectedProvince('All');
     setSelectedCity('All');
     setSelectedCurriculum('All');
@@ -369,6 +382,7 @@ export default function DirectoryPage() {
 
   const hasActiveFilters =
     searchQuery.trim() !== '' ||
+    selectedInstitutionType !== 'All' ||
     selectedProvince !== 'All' ||
     selectedCity !== 'All' ||
     selectedCurriculum !== 'All' ||
@@ -629,6 +643,71 @@ export default function DirectoryPage() {
   // Filter Sidebar Content (shared between desktop and mobile sheet)
   const FilterControls = () => (
     <div className="space-y-6">
+      {/* Institution Type Filter (Primary School Grade R vs Preschools) */}
+      <div>
+        <label className="text-xs font-bold text-foreground uppercase tracking-wider block mb-2">
+          Institution Type &amp; Grade R
+        </label>
+        <div className="space-y-1.5">
+          {[
+            {
+              id: 'All',
+              label: 'All Institutions',
+              sublabel: 'Preschools & Primary Grade R',
+              count: institutionCounts.all,
+            },
+            {
+              id: 'primary-grade-r',
+              label: 'Primary School Grade R',
+              sublabel: 'Reception Units (e.g. D.P.H.S)',
+              count: institutionCounts['primary-grade-r'],
+            },
+            {
+              id: 'preschool',
+              label: 'Preschools & ECD Centres',
+              sublabel: 'Standalone Crèches & Montessori',
+              count: institutionCounts.preschool,
+            },
+          ].map((inst) => {
+            const isActive = selectedInstitutionType === inst.id;
+            return (
+              <button
+                key={inst.id}
+                type="button"
+                onClick={() => setSelectedInstitutionType(inst.id as any)}
+                className={`w-full text-xs py-2.5 px-3 rounded-xl border transition-all text-left flex items-center justify-between gap-2 ${
+                  isActive
+                    ? inst.id === 'primary-grade-r'
+                      ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm font-bold'
+                      : 'bg-primary/10 text-primary border-primary/50 font-bold'
+                    : 'bg-background hover:bg-muted text-foreground border-border font-semibold'
+                }`}
+              >
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    {inst.id === 'primary-grade-r' && (
+                      <GraduationCap className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-white' : 'text-indigo-600 dark:text-indigo-400'}`} />
+                    )}
+                    <span className="truncate">{inst.label}</span>
+                  </div>
+                  <span className={`block text-[10px] truncate mt-0.5 ${isActive && inst.id === 'primary-grade-r' ? 'text-white/85 font-normal' : 'text-muted-foreground font-normal'}`}>
+                    {inst.sublabel}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {typeof inst.count === 'number' && inst.count > 0 && (
+                    <span className={`text-[10px] font-mono tabular-nums ${isActive && inst.id === 'primary-grade-r' ? 'text-white/90' : 'text-muted-foreground'}`}>
+                      ({inst.count.toLocaleString()})
+                    </span>
+                  )}
+                  {isActive && <Check className="w-3.5 h-3.5 shrink-0" />}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Province Filter */}
       <div>
         <label className="text-xs font-bold text-foreground uppercase tracking-wider block mb-2">
@@ -1035,6 +1114,67 @@ export default function DirectoryPage() {
           </div>
         </div>
 
+        {/* Quick Institution Type & Primary School Grade R Filter Bar */}
+        <div className="mb-4 p-3 rounded-2xl bg-card border border-border/80 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-bold text-foreground flex items-center gap-1.5 mr-1">
+              <GraduationCap className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+              <span>Institution Filter:</span>
+            </span>
+            <button
+              type="button"
+              onClick={() => setSelectedInstitutionType('All')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors whitespace-nowrap shrink-0 border ${
+                selectedInstitutionType === 'All'
+                  ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                  : 'bg-background text-foreground border-border hover:bg-muted'
+              }`}
+            >
+              All Schools {institutionCounts.all ? `(${institutionCounts.all.toLocaleString()})` : ''}
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedInstitutionType('primary-grade-r')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors whitespace-nowrap shrink-0 border flex items-center gap-1.5 ${
+                selectedInstitutionType === 'primary-grade-r'
+                  ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
+                  : 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/30 hover:bg-indigo-500/20'
+              }`}
+            >
+              <GraduationCap className="w-3.5 h-3.5" />
+              <span>
+                Primary School Grade R / Reception Units{' '}
+                {institutionCounts['primary-grade-r'] ? `(${institutionCounts['primary-grade-r'].toLocaleString()})` : ''}
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedInstitutionType('preschool')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors whitespace-nowrap shrink-0 border ${
+                selectedInstitutionType === 'preschool'
+                  ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                  : 'bg-background text-foreground border-border hover:bg-muted'
+              }`}
+            >
+              Preschools &amp; ECD Centres {institutionCounts.preschool ? `(${institutionCounts.preschool.toLocaleString()})` : ''}
+            </button>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedInstitutionType('primary-grade-r');
+                setSelectedProvince('KwaZulu-Natal');
+                setSearchQuery('D.P.H.S');
+              }}
+              className="text-xs font-semibold text-indigo-700 dark:text-indigo-300 hover:underline flex items-center gap-1 whitespace-nowrap shrink-0"
+            >
+              <span>Spotlight: D.P.H.S Reception Unit (Durban, Morningside)</span>
+            </button>
+          </div>
+        </div>
+
         {/* Results Header Status & Quick Province Pills */}
         <div className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-6 border-b border-border/60 text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
@@ -1042,7 +1182,12 @@ export default function DirectoryPage() {
               {totalCount === 0 ? 0 : (currentPage - 1) * ITEMS_PER_PAGE + 1}–
               {Math.min(currentPage * ITEMS_PER_PAGE, totalCount)}
             </strong> of{' '}
-            <strong className="text-foreground font-bold">{totalCount.toLocaleString()}</strong> verified preschools
+            <strong className="text-foreground font-bold">{totalCount.toLocaleString()}</strong>{' '}
+            {selectedInstitutionType === 'primary-grade-r'
+              ? 'Primary School Grade R & Reception Units'
+              : selectedInstitutionType === 'preschool'
+              ? 'standalone preschools & ECD centres'
+              : 'verified preschools & Primary School Grade R units'}
             {selectedProvince !== 'All' && <span> in {selectedProvince}</span>}
             {selectedCity !== 'All' && <span> ({selectedCity})</span>}
           </div>
