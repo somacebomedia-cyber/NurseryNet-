@@ -155,18 +155,12 @@ export async function GET(request: NextRequest) {
     .slice(0, 16)
     .map(([name, count]) => ({ name, count }));
 
-  // Sorting
+  // Sorting (organic across all schools)
   filtered = [...filtered].sort((a, b) => {
     if (sortBy === 'fee-asc') return a.monthlyFeeZAR - b.monthlyFeeZAR;
     if (sortBy === 'fee-desc') return b.monthlyFeeZAR - a.monthlyFeeZAR;
     if (sortBy === 'reviews') return b.reviewCount - a.reviewCount;
     if (sortBy === 'name') return a.name.localeCompare(b.name);
-    // Prioritize verified flagship Primary School Grade R units when filtering by primary-grade-r or matching rating
-    if (institutionType === 'primary-grade-r') {
-      const aHasCustomDetails = a.gradeRDetails?.feederPolicySummary ? 1 : 0;
-      const bHasCustomDetails = b.gradeRDetails?.feederPolicySummary ? 1 : 0;
-      if (bHasCustomDetails !== aHasCustomDetails) return bHasCustomDetails - aHasCustomDetails;
-    }
     return b.rating - a.rating; // default 'rating'
   });
 

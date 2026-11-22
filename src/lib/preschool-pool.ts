@@ -1,7 +1,10 @@
 import fs from 'fs';
 import path from 'path';
 import { FEATURED_PRESCHOOLS } from '@/data/preschools';
-import { isPrimarySchoolGradeR } from '@/data/primary-grade-r-schools';
+import {
+  isPrimarySchoolGradeR,
+  PRIMARY_SCHOOL_GRADE_R_UNITS,
+} from '@/data/primary-grade-r-schools';
 import {
   hasOnlyStockPlaceholderImages,
   hasRealWebsitePhoto,
@@ -165,12 +168,25 @@ function transformRawListing(item: any, idx: number): any {
 
 function enrichBaseListWithRealPhotos(list: any[]): any[] {
   const featuredIds = new Set(FEATURED_PRESCHOOLS.map((f) => f.slug || f.id));
+  const combinedInput = [...list];
+  const existingKeys = new Set(combinedInput.map((s) => s.slug || s.id));
+  for (const unit of PRIMARY_SCHOOL_GRADE_R_UNITS) {
+    const key = unit.slug || unit.id;
+    if (!featuredIds.has(key) && !existingKeys.has(key)) {
+      combinedInput.push(unit);
+      existingKeys.add(key);
+    }
+  }
+
   const withRealPhotos: any[] = [];
   const standardListings: any[] = [];
 
-  for (const s of list) {
+  for (const s of combinedInput) {
     if (featuredIds.has(s.slug || s.id)) continue;
-    const cleanWebUrl = normalizeSchoolWebsiteOrSocialUrl(s.websiteUrl, s.name, true);
+    const cleanWebUrl =
+      s.institutionType === 'primary-grade-r' && s.websiteUrl
+        ? s.websiteUrl
+        : normalizeSchoolWebsiteOrSocialUrl(s.websiteUrl, s.name, true);
     const resolved = resolveRealPreschoolImages({
       name: s.name,
       slug: s.slug || s.id,
@@ -276,7 +292,7 @@ function loadBasePreschools(): any[] {
     // return empty array if all sources fail
   }
 
-  return [...FEATURED_PRESCHOOLS];
+  return [...FEATURED_PRESCHOOLS, ...PRIMARY_SCHOOL_GRADE_R_UNITS];
 }
 
 export function loadAllPreschools(): any[] {

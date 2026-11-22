@@ -156,10 +156,10 @@ export default function PreschoolCard({
 
       {/* Card Body */}
       <div className="p-5 flex flex-col flex-grow">
-        {/* Title & Tagline */}
+        {/* Title, Official Logo & Tagline */}
         <div className="mb-2">
           {isPrimaryGradeR && (
-            <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-bold text-indigo-700 dark:text-indigo-300 mb-1">
+            <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-bold text-indigo-700 dark:text-indigo-300 mb-1.5">
               <GraduationCap className="w-3.5 h-3.5 shrink-0" />
               <span>Primary School Grade R</span>
               <span aria-hidden="true" className="text-muted-foreground/40">·</span>
@@ -170,30 +170,49 @@ export default function PreschoolCard({
               </span>
             </div>
           )}
-          <h3
-            onClick={() => onSelect(preschool)}
-            className="font-heading text-lg font-bold text-foreground group-hover:text-primary transition-colors cursor-pointer line-clamp-1"
-          >
-            {preschool.name}
-          </h3>
-          <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
-            {preschool.tagline}
-          </p>
+          <div className="flex items-start gap-2.5">
+            {preschool.logoUrl && (
+              <div className="relative w-10 h-10 rounded-lg bg-white border border-border/80 shadow-xs p-1 shrink-0 overflow-hidden mt-0.5">
+                <Image
+                  src={preschool.logoUrl}
+                  alt={`${preschool.name} official crest`}
+                  fill
+                  sizes="40px"
+                  className="object-contain p-0.5"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+            )}
+            <div className="min-w-0 flex-1">
+              <h3
+                onClick={() => onSelect(preschool)}
+                className="font-heading text-lg font-bold text-foreground group-hover:text-primary transition-colors cursor-pointer line-clamp-1"
+              >
+                {preschool.name}
+              </h3>
+              <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
+                {preschool.tagline}
+              </p>
+            </div>
+          </div>
         </div>
 
-        {/* Dedicated Primary School Grade R Reception Unit Spotlight */}
+        {/* Dedicated Primary School Grade R Reception Unit Summary */}
         {isPrimaryGradeR && (
-          <div className="my-2 p-2.5 rounded-xl bg-indigo-500/5 border border-indigo-500/20 space-y-1 text-[11px]">
-            <div className="flex items-center gap-1.5 text-foreground font-semibold">
-              <Building2 className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
-              <span className="truncate">
-                {preschool.gradeRDetails?.receptionUnitName || 'Dedicated Separate Reception Unit Campus'}
+          <div className="my-2 p-2.5 rounded-xl bg-indigo-500/5 border border-indigo-500/20 space-y-1.5 text-[11px]">
+            <div className="flex items-start gap-1.5 text-foreground font-semibold">
+              <Building2 className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
+              <span className="line-clamp-2">
+                {preschool.gradeRDetails?.campusFacilitiesSummary ||
+                  preschool.gradeRDetails?.receptionUnitName ||
+                  'Dedicated Separate Reception Unit Campus'}
               </span>
             </div>
-            <div className="flex items-center gap-1.5 text-muted-foreground">
-              <Trophy className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
-              <span className="truncate">
-                {preschool.gradeRDetails?.primarySportsAndExtramurals?.slice(0, 2).join(' · ') ||
+            <div className="flex items-start gap-1.5 text-muted-foreground">
+              <Trophy className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+              <span className="line-clamp-2">
+                {preschool.gradeRDetails?.aftercareAccessModel ||
+                  preschool.gradeRDetails?.primarySportsAndExtramurals?.slice(0, 2).join(' · ') ||
                   'Primary school sports, extramurals & aftercare access'}
               </span>
             </div>

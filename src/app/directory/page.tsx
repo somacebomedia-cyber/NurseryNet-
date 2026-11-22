@@ -659,7 +659,7 @@ export default function DirectoryPage() {
             {
               id: 'primary-grade-r',
               label: 'Primary School Grade R',
-              sublabel: 'Reception Units (e.g. D.P.H.S)',
+              sublabel: 'Reception Units & Foundation Phase',
               count: institutionCounts['primary-grade-r'],
             },
             {
@@ -1157,20 +1157,6 @@ export default function DirectoryPage() {
               }`}
             >
               Preschools &amp; ECD Centres {institutionCounts.preschool ? `(${institutionCounts.preschool.toLocaleString()})` : ''}
-            </button>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedInstitutionType('primary-grade-r');
-                setSelectedProvince('KwaZulu-Natal');
-                setSearchQuery('D.P.H.S');
-              }}
-              className="text-xs font-semibold text-indigo-700 dark:text-indigo-300 hover:underline flex items-center gap-1 whitespace-nowrap shrink-0"
-            >
-              <span>Spotlight: D.P.H.S Reception Unit (Durban, Morningside)</span>
             </button>
           </div>
         </div>

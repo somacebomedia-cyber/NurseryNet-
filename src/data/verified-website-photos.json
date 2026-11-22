@@ -1,5 +1,28 @@
 [
   {
+    "domain": "dphs.co.za",
+    "namePattern": "d\\.?p\\.?h\\.?s|durban\\s+preparatory\\s+high\\s+school",
+    "websiteUrl": "https://dphs.co.za/pages/grade-r",
+    "sourceType": "website",
+    "images": [
+      "/images/preschools/dphs-grade-r-hero.png",
+      "/images/preschools/dphs-grade-r-classroom.png",
+      "/images/preschools/dphs-grade-r-learning.png",
+      "/images/preschools/dphs-aftercare-1.jpg",
+      "/images/preschools/dphs-aftercare-4.jpg",
+      "/images/preschools/dphs-aftercare-2.jpg"
+    ],
+    "captions": [
+      "D.P.H.S Reception Unit — Grade R movement and music readiness session",
+      "Grade R Classroom — Hands-on numeracy and fine-motor construction play",
+      "IT & Digital Readiness — Grade R boys in the D.P.H.S computer lab",
+      "Outdoor Play Precinct — Jungle gym and adventure play at 50 Claribel Road",
+      "Junior Primary Aftercare — Individual reading and guided learning support",
+      "Aftercare Programme — Supervised afternoon activities for Grades R–3"
+    ],
+    "coverPhoto": "/images/preschools/dphs-grade-r-hero.png"
+  },
+  {
     "domain": "nawilearn.co.za",
     "namePattern": "nawi\\\\s*learn",
     "websiteUrl": "https://www.nawilearn.co.za",

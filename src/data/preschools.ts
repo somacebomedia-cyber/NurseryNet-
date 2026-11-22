@@ -38,7 +38,9 @@ export interface GradeRDetails {
   receptionUnitName?: string;
   parentPrimarySchoolName?: string;
   grade1FeederPriority: boolean;
+  campusFacilitiesSummary?: string;
   feederPolicySummary?: string;
+  aftercareAccessModel?: string;
   primarySportsAndExtramurals: string[];
   aftercareIncluded?: boolean;
   governingBody?: 'Public Section 21 / Quintile 5' | 'Independent / IEB' | 'Public Primary School' | string;
@@ -90,6 +92,7 @@ export interface Preschool {
   operatingHours: string;
   facilities: string[];
   images: string[];
+  logoUrl?: string;
   phone: string;
   email: string;
   websiteUrl?: string;
@@ -167,7 +170,6 @@ export const ALL_FACILITIES = [
 export const ECD_BENCHMARKS = ecdBenchmarksData;
 
 export const FEATURED_PRESCHOOLS: Preschool[] = [
-  ...PRIMARY_SCHOOL_GRADE_R_UNITS,
   {
     id: 'nawi-learn-toddler-centre-umzimkhulu',
     slug: 'nawi-learn-toddler-centre-umzimkhulu',
@@ -588,11 +590,16 @@ export const REAL_PRESCHOOLS: Preschool[] = ((realPreschoolsData as any[]) as Pr
   }
 );
 
-// Merged dataset of real verified South African preschools
+// Merged dataset of real verified South African preschools and Primary School Grade R units
 export const PRESCHOOLS: Preschool[] = [
   ...FEATURED_PRESCHOOLS,
+  ...PRIMARY_SCHOOL_GRADE_R_UNITS.filter(
+    (pu) => !FEATURED_PRESCHOOLS.some((fp) => fp.id === pu.id || fp.slug === pu.slug)
+  ),
   ...REAL_PRESCHOOLS.filter(
-    (rp) => !FEATURED_PRESCHOOLS.some((fp) => fp.id === rp.id || fp.slug === rp.slug)
+    (rp) =>
+      !FEATURED_PRESCHOOLS.some((fp) => fp.id === rp.id || fp.slug === rp.slug) &&
+      !PRIMARY_SCHOOL_GRADE_R_UNITS.some((pu) => pu.id === rp.id || pu.slug === rp.slug)
   ),
 ];
 

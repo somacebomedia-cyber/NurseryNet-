@@ -308,18 +308,34 @@ export default function SchoolDetailModal({
                 {activePhotoCaption}
               </div>
             )}
-            <h2 className="font-heading text-2xl sm:text-3xl font-extrabold drop-shadow-md">
-              {preschool.name}
-            </h2>
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs sm:text-sm text-white/90 mt-1">
-              <span className="flex items-center gap-1">
-                <MapPin className="w-4 h-4 text-accent" />
-                {preschool.address}
-              </span>
-              <span className="flex items-center gap-1 text-yellow-300 font-bold">
-                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                {preschool.rating.toFixed(1)} ({preschool.reviewCount} parent reviews)
-              </span>
+            <div className="flex items-center gap-3">
+              {preschool.logoUrl && (
+                <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-white/95 border border-white/40 shadow-lg shrink-0 overflow-hidden">
+                  <Image
+                    src={preschool.logoUrl}
+                    alt={`${preschool.name} official logo`}
+                    fill
+                    sizes="56px"
+                    className="object-contain p-1"
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
+              )}
+              <div className="min-w-0">
+                <h2 className="font-heading text-2xl sm:text-3xl font-extrabold drop-shadow-md leading-tight">
+                  {preschool.name}
+                </h2>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs sm:text-sm text-white/90 mt-1">
+                  <span className="flex items-center gap-1">
+                    <MapPin className="w-4 h-4 text-accent shrink-0" />
+                    {preschool.address}
+                  </span>
+                  <span className="flex items-center gap-1 text-yellow-300 font-bold">
+                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                    {preschool.rating.toFixed(1)} ({preschool.reviewCount} parent reviews)
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -457,12 +473,25 @@ export default function SchoolDetailModal({
             </div>
           </div>
 
-          {/* Primary School Grade R & Reception Unit Spotlight Section */}
+          {/* Primary School Grade R & Reception Unit Profile Section */}
           {isPrimaryGradeR && (
             <div className="p-5 rounded-xl bg-indigo-500/5 border border-indigo-500/25 space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <GraduationCap className="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0" />
+                <div className="flex items-center gap-2.5">
+                  {preschool.logoUrl ? (
+                    <div className="relative w-9 h-9 rounded-lg bg-white border border-border/80 shrink-0 overflow-hidden">
+                      <Image
+                        src={preschool.logoUrl}
+                        alt={`${preschool.name} crest`}
+                        fill
+                        sizes="36px"
+                        className="object-contain p-0.5"
+                        referrerPolicy="no-referrer"
+                      />
+                    </div>
+                  ) : (
+                    <GraduationCap className="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0" />
+                  )}
                   <div>
                     <h4 className="font-heading text-sm font-bold text-foreground">
                       Primary School Grade R &amp; Reception Unit Profile
@@ -478,8 +507,24 @@ export default function SchoolDetailModal({
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                <div className="p-3.5 rounded-xl bg-background border border-border/80 space-y-1">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                <div className="p-3.5 rounded-xl bg-background border border-border/80 space-y-1.5">
+                  <div className="flex items-center gap-1.5 font-bold text-indigo-700 dark:text-indigo-300">
+                    <Building2 className="w-4 h-4 shrink-0" />
+                    <span>Dedicated Campus Facilities</span>
+                  </div>
+                  {preschool.gradeRDetails?.receptionUnitName && (
+                    <span className="block text-[11px] font-semibold text-foreground">
+                      {preschool.gradeRDetails.receptionUnitName}
+                    </span>
+                  )}
+                  <p className="text-muted-foreground leading-relaxed">
+                    {preschool.gradeRDetails?.campusFacilitiesSummary ||
+                      'Dedicated separate Grade R Reception Unit campus and age-appropriate play precinct inside the primary school.'}
+                  </p>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-background border border-border/80 space-y-1.5">
                   <div className="flex items-center gap-1.5 font-bold text-emerald-700 dark:text-emerald-400">
                     <CheckCircle2 className="w-4 h-4 shrink-0" />
                     <span>Grade 1 Feeder Priority</span>
@@ -490,31 +535,37 @@ export default function SchoolDetailModal({
                   </p>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-background border border-border/80 space-y-1">
-                  <div className="flex items-center gap-1.5 font-bold text-indigo-700 dark:text-indigo-300">
-                    <Building2 className="w-4 h-4 shrink-0" />
-                    <span>Dedicated Reception Unit</span>
-                  </div>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {preschool.gradeRDetails?.receptionUnitName
-                      ? `${preschool.gradeRDetails.receptionUnitName} — separate, age-appropriate Reception campus and playground.`
-                      : 'Dedicated separate Grade R Reception Unit campus and play precinct inside the primary school.'}
-                  </p>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-background border border-border/80 space-y-1">
+                <div className="p-3.5 rounded-xl bg-background border border-border/80 space-y-1.5">
                   <div className="flex items-center gap-1.5 font-bold text-amber-700 dark:text-amber-400">
-                    <Trophy className="w-4 h-4 shrink-0" />
-                    <span>Primary Sports &amp; Aftercare</span>
+                    <Clock className="w-4 h-4 shrink-0" />
+                    <span>Aftercare Access Model</span>
                   </div>
                   <p className="text-muted-foreground leading-relaxed">
-                    {preschool.gradeRDetails?.primarySportsAndExtramurals &&
-                    preschool.gradeRDetails.primarySportsAndExtramurals.length > 0
-                      ? preschool.gradeRDetails.primarySportsAndExtramurals.join(' · ')
-                      : 'Full access to primary school sports fields, aquatics, extramurals, and supervised aftercare.'}
+                    {preschool.gradeRDetails?.aftercareAccessModel ||
+                      (preschool.gradeRDetails?.aftercareIncluded
+                        ? 'Supervised on-campus aftercare available after the Grade R morning programme.'
+                        : 'Optional aftercare programme available by separate application.')}
                   </p>
                 </div>
               </div>
+
+              {preschool.gradeRDetails?.primarySportsAndExtramurals &&
+                preschool.gradeRDetails.primarySportsAndExtramurals.length > 0 && (
+                  <div className="p-3.5 rounded-xl bg-background border border-border/80 space-y-2 text-xs">
+                    <div className="flex items-center gap-1.5 font-bold text-foreground">
+                      <Trophy className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                      <span>Primary School Sports, Cultural &amp; Extramural Access</span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-muted-foreground">
+                      {preschool.gradeRDetails.primarySportsAndExtramurals.map((item, idx) => (
+                        <div key={idx} className="flex items-start gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                          <span>{item}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
             </div>
           )}
 
