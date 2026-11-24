@@ -23,3 +23,7 @@ yarn-error.log*
 # local env files
 .env
 .env*.local
+
+# unused uploaded archives & screenshots (keep NurseryNet-real-listings_8917a630.json)
+/public/assets/aistudio/*.zip
+/public/assets/aistudio/Screenshot_*.jpg
