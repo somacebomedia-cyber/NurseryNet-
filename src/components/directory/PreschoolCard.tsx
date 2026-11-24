@@ -10,7 +10,7 @@ import {
   resolveRealPreschoolImages,
 } from '@/lib/real-website-photos';
 import { Button } from '@/components/ui/button';
-import { Star, MapPin, ShieldCheck, BadgeCheck, Users, Calendar, Languages, Heart, FileText, GraduationCap, Building2, Trophy } from 'lucide-react';
+import { Star, MapPin, ShieldCheck, BadgeCheck, Users, Calendar, Languages, Heart, FileText, GraduationCap, Building2, Trophy, Lock, Clock, ShieldAlert } from 'lucide-react';
 
 interface PreschoolCardProps {
   preschool: Preschool;
@@ -18,6 +18,9 @@ interface PreschoolCardProps {
   onBookTour: (preschool: Preschool) => void;
   onApply?: (preschool: Preschool) => void;
   onClaim?: (preschool: Preschool) => void;
+  onDispute?: (preschool: Preschool) => void;
+  isCurrentOwner?: boolean;
+  hasPendingClaim?: boolean;
   isSaved?: boolean;
   onToggleSave?: (preschool: Preschool) => void;
 }
@@ -28,6 +31,9 @@ export default function PreschoolCard({
   onBookTour,
   onApply,
   onClaim,
+  onDispute,
+  isCurrentOwner = false,
+  hasPendingClaim = false,
   isSaved = false,
   onToggleSave,
 }: PreschoolCardProps) {
@@ -254,15 +260,17 @@ export default function PreschoolCard({
           )}
         </div>
 
-        {/* Owner Claim Link / Badge */}
+        {/* Owner Claim Link / Verified Lock Badge */}
         <div className="my-1.5 text-[11px]">
           {preschool.isClaimed ? (
             <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold">
-                <BadgeCheck className="w-3.5 h-3.5 shrink-0" />
-                <span className="truncate">Verified &amp; managed by owner</span>
+              <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold min-w-0">
+                <Lock className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">
+                  {isCurrentOwner ? 'Verified & locked to you' : 'Verified & locked by owner'}
+                </span>
               </div>
-              {onClaim && (
+              {isCurrentOwner && onClaim ? (
                 <button
                   type="button"
                   onClick={(e) => {
@@ -271,9 +279,26 @@ export default function PreschoolCard({
                   }}
                   className="text-primary hover:underline font-bold whitespace-nowrap shrink-0"
                 >
-                  Edit / Fix Name
+                  Manage Listing
                 </button>
-              )}
+              ) : onDispute ? (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDispute(preschool);
+                  }}
+                  className="text-muted-foreground hover:text-destructive hover:underline font-semibold flex items-center gap-1 whitespace-nowrap shrink-0"
+                >
+                  <ShieldAlert className="w-3 h-3" />
+                  <span>Dispute</span>
+                </button>
+              ) : null}
+            </div>
+          ) : hasPendingClaim ? (
+            <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-semibold">
+              <Clock className="w-3.5 h-3.5 shrink-0" />
+              <span>Your claim is pending admin verification</span>
             </div>
           ) : (
             <button
@@ -282,7 +307,7 @@ export default function PreschoolCard({
               className="text-primary hover:text-primary/80 font-bold flex items-center gap-1 hover:underline transition-all"
             >
               <BadgeCheck className="w-3.5 h-3.5" />
-              <span>Is this your preschool? Claim listing — free</span>
+              <span>Is this your preschool? Verify &amp; claim — free</span>
             </button>
           )}
         </div>

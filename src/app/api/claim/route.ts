@@ -1,25 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { removeCustomPreschoolBySlug, upsertCustomPreschool } from '@/lib/preschool-pool';
+import {
+  validateVerificationProof,
+  verifyFirebaseBearerToken,
+} from '@/lib/server-verification-store';
 
-interface ClaimRecord {
-  id: string;
-  nurserySlug: string;
-  nurseryName?: string;
+interface VerifiedClaimCacheRecord {
+  schoolSlug: string;
+  ownerUid: string;
   ownerName: string;
-  ownerEmail: string;
-  ownerPhone: string;
-  role: string;
-  proofNotes?: string;
-  status: 'pending_review' | 'approved' | 'rejected';
-  createdAt: string;
-  token?: string;
-  preschool?: any;
+  verificationMethod: string;
+  updatedAt: string;
 }
 
-const claimsStore: Map<string, ClaimRecord> = new Map();
+const globalForClaims = globalThis as unknown as {
+  __nurserynetVerifiedClaims?: Map<string, VerifiedClaimCacheRecord>;
+};
+
+const verifiedClaimsCache =
+  globalForClaims.__nurserynetVerifiedClaims ??
+  (globalForClaims.__nurserynetVerifiedClaims = new Map<string, VerifiedClaimCacheRecord>());
 
 export async function POST(req: NextRequest) {
   try {
+    const caller = await verifyFirebaseBearerToken(req.headers.get('authorization'));
+    if (!caller || !caller.emailVerified) {
+      return NextResponse.json(
+        { error: 'Unauthorized: Sign in with a verified account to update a claimed preschool listing.' },
+        { status: 401 }
+      );
+    }
+
     const body = await req.json();
     const {
       nurserySlug,
@@ -30,23 +41,45 @@ export async function POST(req: NextRequest) {
       ownerEmail,
       ownerPhone,
       role,
-      proofNotes,
+      verificationMethod,
+      verificationProofHash,
       preschoolData,
-      replaceAllForOwner,
+      ownerUidOverride,
     } = body || {};
 
-    if (!nurserySlug) {
+    if (!nurserySlug || typeof nurserySlug !== 'string') {
       return NextResponse.json(
         { error: 'Preschool identifier is required.' },
         { status: 400 }
       );
     }
 
-    const claimId = `claim_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-    const token = `owner_tok_${Math.random().toString(36).substring(2, 10)}`;
+    const existingLock = verifiedClaimsCache.get(nurserySlug);
 
-    // Upsert the claimed/updated preschool into the shared directory pool so it appears in /api/directory
-    // and replaces any previous misspelled slug
+    // Authorization gate:
+    // 1. Platform Admin can always publish approved manual claims or ownership transfers.
+    // 2. Already-verified owner of this slug can publish listing edits.
+    // 3. New instant claim must present a valid server-issued verificationProofHash bound to (caller.uid, nurserySlug).
+    const isExistingOwner = Boolean(existingLock && existingLock.ownerUid === caller.uid);
+    const validProof = validateVerificationProof(verificationProofHash, caller.uid, nurserySlug);
+
+    if (!caller.isAdmin && !isExistingOwner && !validProof) {
+      return NextResponse.json(
+        {
+          error:
+            existingLock && existingLock.ownerUid !== caller.uid
+              ? 'This preschool listing is locked to another verified owner. Please submit an Ownership Dispute if you represent this school.'
+              : 'Verification proof required. Complete Official Domain Match, Listed Phone OTP, or wait for Admin approval before publishing.',
+        },
+        { status: 403 }
+      );
+    }
+
+    const effectiveOwnerUid =
+      caller.isAdmin && typeof ownerUidOverride === 'string' && ownerUidOverride.trim()
+        ? ownerUidOverride.trim()
+        : existingLock?.ownerUid || caller.uid;
+
     let savedPreschool: any = null;
     if (preschoolData && typeof preschoolData === 'object') {
       savedPreschool = upsertCustomPreschool(
@@ -56,13 +89,17 @@ export async function POST(req: NextRequest) {
           id: nurserySlug,
           previousSlug,
           previousName,
-          replaceAllForOwner: Boolean(replaceAllForOwner),
+          replaceAllForOwner: false,
           name: preschoolData.name || nurseryName || nurserySlug,
           phone: preschoolData.phone || ownerPhone || '',
           email: preschoolData.email || ownerEmail || '',
           principal: ownerName
             ? `${ownerName} (${role || 'Owner / Principal'})`
-            : preschoolData.principal || 'Principal / Owner',
+            : preschoolData.principal || 'Verified Principal',
+          ownerUid: effectiveOwnerUid,
+          verificationMethod:
+            verificationMethod || validProof?.method || existingLock?.verificationMethod || 'admin_document_review',
+          lockStatus: 'locked',
           isClaimed: true,
           isVerified: true,
         },
@@ -70,57 +107,62 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (previousSlug && previousSlug !== nurserySlug) {
-      claimsStore.delete(previousSlug);
+    if (previousSlug && previousSlug !== nurserySlug && (caller.isAdmin || isExistingOwner)) {
+      verifiedClaimsCache.delete(previousSlug);
     }
 
-    const newClaim: ClaimRecord = {
-      id: claimId,
-      nurserySlug: savedPreschool?.slug || nurserySlug,
-      nurseryName: savedPreschool?.name || nurseryName || nurserySlug,
-      ownerName: ownerName || 'Verified Principal',
-      ownerEmail: ownerEmail || '',
-      ownerPhone: ownerPhone || '',
-      role: role || 'Owner / Principal',
-      proofNotes: proofNotes || '',
-      status: 'approved',
-      createdAt: new Date().toISOString(),
-      token,
-      preschool: savedPreschool,
-    };
-
-    claimsStore.set(newClaim.nurserySlug, newClaim);
+    const finalSlug = savedPreschool?.slug || nurserySlug;
+    verifiedClaimsCache.set(finalSlug, {
+      schoolSlug: finalSlug,
+      ownerUid: effectiveOwnerUid,
+      ownerName: ownerName || caller.displayName,
+      verificationMethod:
+        verificationMethod || validProof?.method || existingLock?.verificationMethod || 'admin_document_review',
+      updatedAt: new Date().toISOString(),
+    });
 
     return NextResponse.json(
       {
         success: true,
-        claimId,
-        token,
-        status: newClaim.status,
+        status: 'approved',
+        ownerUid: effectiveOwnerUid,
         preschool: savedPreschool,
-        message:
-          'Claim verified and published! Your preschool now appears in the NurseryNet Directory with the Owner-Claimed & Verified badge.',
+        message: 'Verified ownership listing synchronized.',
       },
-      { status: 201 }
+      { status: 200 }
     );
   } catch (err) {
     console.error('[/api/claim] error:', err);
-    return NextResponse.json({ error: 'Failed to process claim submission.' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to process verified listing update.' }, { status: 500 });
   }
 }
 
 export async function DELETE(req: NextRequest) {
   try {
+    const caller = await verifyFirebaseBearerToken(req.headers.get('authorization'));
+    if (!caller || !caller.emailVerified) {
+      return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(req.url);
     const slug = searchParams.get('slug');
     if (!slug) {
-      return NextResponse.json({ error: 'Slug is required' }, { status: 400 });
+      return NextResponse.json({ error: 'Slug is required.' }, { status: 400 });
     }
-    claimsStore.delete(slug);
+
+    const existingLock = verifiedClaimsCache.get(slug);
+    if (!caller.isAdmin && (!existingLock || existingLock.ownerUid !== caller.uid)) {
+      return NextResponse.json(
+        { error: 'Only a Platform Admin or the verified owner may remove this custom listing.' },
+        { status: 403 }
+      );
+    }
+
+    verifiedClaimsCache.delete(slug);
     removeCustomPreschoolBySlug(slug);
     return NextResponse.json({ success: true, removedSlug: slug });
   } catch {
-    return NextResponse.json({ error: 'Failed to remove claim' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to remove listing.' }, { status: 500 });
   }
 }
 
@@ -129,15 +171,19 @@ export async function GET(req: NextRequest) {
   const slug = searchParams.get('slug');
 
   if (slug) {
-    const claim = claimsStore.get(slug);
+    const claim = verifiedClaimsCache.get(slug);
     if (!claim) {
       return NextResponse.json({ claimed: false });
     }
-    return NextResponse.json({ claimed: true, claim });
+    return NextResponse.json({
+      claimed: true,
+      schoolSlug: claim.schoolSlug,
+      verificationMethod: claim.verificationMethod,
+      updatedAt: claim.updatedAt,
+    });
   }
 
   return NextResponse.json({
-    totalClaims: claimsStore.size,
-    claims: Array.from(claimsStore.values()),
+    totalVerifiedLocks: verifiedClaimsCache.size,
   });
 }

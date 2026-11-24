@@ -129,10 +129,10 @@ export async function POST(req: NextRequest) {
       lower
     );
 
-  // 2. Check for Funding / Subsidy / DSD Grant intent
+  // 2. Check for Funding / Subsidy / DBE Grant intent
   const isFundingIntent =
     !isClaimIntent &&
-    /\b(subsidy|subsidies|r17|grant|grants|funding|donor|dsd\s+registration|partial\s+care|npo\s+registration|stipend|bursary|sponsorship)\b/i.test(
+    /\b(subsidy|subsidies|r24|r17|grant|grants|funding|donor|dbe|dsd\s+registration|partial\s+care|npo\s+registration|stipend|bursary|sponsorship|vangasali)\b/i.test(
       lower
     );
 
@@ -204,7 +204,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(response);
   }
 
-  // Handle Funding / DSD Subsidy Intent
+  // Handle Funding / DBE Subsidy Intent
   if (isFundingIntent) {
     const liveData = await callInternalLiveSearch(req.url, {
       mode: 'funding',
@@ -214,13 +214,13 @@ export async function POST(req: NextRequest) {
 
     const topGrant = liveData?.highlights?.[0];
     const spokenText =
-      lower.includes('r17') || lower.includes('subsidy')
-        ? `The South African Department of Social Development provides an ECD equitable share subsidy of R17 per qualifying child per day for up to 264 days a year. To apply, your centre needs Partial Care registration under Form 11, an NPO number, municipal health clearance, and quarterly attendance registers. I've pulled up the latest DSD and donor funding calls for you.`
+      lower.includes('r24') || lower.includes('r17') || lower.includes('subsidy')
+        ? `The South African Department of Basic Education now provides an ECD equitable share subsidy of R24 per qualifying child per day for up to 264 days a year, increased from the old R17 rate. To apply, your centre needs Partial Care registration, an NPO number, municipal health clearance, and monthly attendance registers. I've opened the ECD Funding Operating System so you can calculate your tranche, check your compliance score, or draft a grant proposal.`
         : topGrant
         ? `I found ${liveData?.highlights?.length || 1} active South African ECD funding opportunities, starting with ${topGrant.title}${
             topGrant.feeOrAmount ? ` offering ${topGrant.feeOrAmount}` : ''
-          }. You can explore the eligibility requirements and official application links right here.`
-        : `I've searched for South African ECD grants and Department of Social Development subsidies. Here are the key registration requirements and funding programmes available.`;
+          }. You can track deadlines and draft an AI motivation letter right on the Funding Hub.`
+        : `I've searched for South African ECD grants and Department of Basic Education R24 per child daily subsidies. Here are the verified funding windows and compliance tools available.`;
 
     const response: VoiceAssistantResponse = {
       spokenText,

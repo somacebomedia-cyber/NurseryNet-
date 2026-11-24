@@ -24,10 +24,19 @@ import SchoolDetailModal from '@/components/directory/SchoolDetailModal';
 import TourBookingModal from '@/components/directory/TourBookingModal';
 import InquiryModal from '@/components/directory/InquiryModal';
 import ClaimDialog from '@/components/directory/ClaimDialog';
+import OwnershipDisputeModal from '@/components/directory/OwnershipDisputeModal';
 import EcdBenchmarksDialog from '@/components/directory/EcdBenchmarksDialog';
 import CompareSchoolsModal from '@/components/directory/CompareSchoolsModal';
 import OnlineApplicationModal from '@/components/directory/OnlineApplicationModal';
 import LiveSearchSources from '@/components/directory/LiveSearchSources';
+import { useAuth } from '@/context/AuthContext';
+import {
+  subscribeToUserClaims,
+  subscribeToVerifiedOwnerships,
+  type OwnershipClaimRecord,
+  type VerifiedOwnershipRecord,
+} from '@/lib/firestore-ownership';
+import { sanitizeFirestoreId } from '@/lib/ownership-verification';
 import { useToast } from '@/hooks/use-toast';
 import {
   buildLiveCacheKey,
@@ -80,6 +89,7 @@ import {
 const ITEMS_PER_PAGE = 24;
 
 export default function DirectoryPage() {
+  const { user } = useAuth();
   const { toast } = useToast();
 
   // Filter States
@@ -114,13 +124,50 @@ export default function DirectoryPage() {
   const [liveError, setLiveError] = useState<string | null>(null);
   const [livePanelOpen, setLivePanelOpen] = useState(false);
 
-  // Claimed Slugs, Custom Added Preschools, and Saved Shortlist tracking in localStorage
+  // Claimed Slugs, Custom Added Preschools, and Saved Shortlist tracking
   const [claimedSlugs, setClaimedSlugs] = useState<string[]>([]);
   const [customSchools, setCustomSchools] = useState<Preschool[]>([]);
   const [savedSchools, setSavedSchools] = useState<Preschool[]>([]);
   const [claimFromLiveSearch, setClaimFromLiveSearch] = useState(false);
 
+  // Authoritative real-time Firestore Ownership Locks & User's Pending Claims
+  const [verifiedOwnershipsMap, setVerifiedOwnershipsMap] = useState<
+    Record<string, VerifiedOwnershipRecord>
+  >({});
+  const [myClaims, setMyClaims] = useState<OwnershipClaimRecord[]>([]);
+
   const [replacedSlugs, setReplacedSlugs] = useState<string[]>([]);
+
+  useEffect(() => {
+    const unsub = subscribeToVerifiedOwnerships(
+      (map) => setVerifiedOwnershipsMap(map),
+      () => {}
+    );
+    return () => unsub();
+  }, []);
+
+  useEffect(() => {
+    if (!user?.uid) {
+      setMyClaims([]);
+      return;
+    }
+    const unsub = subscribeToUserClaims(
+      user.uid,
+      (list) => setMyClaims(list),
+      () => {}
+    );
+    return () => unsub();
+  }, [user?.uid]);
+
+  const pendingClaimSlugs = useMemo(
+    () =>
+      new Set(
+        myClaims
+          .filter((c) => c.status === 'pending_review')
+          .map((c) => sanitizeFirestoreId(c.schoolSlug))
+      ),
+    [myClaims]
+  );
 
   useEffect(() => {
     const loadAndReconcile = async () => {
@@ -174,6 +221,7 @@ export default function DirectoryPage() {
   const [tourModalOpen, setTourModalOpen] = useState(false);
   const [inquiryModalOpen, setInquiryModalOpen] = useState(false);
   const [claimModalOpen, setClaimModalOpen] = useState(false);
+  const [disputeModalOpen, setDisputeModalOpen] = useState(false);
   const [benchmarksModalOpen, setBenchmarksModalOpen] = useState(false);
   const [compareModalOpen, setCompareModalOpen] = useState(false);
   const [applicationModalOpen, setApplicationModalOpen] = useState(false);
@@ -286,6 +334,39 @@ export default function DirectoryPage() {
       return hay.includes(qClean) || qTokens.every((t) => hay.includes(t));
     });
 
+    const overlayFirestoreOwnership = (school: Preschool): Preschool => {
+      const cleanSlug = sanitizeFirestoreId(school.slug || school.id);
+      const lock =
+        verifiedOwnershipsMap[cleanSlug] ||
+        verifiedOwnershipsMap[school.slug || ''] ||
+        verifiedOwnershipsMap[school.id];
+      if (!lock) return school;
+      return {
+        ...school,
+        name: lock.schoolName || school.name,
+        city: lock.city || school.city,
+        province: lock.province || school.province,
+        address: lock.address || school.address,
+        monthlyFeeZAR: typeof lock.monthlyFeeZAR === 'number' ? lock.monthlyFeeZAR : school.monthlyFeeZAR,
+        operatingHours: lock.operatingHours || school.operatingHours,
+        curriculum: lock.curriculum || school.curriculum,
+        websiteUrl: lock.websiteUrl || school.websiteUrl,
+        npoNumber: lock.npoNumber || school.npoNumber,
+        phone: lock.publicContactPhone || school.phone,
+        email: lock.publicContactEmail || school.email,
+        images: Array.isArray(lock.images) && lock.images.length > 0 ? lock.images : school.images,
+        principal: lock.ownerDisplayName
+          ? `${lock.ownerDisplayName} (${lock.ownerRole || 'Owner / Principal'})`
+          : school.principal,
+        isClaimed: true,
+        isVerified: true,
+        ownerUid: lock.ownerUid,
+        ownerDisplayName: lock.ownerDisplayName,
+        verificationMethod: lock.verificationMethod,
+        lockStatus: lock.lockStatus,
+      };
+    };
+
     const customSlugSet = new Set([
       ...matchingCustom.map((c) => c.slug || c.id),
       ...customSchools.map((c) => c.slug || c.id),
@@ -294,6 +375,8 @@ export default function DirectoryPage() {
     const baseMapped = preschools
       .filter((s) => !customSlugSet.has(s.slug || s.id))
       .map((s) => {
+        const overlaid = overlayFirestoreOwnership(s);
+        if (overlaid.isClaimed) return overlaid;
         const slug = s.slug || s.id;
         if (claimedSlugs.includes(slug)) {
           return { ...s, isClaimed: true };
@@ -301,15 +384,18 @@ export default function DirectoryPage() {
         return s;
       });
 
-    const combined = [...matchingCustom.map((c) => ({ ...c, isClaimed: true })), ...baseMapped];
+    const combined = [
+      ...matchingCustom.map((c) => overlayFirestoreOwnership({ ...c, isClaimed: true })),
+      ...baseMapped,
+    ];
     if (onlySaved) {
-      return savedSchools;
+      return savedSchools.map(overlayFirestoreOwnership);
     }
     if (onlyClaimed) {
       return combined.filter((s) => s.isClaimed);
     }
     return combined;
-  }, [preschools, claimedSlugs, customSchools, replacedSlugs, searchQuery, selectedInstitutionType, selectedProvince, selectedCity, onlyClaimed, onlySaved, savedSchools]);
+  }, [preschools, claimedSlugs, customSchools, replacedSlugs, verifiedOwnershipsMap, searchQuery, selectedInstitutionType, selectedProvince, selectedCity, onlyClaimed, onlySaved, savedSchools]);
 
   const savedIdSet = useMemo(() => new Set(savedSchools.map((s) => s.id)), [savedSchools]);
 
@@ -426,6 +512,32 @@ export default function DirectoryPage() {
     setClaimFromLiveSearch(false);
     setDetailModalOpen(false);
     setClaimModalOpen(true);
+  };
+
+  const handleOpenDispute = (school: Preschool) => {
+    setActiveSchool(school);
+    setDetailModalOpen(false);
+    setClaimModalOpen(false);
+    setDisputeModalOpen(true);
+  };
+
+  const getOwnershipForSchool = (school: Preschool | null): VerifiedOwnershipRecord | null => {
+    if (!school) return null;
+    const cleanSlug = sanitizeFirestoreId(school.slug || school.id);
+    return (
+      verifiedOwnershipsMap[cleanSlug] ||
+      verifiedOwnershipsMap[school.slug || ''] ||
+      verifiedOwnershipsMap[school.id] ||
+      null
+    );
+  };
+
+  const isUserOwnerOfSchool = (school: Preschool | null): boolean => {
+    if (!school || !user) return false;
+    const lock = getOwnershipForSchool(school);
+    const ownerUid = lock?.ownerUid || school.ownerUid;
+    if (!ownerUid) return false;
+    return ownerUid === user.uid || user.isAdmin;
   };
 
   const handleAddAndClaimFromLiveSearch = (item: LiveSearchHighlight) => {
@@ -1544,18 +1656,24 @@ export default function DirectoryPage() {
                     isLoading ? 'opacity-60 pointer-events-none' : 'opacity-100'
                   }`}
                 >
-                  {displayedSchools.map((school) => (
-                    <PreschoolCard
-                      key={school.id}
-                      preschool={school}
-                      onSelect={handleOpenDetail}
-                      onBookTour={handleOpenTour}
-                      onApply={handleOpenApply}
-                      onClaim={handleOpenClaim}
-                      isSaved={savedIdSet.has(school.id)}
-                      onToggleSave={handleToggleSave}
-                    />
-                  ))}
+                  {displayedSchools.map((school) => {
+                    const cleanSlug = sanitizeFirestoreId(school.slug || school.id);
+                    return (
+                      <PreschoolCard
+                        key={school.id}
+                        preschool={school}
+                        onSelect={handleOpenDetail}
+                        onBookTour={handleOpenTour}
+                        onApply={handleOpenApply}
+                        onClaim={handleOpenClaim}
+                        onDispute={handleOpenDispute}
+                        isCurrentOwner={isUserOwnerOfSchool(school)}
+                        hasPendingClaim={pendingClaimSlugs.has(cleanSlug)}
+                        isSaved={savedIdSet.has(school.id)}
+                        onToggleSave={handleToggleSave}
+                      />
+                    );
+                  })}
                 </div>
 
                 {/* Pagination Bar */}
@@ -1708,6 +1826,13 @@ export default function DirectoryPage() {
         onInquire={handleOpenInquiry}
         onApply={handleOpenApply}
         onClaim={handleOpenClaim}
+        onDispute={handleOpenDispute}
+        isCurrentOwner={isUserOwnerOfSchool(activeSchool)}
+        hasPendingClaim={
+          activeSchool
+            ? pendingClaimSlugs.has(sanitizeFirestoreId(activeSchool.slug || activeSchool.id))
+            : false
+        }
         isSaved={activeSchool ? savedIdSet.has(activeSchool.id) : false}
         onToggleSave={handleToggleSave}
       />
@@ -1751,11 +1876,20 @@ export default function DirectoryPage() {
 
       <ClaimDialog
         preschool={activeSchool}
+        ownershipRecord={getOwnershipForSchool(activeSchool)}
         isOpen={claimModalOpen}
         onClose={() => setClaimModalOpen(false)}
         onClaimSuccess={handleClaimSuccess}
         onRemoveClaimed={handleRemoveClaimed}
+        onOpenDispute={handleOpenDispute}
         isFromLiveSearch={claimFromLiveSearch}
+      />
+
+      <OwnershipDisputeModal
+        preschool={activeSchool}
+        ownershipRecord={getOwnershipForSchool(activeSchool)}
+        isOpen={disputeModalOpen}
+        onClose={() => setDisputeModalOpen(false)}
       />
 
       <EcdBenchmarksDialog

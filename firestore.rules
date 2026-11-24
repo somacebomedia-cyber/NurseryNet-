@@ -1,0 +1,623 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net (Default Deny)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // =========================================================================
+    // Primitive Helpers (Zero DB Reads First)
+    // =========================================================================
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isVerifiedUser() && (
+        request.auth.token.email == 'Somacebomedia@gmail.com' ||
+        request.auth.token.email == 'somacebomedia@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isOptionalString(data, key, maxLen) {
+      return !(key in data) || (data[key] is string && data[key].size() <= maxLen);
+    }
+
+    function isValidEmailFormat(val) {
+      return val is string && val.size() >= 3 && val.size() <= 200 && val.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
+    }
+
+    function isNonWebmailDomain(domain) {
+      return domain is string &&
+        domain.size() >= 4 &&
+        domain.size() <= 160 &&
+        domain.matches('^[a-z0-9][a-z0-9\\-\\.]+\\.[a-z]{2,}$') &&
+        !(domain in [
+          'gmail.com',
+          'googlemail.com',
+          'outlook.com',
+          'hotmail.com',
+          'live.com',
+          'yahoo.com',
+          'yahoo.co.za',
+          'icloud.com',
+          'me.com',
+          'webmail.co.za',
+          'mweb.co.za',
+          'telkomsa.net',
+          'vodamail.co.za',
+          'aol.com',
+          'protonmail.com',
+          'proton.me'
+        ]);
+    }
+
+    function authEmailMatchesDomain(domain) {
+      return isNonWebmailDomain(domain) &&
+        request.auth.token.email is string &&
+        request.auth.token.email.lower().split('@').size() == 2 &&
+        request.auth.token.email.lower().split('@')[1] == domain;
+    }
+
+    function isValidProofHash(val) {
+      return val is string && val.size() == 64 && val.matches('^[a-f0-9]{64}$');
+    }
+
+    function isValidImagesList(data) {
+      return !('images' in data) || (
+        data.images is list &&
+        data.images.size() <= 4 &&
+        (data.images.size() == 0 || (data.images[0] is string && data.images[0].size() <= 500))
+      );
+    }
+
+    function isValidComplianceChecksList(listVal) {
+      return listVal is list &&
+        listVal.size() <= 20 &&
+        (listVal.size() == 0 || (listVal[0] is string && listVal[0].size() <= 80));
+    }
+
+    function isValidPipelineGrantsList(listVal) {
+      return listVal is list &&
+        listVal.size() <= 25 &&
+        (
+          listVal.size() == 0 || (
+            listVal[0] is map &&
+            listVal[0].keys().hasAll(['grantId', 'title', 'provider', 'amountLabel', 'estimatedZAR', 'status', 'deadline', 'url']) &&
+            listVal[0].grantId is string && listVal[0].grantId.size() <= 128 &&
+            listVal[0].title is string && listVal[0].title.size() <= 200 &&
+            listVal[0].status in ['saved', 'preparing', 'submitted', 'approved']
+          )
+        );
+    }
+
+    // =========================================================================
+    // Entity Validation Blueprints (Anti-Update-Gap)
+    // =========================================================================
+    function isValidUserProfile(data) {
+      return data.keys().hasAll(['uid', 'name', 'email', 'role', 'createdAt', 'updatedAt']) &&
+        data.keys().hasOnly([
+          'uid', 'name', 'email', 'role', 'whatsappNumber',
+          'planId', 'subscriptionStatus', 'createdAt', 'updatedAt'
+        ]) &&
+        isValidId(data.uid) &&
+        data.name is string && data.name.size() >= 1 && data.name.size() <= 120 &&
+        isValidEmailFormat(data.email) &&
+        data.role in ['Parent', 'Preschool Owner', 'Job Seeker'] &&
+        isOptionalString(data, 'whatsappNumber', 32) &&
+        (!('planId' in data) || data.planId in ['discovery', 'creative', 'growth']) &&
+        (!('subscriptionStatus' in data) || data.subscriptionStatus in ['active', 'cancelled', 'inactive']) &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidAdminRecord(data) {
+      return data.keys().hasAll(['uid', 'email', 'grantedAt']) &&
+        data.keys().hasOnly(['uid', 'email', 'grantedAt']) &&
+        isValidId(data.uid) &&
+        isValidEmailFormat(data.email) &&
+        data.grantedAt is timestamp;
+    }
+
+    function isValidVerifiedOwnership(data) {
+      return data.keys().hasAll([
+          'schoolSlug', 'schoolName', 'ownerUid', 'ownerDisplayName',
+          'ownerRole', 'verificationMethod', 'sourceClaimId',
+          'lockStatus', 'verifiedAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'schoolSlug', 'schoolName', 'ownerUid', 'ownerDisplayName',
+          'ownerRole', 'verificationMethod', 'verifiedDomain',
+          'sourceClaimId', 'verificationProofHash', 'lockStatus',
+          'activeDisputeId', 'city', 'province', 'address',
+          'monthlyFeeZAR', 'operatingHours', 'curriculum',
+          'websiteUrl', 'npoNumber', 'publicContactPhone',
+          'publicContactEmail', 'images', 'verifiedAt', 'updatedAt'
+        ]) &&
+        isValidId(data.schoolSlug) &&
+        data.schoolName is string && data.schoolName.size() >= 2 && data.schoolName.size() <= 160 &&
+        isValidId(data.ownerUid) &&
+        data.ownerDisplayName is string && data.ownerDisplayName.size() >= 1 && data.ownerDisplayName.size() <= 120 &&
+        data.ownerRole is string && data.ownerRole.size() >= 1 && data.ownerRole.size() <= 80 &&
+        data.verificationMethod in ['domain_match', 'phone_otp', 'admin_document_review'] &&
+        isOptionalString(data, 'verifiedDomain', 160) &&
+        isValidId(data.sourceClaimId) &&
+        isOptionalString(data, 'verificationProofHash', 64) &&
+        data.lockStatus in ['locked', 'disputed'] &&
+        isOptionalString(data, 'activeDisputeId', 128) &&
+        isOptionalString(data, 'city', 100) &&
+        isOptionalString(data, 'province', 80) &&
+        isOptionalString(data, 'address', 240) &&
+        (!('monthlyFeeZAR' in data) || (data.monthlyFeeZAR is number && data.monthlyFeeZAR >= 0 && data.monthlyFeeZAR <= 50000)) &&
+        isOptionalString(data, 'operatingHours', 80) &&
+        isOptionalString(data, 'curriculum', 80) &&
+        isOptionalString(data, 'websiteUrl', 300) &&
+        isOptionalString(data, 'npoNumber', 64) &&
+        isOptionalString(data, 'publicContactPhone', 32) &&
+        isOptionalString(data, 'publicContactEmail', 200) &&
+        isValidImagesList(data) &&
+        data.verifiedAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidOwnershipClaim(data) {
+      return data.keys().hasAll([
+          'claimId', 'schoolSlug', 'schoolName', 'claimantUid',
+          'claimantName', 'claimantEmail', 'claimantRole',
+          'verificationMethod', 'status', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'claimId', 'schoolSlug', 'schoolName', 'city', 'province',
+          'claimantUid', 'claimantName', 'claimantEmail', 'claimantPhone',
+          'claimantRole', 'verificationMethod', 'status',
+          'dsdNumber', 'npoNumber', 'cipcNumber', 'proofNotes',
+          'verifiedDomain', 'maskedTargetPhone', 'verificationProofHash',
+          'reviewNotes', 'reviewedBy', 'createdAt', 'updatedAt'
+        ]) &&
+        isValidId(data.claimId) &&
+        isValidId(data.schoolSlug) &&
+        data.schoolName is string && data.schoolName.size() >= 2 && data.schoolName.size() <= 160 &&
+        isOptionalString(data, 'city', 100) &&
+        isOptionalString(data, 'province', 80) &&
+        isValidId(data.claimantUid) &&
+        data.claimantName is string && data.claimantName.size() >= 2 && data.claimantName.size() <= 120 &&
+        isValidEmailFormat(data.claimantEmail) &&
+        isOptionalString(data, 'claimantPhone', 32) &&
+        data.claimantRole is string && data.claimantRole.size() >= 2 && data.claimantRole.size() <= 80 &&
+        data.verificationMethod in ['domain_match', 'phone_otp', 'admin_document_review'] &&
+        data.status in ['pending_review', 'approved', 'rejected'] &&
+        isOptionalString(data, 'dsdNumber', 80) &&
+        isOptionalString(data, 'npoNumber', 80) &&
+        isOptionalString(data, 'cipcNumber', 80) &&
+        isOptionalString(data, 'proofNotes', 1500) &&
+        isOptionalString(data, 'verifiedDomain', 160) &&
+        isOptionalString(data, 'maskedTargetPhone', 40) &&
+        isOptionalString(data, 'verificationProofHash', 64) &&
+        isOptionalString(data, 'reviewNotes', 1000) &&
+        isOptionalString(data, 'reviewedBy', 128) &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidOwnershipDispute(data) {
+      return data.keys().hasAll([
+          'disputeId', 'schoolSlug', 'schoolName', 'currentOwnerUid',
+          'challengerUid', 'challengerName', 'challengerEmail',
+          'challengerPhone', 'challengerRole', 'reason',
+          'status', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'disputeId', 'schoolSlug', 'schoolName', 'currentOwnerUid',
+          'challengerUid', 'challengerName', 'challengerEmail',
+          'challengerPhone', 'challengerRole', 'reason',
+          'registrationRef', 'status', 'adminNotes', 'resolvedBy',
+          'createdAt', 'updatedAt'
+        ]) &&
+        isValidId(data.disputeId) &&
+        isValidId(data.schoolSlug) &&
+        data.schoolName is string && data.schoolName.size() >= 2 && data.schoolName.size() <= 160 &&
+        isValidId(data.currentOwnerUid) &&
+        isValidId(data.challengerUid) &&
+        data.challengerName is string && data.challengerName.size() >= 2 && data.challengerName.size() <= 120 &&
+        isValidEmailFormat(data.challengerEmail) &&
+        data.challengerPhone is string && data.challengerPhone.size() >= 6 && data.challengerPhone.size() <= 32 &&
+        data.challengerRole is string && data.challengerRole.size() >= 2 && data.challengerRole.size() <= 80 &&
+        data.reason is string && data.reason.size() >= 10 && data.reason.size() <= 1500 &&
+        isOptionalString(data, 'registrationRef', 120) &&
+        data.status in ['open', 'resolved_kept', 'resolved_transferred', 'dismissed'] &&
+        isOptionalString(data, 'adminNotes', 1000) &&
+        isOptionalString(data, 'resolvedBy', 128) &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidAuditLog(data) {
+      return data.keys().hasAll([
+          'logId', 'schoolSlug', 'schoolName', 'action',
+          'actorUid', 'actorName', 'details', 'createdAt'
+        ]) &&
+        data.keys().hasOnly([
+          'logId', 'schoolSlug', 'schoolName', 'action',
+          'actorUid', 'actorName', 'details', 'createdAt'
+        ]) &&
+        isValidId(data.logId) &&
+        isValidId(data.schoolSlug) &&
+        data.schoolName is string && data.schoolName.size() >= 2 && data.schoolName.size() <= 160 &&
+        data.action in [
+          'claim_submitted',
+          'claim_auto_verified',
+          'claim_approved',
+          'claim_rejected',
+          'dispute_opened',
+          'dispute_upheld',
+          'ownership_transferred',
+          'ownership_revoked'
+        ] &&
+        isValidId(data.actorUid) &&
+        data.actorName is string && data.actorName.size() >= 1 && data.actorName.size() <= 120 &&
+        data.details is string && data.details.size() >= 1 && data.details.size() <= 600 &&
+        data.createdAt is timestamp;
+    }
+
+    function isValidFundingWorkspace(data) {
+      return data.keys().hasAll([
+          'uid', 'schoolName', 'province', 'registrationStatus',
+          'qualifyingChildren', 'daysPerMonth', 'complianceChecks',
+          'pipelineGrants', 'estimatedPipelineZAR', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'uid', 'schoolName', 'province', 'npoNumber', 'registrationStatus',
+          'qualifyingChildren', 'daysPerMonth', 'complianceChecks',
+          'pipelineGrants', 'estimatedPipelineZAR', 'createdAt', 'updatedAt'
+        ]) &&
+        isValidId(data.uid) &&
+        data.uid == request.auth.uid &&
+        data.schoolName is string && data.schoolName.size() >= 2 && data.schoolName.size() <= 160 &&
+        data.province is string && data.province.size() >= 2 && data.province.size() <= 80 &&
+        isOptionalString(data, 'npoNumber', 80) &&
+        data.registrationStatus in ['full', 'conditional', 'unregistered'] &&
+        data.qualifyingChildren is number && data.qualifyingChildren >= 0 && data.qualifyingChildren <= 1000 &&
+        data.daysPerMonth is number && data.daysPerMonth >= 1 && data.daysPerMonth <= 31 &&
+        isValidComplianceChecksList(data.complianceChecks) &&
+        isValidPipelineGrantsList(data.pipelineGrants) &&
+        data.estimatedPipelineZAR is number && data.estimatedPipelineZAR >= 0 && data.estimatedPipelineZAR <= 50000000 &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidGrantProposal(data) {
+      return data.keys().hasAll([
+          'proposalId', 'ownerUid', 'schoolName', 'province',
+          'grantId', 'grantTitle', 'funderName', 'requestedAmountZAR',
+          'projectFocus', 'executiveSummary', 'fullProposalText',
+          'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'proposalId', 'ownerUid', 'schoolName', 'province', 'npoNumber',
+          'grantId', 'grantTitle', 'funderName', 'requestedAmountZAR',
+          'projectFocus', 'executiveSummary', 'fullProposalText',
+          'budgetBreakdown', 'createdAt', 'updatedAt'
+        ]) &&
+        isValidId(data.proposalId) &&
+        isValidId(data.ownerUid) &&
+        data.ownerUid == request.auth.uid &&
+        data.schoolName is string && data.schoolName.size() >= 2 && data.schoolName.size() <= 160 &&
+        data.province is string && data.province.size() >= 2 && data.province.size() <= 80 &&
+        isOptionalString(data, 'npoNumber', 80) &&
+        data.grantId is string && data.grantId.size() >= 1 && data.grantId.size() <= 128 &&
+        data.grantTitle is string && data.grantTitle.size() >= 2 && data.grantTitle.size() <= 200 &&
+        data.funderName is string && data.funderName.size() >= 2 && data.funderName.size() <= 160 &&
+        data.requestedAmountZAR is number && data.requestedAmountZAR >= 0 && data.requestedAmountZAR <= 25000000 &&
+        data.projectFocus is string && data.projectFocus.size() >= 3 && data.projectFocus.size() <= 500 &&
+        data.executiveSummary is string && data.executiveSummary.size() >= 10 && data.executiveSummary.size() <= 2000 &&
+        data.fullProposalText is string && data.fullProposalText.size() >= 20 && data.fullProposalText.size() <= 12000 &&
+        isOptionalString(data, 'budgetBreakdown', 3000) &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    // =========================================================================
+    // Collection Rules
+    // =========================================================================
+
+    // 1. User Profiles (PII Isolated to Self or Admin)
+    match /users/{userId} {
+      allow get: if isValidId(userId) && (isOwner(userId) || isAdmin());
+      allow list: if isAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid);
+
+      allow create: if isVerifiedUser() &&
+        isValidId(userId) &&
+        isOwner(userId) &&
+        isValidUserProfile(incoming()) &&
+        incoming().uid == request.auth.uid &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+
+      allow update: if isVerifiedUser() &&
+        isValidId(userId) &&
+        isValidUserProfile(incoming()) &&
+        incoming().uid == existing().uid &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time && (
+          isAdmin() ||
+          (
+            isOwner(userId) &&
+            incoming().role == existing().role &&
+            incoming().diff(existing()).affectedKeys().hasOnly(['name', 'whatsappNumber', 'updatedAt'])
+          )
+        );
+
+      allow delete: if isValidId(userId) && isAdmin();
+    }
+
+    // 2. Admins Registry
+    match /admins/{adminId} {
+      allow get: if isValidId(adminId) && (isOwner(adminId) || isAdmin());
+      allow list: if isAdmin();
+      allow create: if isValidId(adminId) && isValidAdminRecord(incoming()) && isAdmin() && incoming().grantedAt == request.time;
+      allow update: if false;
+      allow delete: if isValidId(adminId) && isAdmin();
+    }
+
+    // 3. Verified Ownerships (Public Lock Registry + Owner-Managed Directory Overrides)
+    match /verified_ownerships/{schoolSlug} {
+      allow get: if isValidId(schoolSlug);
+      allow list: if true;
+
+      allow create: if isVerifiedUser() &&
+        isValidId(schoolSlug) &&
+        isValidVerifiedOwnership(incoming()) &&
+        incoming().schoolSlug == schoolSlug &&
+        incoming().verifiedAt == request.time &&
+        incoming().updatedAt == request.time && (
+          isAdmin() ||
+          (
+            incoming().ownerUid == request.auth.uid &&
+            incoming().lockStatus == 'locked' &&
+            isValidProofHash(incoming().verificationProofHash) &&
+            (
+              (
+                incoming().verificationMethod == 'domain_match' &&
+                'verifiedDomain' in incoming() &&
+                authEmailMatchesDomain(incoming().verifiedDomain)
+              ) ||
+              (
+                incoming().verificationMethod == 'phone_otp'
+              )
+            ) &&
+            existsAfter(/databases/$(database)/documents/ownership_claims/$(incoming().sourceClaimId))
+          )
+        );
+
+      allow update: if isVerifiedUser() &&
+        isValidId(schoolSlug) &&
+        isValidVerifiedOwnership(incoming()) &&
+        incoming().schoolSlug == existing().schoolSlug &&
+        incoming().verifiedAt == existing().verifiedAt &&
+        incoming().updatedAt == request.time && (
+          isAdmin() ||
+          (
+            existing().ownerUid == request.auth.uid &&
+            incoming().ownerUid == existing().ownerUid &&
+            incoming().verificationMethod == existing().verificationMethod &&
+            incoming().sourceClaimId == existing().sourceClaimId &&
+            incoming().lockStatus == existing().lockStatus &&
+            incoming().diff(existing()).affectedKeys().hasOnly([
+              'schoolName', 'ownerDisplayName', 'ownerRole', 'city', 'province',
+              'address', 'monthlyFeeZAR', 'operatingHours', 'curriculum',
+              'websiteUrl', 'npoNumber', 'publicContactPhone',
+              'publicContactEmail', 'images', 'updatedAt'
+            ])
+          )
+        );
+
+      allow delete: if isValidId(schoolSlug) && isAdmin();
+    }
+
+    // 4. Ownership Claims (PII Isolated to Claimant or Admin)
+    match /ownership_claims/{claimId} {
+      allow get: if isValidId(claimId) && (
+        isAdmin() ||
+        (isSignedIn() && existing().claimantUid == request.auth.uid)
+      );
+      allow list: if isAdmin() || (isSignedIn() && resource.data.claimantUid == request.auth.uid);
+
+      allow create: if isVerifiedUser() &&
+        isValidId(claimId) &&
+        isValidOwnershipClaim(incoming()) &&
+        incoming().claimId == claimId &&
+        incoming().claimantUid == request.auth.uid &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time && (
+          (
+            incoming().verificationMethod == 'admin_document_review' &&
+            incoming().status == 'pending_review'
+          ) ||
+          (
+            incoming().verificationMethod == 'domain_match' &&
+            incoming().status == 'approved' &&
+            isValidProofHash(incoming().verificationProofHash) &&
+            'verifiedDomain' in incoming() &&
+            authEmailMatchesDomain(incoming().verifiedDomain) &&
+            !exists(/databases/$(database)/documents/verified_ownerships/$(incoming().schoolSlug))
+          ) ||
+          (
+            incoming().verificationMethod == 'phone_otp' &&
+            incoming().status == 'approved' &&
+            isValidProofHash(incoming().verificationProofHash) &&
+            !exists(/databases/$(database)/documents/verified_ownerships/$(incoming().schoolSlug))
+          )
+        );
+
+      allow update: if isVerifiedUser() &&
+        isValidId(claimId) &&
+        isValidOwnershipClaim(incoming()) &&
+        incoming().claimId == existing().claimId &&
+        incoming().schoolSlug == existing().schoolSlug &&
+        incoming().claimantUid == existing().claimantUid &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        isAdmin() &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['status', 'reviewNotes', 'reviewedBy', 'updatedAt']);
+
+      allow delete: if isValidId(claimId) && isAdmin();
+    }
+
+    // 5. Ownership Disputes (PII Isolated to Challenger, Current Owner, or Admin)
+    match /ownership_disputes/{disputeId} {
+      allow get: if isValidId(disputeId) && (
+        isAdmin() ||
+        (isSignedIn() && (existing().challengerUid == request.auth.uid || existing().currentOwnerUid == request.auth.uid))
+      );
+      allow list: if isAdmin() || (
+        isSignedIn() && (
+          resource.data.challengerUid == request.auth.uid ||
+          resource.data.currentOwnerUid == request.auth.uid
+        )
+      );
+
+      allow create: if isVerifiedUser() &&
+        isValidId(disputeId) &&
+        isValidOwnershipDispute(incoming()) &&
+        incoming().disputeId == disputeId &&
+        incoming().challengerUid == request.auth.uid &&
+        incoming().challengerUid != incoming().currentOwnerUid &&
+        incoming().status == 'open' &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time &&
+        exists(/databases/$(database)/documents/verified_ownerships/$(incoming().schoolSlug)) &&
+        get(/databases/$(database)/documents/verified_ownerships/$(incoming().schoolSlug)).data.ownerUid == incoming().currentOwnerUid;
+
+      allow update: if isVerifiedUser() &&
+        isValidId(disputeId) &&
+        isValidOwnershipDispute(incoming()) &&
+        incoming().disputeId == existing().disputeId &&
+        incoming().schoolSlug == existing().schoolSlug &&
+        incoming().currentOwnerUid == existing().currentOwnerUid &&
+        incoming().challengerUid == existing().challengerUid &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        isAdmin() &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['status', 'adminNotes', 'resolvedBy', 'updatedAt']);
+
+      allow delete: if isValidId(disputeId) && isAdmin();
+    }
+
+    // 6. Verification Audit Logs (Append-Only Immutable Trail)
+    match /verification_audit_logs/{logId} {
+      allow get: if isValidId(logId) && (
+        isAdmin() ||
+        (isSignedIn() && existing().actorUid == request.auth.uid)
+      );
+      allow list: if isAdmin() || (isSignedIn() && resource.data.actorUid == request.auth.uid);
+
+      allow create: if isVerifiedUser() &&
+        isValidId(logId) &&
+        isValidAuditLog(incoming()) &&
+        incoming().logId == logId &&
+        incoming().actorUid == request.auth.uid &&
+        incoming().createdAt == request.time;
+
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // 7. Principal Funding OS Workspaces (Isolated to Self or Admin)
+    match /funding_workspaces/{userId} {
+      allow get: if isValidId(userId) && (isOwner(userId) || isAdmin());
+      allow list: if isAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid);
+
+      allow create: if isVerifiedUser() &&
+        isValidId(userId) &&
+        isOwner(userId) &&
+        isValidFundingWorkspace(incoming()) &&
+        incoming().uid == userId &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+
+      allow update: if isVerifiedUser() &&
+        isValidId(userId) &&
+        isOwner(userId) &&
+        isValidFundingWorkspace(incoming()) &&
+        incoming().uid == existing().uid &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'schoolName', 'province', 'npoNumber', 'registrationStatus',
+          'qualifyingChildren', 'daysPerMonth', 'complianceChecks',
+          'pipelineGrants', 'estimatedPipelineZAR', 'updatedAt'
+        ]);
+
+      allow delete: if isValidId(userId) && (isOwner(userId) || isAdmin());
+    }
+
+    // 8. Principal AI Grant Proposal Drafts (Isolated to Owner or Admin)
+    match /grant_proposals/{proposalId} {
+      allow get: if isValidId(proposalId) && (
+        isAdmin() ||
+        (isSignedIn() && existing().ownerUid == request.auth.uid)
+      );
+      allow list: if isAdmin() || (isSignedIn() && resource.data.ownerUid == request.auth.uid);
+
+      allow create: if isVerifiedUser() &&
+        isValidId(proposalId) &&
+        isValidGrantProposal(incoming()) &&
+        incoming().proposalId == proposalId &&
+        incoming().ownerUid == request.auth.uid &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+
+      allow update: if isVerifiedUser() &&
+        isValidId(proposalId) &&
+        isValidGrantProposal(incoming()) &&
+        incoming().proposalId == existing().proposalId &&
+        incoming().ownerUid == existing().ownerUid &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time && (
+          isAdmin() ||
+          (
+            existing().ownerUid == request.auth.uid &&
+            incoming().diff(existing()).affectedKeys().hasOnly([
+              'schoolName', 'province', 'npoNumber', 'requestedAmountZAR',
+              'projectFocus', 'executiveSummary', 'fullProposalText',
+              'budgetBreakdown', 'updatedAt'
+            ])
+          )
+        );
+
+      allow delete: if isValidId(proposalId) && (
+        isAdmin() ||
+        (isSignedIn() && existing().ownerUid == request.auth.uid)
+      );
+    }
+
+    // 9. Connection Health Check (Read-Only Non-Existent Probe)
+    match /test/connection {
+      allow get: if true;
+      allow list, write: if false;
+    }
+  }
+}

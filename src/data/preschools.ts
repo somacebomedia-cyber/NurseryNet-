@@ -100,6 +100,10 @@ export interface Preschool {
   reviews: ParentReview[];
   isClaimed?: boolean;
   claimedAt?: string | null;
+  ownerUid?: string;
+  ownerDisplayName?: string;
+  verificationMethod?: 'domain_match' | 'phone_otp' | 'admin_document_review' | string;
+  lockStatus?: 'locked' | 'disputed';
 }
 
 export const PROVINCES: Province[] = [

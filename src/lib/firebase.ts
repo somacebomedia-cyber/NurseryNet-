@@ -1,45 +1,40 @@
-import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
-import { getAuth, type Auth } from "firebase/auth";
-import { getFirestore, type Firestore } from "firebase/firestore";
+import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
+import { getAuth, type Auth } from 'firebase/auth';
+import { getFirestore, doc, getDocFromServer, type Firestore } from 'firebase/firestore';
 import { getStorage, type FirebaseStorage } from 'firebase/storage';
+import firebaseAppletConfig from '../../firebase-applet-config.json';
 
-// IMPORTANT: Configure Firebase credentials in .env.local or your deployment platform (e.g. Vercel).
-// Safe fallback placeholders are provided so build-time static page collection succeeds even if
-// environment variables are missing during CI/Vercel build phase.
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyDummyKeyForBuildEnv1234567890",
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "nurserynet-app.firebaseapp.com",
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "nurserynet-app",
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "nurserynet-app.appspot.com",
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "123456789012",
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:123456789012:web:placeholder1234567890",
+  apiKey: firebaseAppletConfig.apiKey,
+  authDomain: firebaseAppletConfig.authDomain,
+  projectId: firebaseAppletConfig.projectId,
+  storageBucket: firebaseAppletConfig.storageBucket,
+  messagingSenderId: firebaseAppletConfig.messagingSenderId,
+  appId: firebaseAppletConfig.appId,
 };
 
-// Initialize Firebase
 const app: FirebaseApp = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-let auth: Auth;
-try {
-  auth = getAuth(app);
-} catch (error) {
-  console.warn("Firebase Auth initialization skipped during build:", error);
-  auth = {} as Auth;
+const auth: Auth = getAuth(app);
+const db: Firestore = getFirestore(app, firebaseAppletConfig.firestoreDatabaseId);
+const storage: FirebaseStorage = getStorage(app);
+
+let connectionChecked = false;
+
+export async function testFirestoreConnection(): Promise<void> {
+  if (typeof window === 'undefined' || connectionChecked) return;
+  connectionChecked = true;
+  try {
+    await getDocFromServer(doc(db, 'test', 'connection'));
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('the client is offline')) {
+      console.error('Please check your Firebase configuration: Firestore client is offline.');
+    }
+  }
 }
 
-let db: Firestore;
-try {
-  db = getFirestore(app);
-} catch (error) {
-  console.warn("Firebase Firestore initialization warning:", error);
-  db = {} as Firestore;
+if (typeof window !== 'undefined') {
+  void testFirestoreConnection();
 }
 
-let storage: FirebaseStorage;
-try {
-  storage = getStorage(app);
-} catch (error) {
-  console.warn("Firebase Storage initialization warning:", error);
-  storage = {} as FirebaseStorage;
-}
-
-export { app, auth, db, storage };
+export { app, auth, db, storage, firebaseAppletConfig };

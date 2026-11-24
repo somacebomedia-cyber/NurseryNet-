@@ -1,0 +1,683 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Authenticated NurseryNet user profile with strict RBAC and PII protection.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 200
+        },
+        "role": {
+          "type": "string",
+          "enum": ["Parent", "Preschool Owner", "Job Seeker"]
+        },
+        "whatsappNumber": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "planId": {
+          "type": "string",
+          "enum": ["discovery", "creative", "growth"]
+        },
+        "subscriptionStatus": {
+          "type": "string",
+          "enum": ["active", "cancelled", "inactive"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["uid", "name", "email", "role", "createdAt", "updatedAt"]
+    },
+    "AdminRecord": {
+      "title": "AdminRecord",
+      "description": "Platform administrator authorization record.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 200
+        },
+        "grantedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["uid", "email", "grantedAt"]
+    },
+    "VerifiedOwnership": {
+      "title": "VerifiedOwnership",
+      "description": "Authoritative ownership lock and public directory overrides for a verified preschool listing.",
+      "type": "object",
+      "properties": {
+        "schoolSlug": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "schoolName": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 160
+        },
+        "ownerUid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "ownerDisplayName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "ownerRole": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "verificationMethod": {
+          "type": "string",
+          "enum": ["domain_match", "phone_otp", "admin_document_review"]
+        },
+        "verifiedDomain": {
+          "type": "string",
+          "maxLength": 160
+        },
+        "sourceClaimId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "verificationProofHash": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "lockStatus": {
+          "type": "string",
+          "enum": ["locked", "disputed"]
+        },
+        "activeDisputeId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "city": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "province": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "address": {
+          "type": "string",
+          "maxLength": 240
+        },
+        "monthlyFeeZAR": {
+          "type": "number"
+        },
+        "operatingHours": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "curriculum": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "websiteUrl": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "npoNumber": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "publicContactPhone": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "publicContactEmail": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "images": {
+          "type": "array",
+          "description": "Up to 4 public school photo URLs"
+        },
+        "verifiedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "schoolSlug",
+        "schoolName",
+        "ownerUid",
+        "ownerDisplayName",
+        "ownerRole",
+        "verificationMethod",
+        "sourceClaimId",
+        "lockStatus",
+        "verifiedAt",
+        "updatedAt"
+      ]
+    },
+    "OwnershipClaim": {
+      "title": "OwnershipClaim",
+      "description": "Submitted preschool ownership verification request containing private claimant contact details and registration evidence.",
+      "type": "object",
+      "properties": {
+        "claimId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "schoolSlug": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "schoolName": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 160
+        },
+        "city": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "province": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "claimantUid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "claimantName": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120
+        },
+        "claimantEmail": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 200
+        },
+        "claimantPhone": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "claimantRole": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 80
+        },
+        "verificationMethod": {
+          "type": "string",
+          "enum": ["domain_match", "phone_otp", "admin_document_review"]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending_review", "approved", "rejected"]
+        },
+        "dsdNumber": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "npoNumber": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "cipcNumber": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "proofNotes": {
+          "type": "string",
+          "maxLength": 1500
+        },
+        "verifiedDomain": {
+          "type": "string",
+          "maxLength": 160
+        },
+        "maskedTargetPhone": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "verificationProofHash": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "reviewNotes": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "reviewedBy": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "claimId",
+        "schoolSlug",
+        "schoolName",
+        "claimantUid",
+        "claimantName",
+        "claimantEmail",
+        "claimantRole",
+        "verificationMethod",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "OwnershipDispute": {
+      "title": "OwnershipDispute",
+      "description": "Formal ownership dispute filed against a currently locked preschool profile.",
+      "type": "object",
+      "properties": {
+        "disputeId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "schoolSlug": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "schoolName": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 160
+        },
+        "currentOwnerUid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "challengerUid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "challengerName": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120
+        },
+        "challengerEmail": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 200
+        },
+        "challengerPhone": {
+          "type": "string",
+          "minLength": 6,
+          "maxLength": 32
+        },
+        "challengerRole": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 80
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 1500
+        },
+        "registrationRef": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "status": {
+          "type": "string",
+          "enum": ["open", "resolved_kept", "resolved_transferred", "dismissed"]
+        },
+        "adminNotes": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "resolvedBy": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "disputeId",
+        "schoolSlug",
+        "schoolName",
+        "currentOwnerUid",
+        "challengerUid",
+        "challengerName",
+        "challengerEmail",
+        "challengerPhone",
+        "challengerRole",
+        "reason",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "VerificationAuditLog": {
+      "title": "VerificationAuditLog",
+      "description": "Immutable append-only audit log of ownership verification, approval, dispute, and transfer events.",
+      "type": "object",
+      "properties": {
+        "logId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "schoolSlug": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "schoolName": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 160
+        },
+        "action": {
+          "type": "string",
+          "enum": [
+            "claim_submitted",
+            "claim_auto_verified",
+            "claim_approved",
+            "claim_rejected",
+            "dispute_opened",
+            "dispute_upheld",
+            "ownership_transferred",
+            "ownership_revoked"
+          ]
+        },
+        "actorUid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "actorName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "details": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 600
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "logId",
+        "schoolSlug",
+        "schoolName",
+        "action",
+        "actorUid",
+        "actorName",
+        "details",
+        "createdAt"
+      ]
+    },
+    "FundingWorkspace": {
+      "title": "FundingWorkspace",
+      "description": "Authenticated principal's South African ECD Funding OS state including DBE compliance readiness checks, saved grant pipeline, and subsidy calculator configuration.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "schoolName": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 160
+        },
+        "province": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 80
+        },
+        "npoNumber": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "registrationStatus": {
+          "type": "string",
+          "enum": ["full", "conditional", "unregistered"]
+        },
+        "qualifyingChildren": {
+          "type": "number"
+        },
+        "daysPerMonth": {
+          "type": "number"
+        },
+        "complianceChecks": {
+          "type": "array",
+          "description": "Bounded list of up to 20 completed DBE compliance checklist IDs"
+        },
+        "pipelineGrants": {
+          "type": "array",
+          "description": "Bounded list of up to 25 tracked grant pipeline entries"
+        },
+        "estimatedPipelineZAR": {
+          "type": "number"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "uid",
+        "schoolName",
+        "province",
+        "registrationStatus",
+        "qualifyingChildren",
+        "daysPerMonth",
+        "complianceChecks",
+        "pipelineGrants",
+        "estimatedPipelineZAR",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "GrantProposalDraft": {
+      "title": "GrantProposalDraft",
+      "description": "AI-generated and principal-customized South African ECD grant proposal and motivation letter stored in the owner's Funding OS vault.",
+      "type": "object",
+      "properties": {
+        "proposalId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "ownerUid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "schoolName": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 160
+        },
+        "province": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 80
+        },
+        "npoNumber": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "grantId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "grantTitle": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 200
+        },
+        "funderName": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 160
+        },
+        "requestedAmountZAR": {
+          "type": "number"
+        },
+        "projectFocus": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 500
+        },
+        "executiveSummary": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 2000
+        },
+        "fullProposalText": {
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 12000
+        },
+        "budgetBreakdown": {
+          "type": "string",
+          "maxLength": 3000
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "proposalId",
+        "ownerUid",
+        "schoolName",
+        "province",
+        "grantId",
+        "grantTitle",
+        "funderName",
+        "requestedAmountZAR",
+        "projectFocus",
+        "executiveSummary",
+        "fullProposalText",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Private user account profiles with PII isolated to self or admin."
+    },
+    "/admins/{adminId}": {
+      "schema": { "$ref": "#/entities/AdminRecord" },
+      "description": "Authoritative platform administrator records."
+    },
+    "/verified_ownerships/{schoolSlug}": {
+      "schema": { "$ref": "#/entities/VerifiedOwnership" },
+      "description": "Locked verified preschool ownership registry and public profile overrides."
+    },
+    "/ownership_claims/{claimId}": {
+      "schema": { "$ref": "#/entities/OwnershipClaim" },
+      "description": "Preschool ownership claim submissions and admin review decisions."
+    },
+    "/ownership_disputes/{disputeId}": {
+      "schema": { "$ref": "#/entities/OwnershipDispute" },
+      "description": "Formal ownership dispute tickets filed against locked preschool listings."
+    },
+    "/verification_audit_logs/{logId}": {
+      "schema": { "$ref": "#/entities/VerificationAuditLog" },
+      "description": "Immutable append-only audit trail for verification and dispute events."
+    },
+    "/funding_workspaces/{userId}": {
+      "schema": { "$ref": "#/entities/FundingWorkspace" },
+      "description": "Private principal ECD funding workspace storing compliance readiness and grant pipeline."
+    },
+    "/grant_proposals/{proposalId}": {
+      "schema": { "$ref": "#/entities/GrantProposalDraft" },
+      "description": "Private principal AI grant proposal drafts and motivation letters."
+    }
+  }
+}

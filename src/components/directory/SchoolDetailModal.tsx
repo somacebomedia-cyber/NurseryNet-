@@ -50,7 +50,9 @@ import {
   GraduationCap,
   Trophy,
   Building2,
+  ShieldAlert,
 } from 'lucide-react';
+import { getVerificationMethodLabel } from '@/lib/ownership-verification';
 
 interface SchoolDetailModalProps {
   preschool: Preschool | null;
@@ -60,6 +62,9 @@ interface SchoolDetailModalProps {
   onInquire: (preschool: Preschool) => void;
   onApply?: (preschool: Preschool) => void;
   onClaim?: (preschool: Preschool) => void;
+  onDispute?: (preschool: Preschool) => void;
+  isCurrentOwner?: boolean;
+  hasPendingClaim?: boolean;
   isSaved?: boolean;
   onToggleSave?: (preschool: Preschool) => void;
 }
@@ -72,6 +77,9 @@ export default function SchoolDetailModal({
   onInquire,
   onApply,
   onClaim,
+  onDispute,
+  isCurrentOwner = false,
+  hasPendingClaim = false,
   isSaved = false,
   onToggleSave,
 }: SchoolDetailModalProps) {
@@ -865,6 +873,76 @@ export default function SchoolDetailModal({
                   </p>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Ownership Verification & Anti-Hijack Protection Bar */}
+          <div className="p-4 rounded-xl bg-background border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div className="flex items-start gap-2.5">
+              <div
+                className={`p-2 rounded-lg shrink-0 ${
+                  preschool.isClaimed
+                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                    : 'bg-primary/10 text-primary'
+                }`}
+              >
+                {preschool.isClaimed ? <Lock className="w-4 h-4" /> : <BadgeCheck className="w-4 h-4" />}
+              </div>
+              <div className="space-y-0.5">
+                <div className="font-bold text-foreground">
+                  {preschool.isClaimed
+                    ? `Owner-Verified & Locked · ${getVerificationMethodLabel(preschool.verificationMethod)}`
+                    : hasPendingClaim
+                    ? 'Ownership Claim Pending Admin Verification'
+                    : 'Unclaimed Preschool Profile'}
+                </div>
+                <p className="text-muted-foreground leading-relaxed">
+                  {preschool.isClaimed
+                    ? isCurrentOwner
+                      ? 'This profile is locked to your verified account. Only you and platform admins can edit it.'
+                      : 'Protected against unauthorized edits. If you are the rightful owner, you may submit a formal ownership dispute.'
+                    : hasPendingClaim
+                    ? 'Our verification team is reviewing your submitted DSD/NPO/CIPC evidence.'
+                    : 'Principals and owners can verify via official school domain, listed phone OTP, or DSD/NPO documentation.'}
+                </p>
+              </div>
+            </div>
+
+            <div className="shrink-0 flex items-center gap-2">
+              {preschool.isClaimed ? (
+                isCurrentOwner && onClaim ? (
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => onClaim(preschool)}
+                    className="h-9 text-xs font-bold whitespace-nowrap"
+                  >
+                    Manage Listing
+                  </Button>
+                ) : onDispute ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onDispute(preschool)}
+                    className="h-9 text-xs font-semibold text-destructive border-destructive/30 hover:bg-destructive/10 whitespace-nowrap"
+                  >
+                    <ShieldAlert className="w-3.5 h-3.5 mr-1.5" />
+                    Report Ownership Issue
+                  </Button>
+                ) : null
+              ) : !hasPendingClaim && onClaim ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onClaim(preschool)}
+                  className="h-9 text-xs font-bold border-primary/40 text-primary hover:bg-primary/10 whitespace-nowrap"
+                >
+                  <BadgeCheck className="w-3.5 h-3.5 mr-1.5" />
+                  Verify &amp; Claim Listing
+                </Button>
+              ) : null}
             </div>
           </div>
 

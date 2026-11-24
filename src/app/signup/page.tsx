@@ -1,5 +1,4 @@
-// src/app/signup/page.tsx
-"use client";
+'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -10,21 +9,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
-import { 
-  UserPlus, 
-  ShieldCheck, 
-  Mail, 
-  Lock, 
-  User, 
-  Building2, 
-  ArrowRight,
-  Sparkles,
-  AlertCircle
-} from 'lucide-react';
+import { UserPlus, ShieldCheck, AlertCircle, Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export default function SignupPage() {
   const { brand } = useBrand();
-  const { signup } = useAuth();
+  const { signup, signInWithGoogle } = useAuth();
+  const { toast } = useToast();
   const router = useRouter();
 
   const [name, setName] = useState('');
@@ -33,6 +24,26 @@ export default function SignupPage() {
   const [role, setRole] = useState<UserRole>('Preschool Owner');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  const handleGoogleSignup = async () => {
+    setError(null);
+    setGoogleLoading(true);
+    try {
+      await signInWithGoogle(role);
+      toast({
+        title: 'Account Verified & Ready',
+        description: `Signed in as ${role}. You can now claim and verify your preschool listing.`,
+      });
+      router.push(role === 'Preschool Owner' ? '/directory' : '/directory');
+    } catch (err: any) {
+      if (err?.code !== 'auth/popup-closed-by-user') {
+        setError(err?.message || 'Google sign-up could not be completed. Please try again.');
+      }
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,34 +54,23 @@ export default function SignupPage() {
       await signup(email, password, name, role);
       router.push(role === 'Preschool Owner' ? '/dashboard' : '/directory');
     } catch (err: any) {
-      console.warn("Firebase auth fallback during demo signup:", err);
-      // For sandbox / demo purposes, store a simulated session if Firebase credentials aren't active in build
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('nurserynet_demo_user', JSON.stringify({ name, email, role }));
+      const code = err?.code || '';
+      if (code === 'auth/operation-not-allowed') {
+        setError('Email/password signup is disabled on this project. Please use Continue with Google above.');
+      } else {
+        setError(err?.message || 'Could not create account. Please use Continue with Google.');
       }
-      router.push(role === 'Preschool Owner' ? '/dashboard' : '/directory');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDemoLogin = (selectedRole: UserRole) => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('nurserynet_demo_user', JSON.stringify({
-        name: selectedRole === 'Preschool Owner' ? 'Principal Nomvula Khumalo' : 'Lerato Moloi (Parent)',
-        email: 'demo@nurserynet.app',
-        role: selectedRole
-      }));
-    }
-    router.push(selectedRole === 'Preschool Owner' ? '/dashboard' : '/directory');
-  };
-
   return (
     <div className="min-h-screen bg-background flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <div className="inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold rounded-full bg-primary/10 text-primary mb-3">
-          <UserPlus className="h-3.5 w-3.5" />
-          <span>Join the {brand} Network</span>
+      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center px-4">
+        <div className="inline-flex items-center gap-2 text-xs font-semibold text-primary mb-2">
+          <ShieldCheck className="h-4 w-4" />
+          <span>Verified {brand} Registration</span>
         </div>
         <h2 className="font-heading text-3xl font-extrabold text-foreground">
           Create your free account
@@ -84,11 +84,11 @@ export default function SignupPage() {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
-        <Card className="border border-border/80 shadow-md">
+        <Card className="border border-border shadow-sm">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-bold">Select Account Type</CardTitle>
+            <CardTitle className="text-lg font-bold">Select Account Role</CardTitle>
             <CardDescription className="text-xs">
-              Choose how you will use the platform
+              Ownership claims require a verified account to protect preschool listings from unauthorized edits.
             </CardDescription>
             <div className="grid grid-cols-3 gap-2 pt-2">
               {(['Preschool Owner', 'Parent', 'Job Seeker'] as UserRole[]).map((r) => (
@@ -97,8 +97,8 @@ export default function SignupPage() {
                   type="button"
                   onClick={() => setRole(r)}
                   className={`py-2 px-1 text-[11px] font-semibold rounded-lg border text-center transition-colors ${
-                    role === r 
-                      ? 'border-primary bg-primary/10 text-primary font-bold' 
+                    role === r
+                      ? 'border-primary bg-primary/10 text-primary font-bold'
                       : 'border-border text-muted-foreground hover:bg-muted/50'
                   }`}
                 >
@@ -110,13 +110,40 @@ export default function SignupPage() {
 
           <CardContent className="space-y-4 pt-0">
             {error && (
-              <div className="p-3 rounded-lg bg-red-50 text-red-700 text-xs flex items-center gap-2">
-                <AlertCircle className="h-4 w-4 shrink-0" />
+              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs flex items-start gap-2">
+                <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
                 <span>{error}</span>
               </div>
             )}
 
-            <form onSubmit={handleSignup} className="space-y-4">
+            <Button
+              type="button"
+              disabled={googleLoading}
+              onClick={handleGoogleSignup}
+              className="w-full h-11 font-bold bg-primary text-primary-foreground hover:bg-primary/90 flex items-center justify-center gap-2"
+            >
+              {googleLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <UserPlus className="h-4 w-4" />
+              )}
+              <span>
+                {googleLoading
+                  ? 'Connecting Google...'
+                  : `Continue with Google as ${role === 'Preschool Owner' ? 'School Owner' : role}`}
+              </span>
+            </Button>
+
+            <div className="relative py-2">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-border" />
+              </div>
+              <div className="relative flex justify-center text-[11px]">
+                <span className="bg-card px-2 text-muted-foreground font-medium">Or register with email</span>
+              </div>
+            </div>
+
+            <form onSubmit={handleSignup} className="space-y-3.5">
               <div className="space-y-1.5">
                 <Label htmlFor="name" className="text-xs">Your Full Name</Label>
                 <Input
@@ -129,7 +156,7 @@ export default function SignupPage() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="email" className="text-xs">Email Address</Label>
+                <Label htmlFor="email" className="text-xs">Official Email Address</Label>
                 <Input
                   id="email"
                   type="email"
@@ -153,44 +180,14 @@ export default function SignupPage() {
                 />
               </div>
 
-              <Button type="submit" disabled={loading} className="w-full font-semibold py-5">
-                {loading ? 'Creating Account...' : `Sign Up as ${role}`}
+              <Button type="submit" variant="outline" disabled={loading} className="w-full h-10 font-semibold">
+                {loading ? 'Creating Account...' : `Sign Up with Email`}
               </Button>
             </form>
-
-            <div className="relative py-2">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border" />
-              </div>
-              <div className="relative flex justify-center text-[11px] uppercase">
-                <span className="bg-card px-2 text-muted-foreground font-semibold">Or One-Click Demo Mode</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="sm" 
-                onClick={() => handleDemoLogin('Preschool Owner')}
-                className="text-xs"
-              >
-                Demo as Owner
-              </Button>
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="sm" 
-                onClick={() => handleDemoLogin('Parent')}
-                className="text-xs"
-              >
-                Demo as Parent
-              </Button>
-            </div>
           </CardContent>
 
           <CardFooter className="pt-0 text-[11px] text-center text-muted-foreground flex justify-center">
-            By signing up, you agree to the{' '}
+            By continuing, you agree to the{' '}
             <Link href="/terms" className="underline ml-1 mr-1 text-primary">Terms</Link>
             and{' '}
             <Link href="/privacy" className="underline ml-1 text-primary">Privacy Policy</Link>.

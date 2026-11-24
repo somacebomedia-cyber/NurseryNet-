@@ -2,7 +2,7 @@
 "use client";
 
 import Link from 'next/link';
-import { Home, Search, Briefcase, DollarSign, LayoutDashboard, Menu, X, Handshake, ClipboardList, ChevronDown, Wand2, TrendingUp, Gift, Eye, Award, LogOut, Compass, UserPlus, FileText, School, BookOpenCheck, GraduationCap, Users } from 'lucide-react';
+import { Home, Search, Briefcase, DollarSign, LayoutDashboard, Menu, X, Handshake, ClipboardList, ChevronDown, Wand2, TrendingUp, Gift, Eye, Award, LogOut, Compass, UserPlus, FileText, School, BookOpenCheck, GraduationCap, Users, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import {
@@ -264,6 +264,9 @@ export default function Navbar() {
           {renderNavLinks()}
           <NavLinkItem href="/parent-profile" label="Parent Profile" icon={FileText} />
           <NavLinkItem href="/dashboard" label="Owner Dashboard" icon={LayoutDashboard} />
+          {user?.isAdmin && (
+            <NavLinkItem href="/admin/verifications" label="Admin Queue" icon={ShieldCheck} className="text-primary" />
+          )}
         </nav>
         
         <div className="hidden md:flex items-center space-x-2">
@@ -325,6 +328,17 @@ export default function Navbar() {
                                    className="py-3 px-4 text-base"
                                />
                            </SheetClose>
+                           {user?.isAdmin && (
+                             <SheetClose asChild>
+                                 <NavLinkItem 
+                                     href="/admin/verifications" 
+                                     label="Admin Queue" 
+                                     icon={ShieldCheck} 
+                                     onClick={closeMobileMenu} 
+                                     className="py-3 px-4 text-base text-emerald-700 font-semibold"
+                                 />
+                             </SheetClose>
+                           )}
                         </Fragment>
                     </Accordion>
                 </div>

@@ -40,8 +40,8 @@ const QUICK_VOICE_PROMPTS = [
     prompt: 'Add and claim Nawi Learn Toddler Centre on the directory',
   },
   {
-    label: 'DSD R17/day subsidy guide',
-    prompt: 'How do I apply for the R17 per child DSD ECD subsidy?',
+    label: 'DBE R24/day subsidy guide',
+    prompt: 'How do I apply for the R24 per child DBE ECD subsidy?',
   },
   {
     label: 'Search Soweto preschools',

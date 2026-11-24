@@ -61,7 +61,29 @@ import {
   UserCheck,
   HeartPulse,
   MapPin,
+  Lock,
+  LogIn,
+  Coins,
+  FolderKanban,
+  ClipboardCheck,
+  ArrowRight,
+  Download,
 } from 'lucide-react';
+import {
+  formatFirestoreTime,
+  subscribeToUserClaims,
+  subscribeToVerifiedOwnerships,
+  type OwnershipClaimRecord,
+  type VerifiedOwnershipRecord,
+} from '@/lib/firestore-ownership';
+import {
+  CURRENT_DBE_DAILY_SUBSIDY_ZAR,
+  DBE_COMPLIANCE_CHECKLIST,
+  getLocalFundingWorkspaceFallback,
+  subscribeToFundingWorkspace,
+  type FundingWorkspaceRecord,
+} from '@/lib/firestore-funding';
+import { getVerificationMethodLabel } from '@/lib/ownership-verification';
 
 interface UnifiedLead {
   id: string;
@@ -150,9 +172,54 @@ function formatSaWhatsAppNumber(rawPhone?: string): string {
 
 function DashboardContent() {
   const { brand } = useBrand();
-  const { user } = useAuth();
+  const { user, signInWithGoogle } = useAuth();
   const { toast } = useToast();
   const searchParams = useSearchParams();
+
+  const [myVerifiedSchools, setMyVerifiedSchools] = useState<VerifiedOwnershipRecord[]>([]);
+  const [myOwnershipClaims, setMyOwnershipClaims] = useState<OwnershipClaimRecord[]>([]);
+  const [fundingWorkspace, setFundingWorkspace] = useState<FundingWorkspaceRecord>(() =>
+    getLocalFundingWorkspaceFallback()
+  );
+
+  useEffect(() => {
+    setFundingWorkspace(getLocalFundingWorkspaceFallback());
+    const onLocalFundingUpdate = () => {
+      setFundingWorkspace(getLocalFundingWorkspaceFallback());
+    };
+    window.addEventListener('nurserynet_funding_updated', onLocalFundingUpdate);
+    return () => window.removeEventListener('nurserynet_funding_updated', onLocalFundingUpdate);
+  }, []);
+
+  useEffect(() => {
+    if (!user?.uid) {
+      setMyVerifiedSchools([]);
+      setMyOwnershipClaims([]);
+      return;
+    }
+    const unsubFunding = subscribeToFundingWorkspace(user.uid, (remote) => {
+      if (remote) {
+        setFundingWorkspace(remote);
+      }
+    });
+    const unsubLocks = subscribeToVerifiedOwnerships(
+      (map) => {
+        const owned = Object.values(map).filter((o) => o.ownerUid === user.uid);
+        setMyVerifiedSchools(owned);
+      },
+      () => {}
+    );
+    const unsubClaims = subscribeToUserClaims(
+      user.uid,
+      (list) => setMyOwnershipClaims(list),
+      () => {}
+    );
+    return () => {
+      unsubFunding();
+      unsubLocks();
+      unsubClaims();
+    };
+  }, [user?.uid]);
 
   const [activeTab, setActiveTab] = useState<
     'applications' | 'form-builder' | 'leads' | 'profile' | 'website' | 'billing'
@@ -771,6 +838,112 @@ function DashboardContent() {
         </div>
       </section>
 
+      {/* Verified Ownership & Claim Status Panel */}
+      <section className="pt-6">
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="p-4 sm:p-5 rounded-xl bg-card border border-border flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            {!user ? (
+              <>
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-primary/10 text-primary shrink-0">
+                    <Lock className="w-4 h-4" />
+                  </div>
+                  <div className="space-y-0.5 text-xs">
+                    <p className="font-bold text-foreground">
+                      Sign in with Google to lock and verify your preschool ownership
+                    </p>
+                    <p className="text-muted-foreground">
+                      Verified owners can edit tuition, photos, and hours directly across the South African directory while blocking unauthorized changes.
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => signInWithGoogle('Preschool Owner')}
+                  className="h-9 px-4 text-xs font-bold shrink-0 whitespace-nowrap"
+                >
+                  <LogIn className="w-3.5 h-3.5 mr-1.5" />
+                  Sign in with Google
+                </Button>
+              </>
+            ) : (
+              <>
+                <div className="space-y-2 flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 text-xs">
+                    <span className="font-bold text-foreground flex items-center gap-1.5">
+                      <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                      <span>Ownership Verification Status</span>
+                    </span>
+                    <span className="text-muted-foreground" aria-hidden="true">·</span>
+                    <span className="text-muted-foreground font-mono text-[11px]">{user.email}</span>
+                  </div>
+
+                  {myVerifiedSchools.length > 0 ? (
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                      {myVerifiedSchools.map((s) => (
+                        <span key={s.schoolSlug} className="inline-flex items-center gap-1.5 text-emerald-700 dark:text-emerald-300 font-semibold">
+                          <Lock className="w-3.5 h-3.5" />
+                          <span>{s.schoolName}</span>
+                          <span className="text-muted-foreground font-normal">
+                            ({getVerificationMethodLabel(s.verificationMethod)})
+                          </span>
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      No locked preschools verified on this account yet. Find your school in the Directory to verify via official domain, listed phone OTP, or DSD/NPO documentation.
+                    </p>
+                  )}
+
+                  {myOwnershipClaims.filter((c) => c.status !== 'approved').length > 0 && (
+                    <div className="pt-2 border-t border-border/60 space-y-1">
+                      {myOwnershipClaims
+                        .filter((c) => c.status !== 'approved')
+                        .slice(0, 3)
+                        .map((claim) => (
+                          <div key={claim.claimId} className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                            <span className="font-semibold text-foreground">
+                              {claim.schoolName}{' '}
+                              <span
+                                className={
+                                  claim.status === 'pending_review'
+                                    ? 'text-amber-600 dark:text-amber-400'
+                                    : 'text-destructive'
+                                }
+                              >
+                                ({claim.status === 'pending_review' ? 'Pending Admin Review' : 'Rejected'})
+                              </span>
+                            </span>
+                            <span className="text-[11px] text-muted-foreground tabular-nums">
+                              {claim.reviewNotes || `Submitted ${formatFirestoreTime(claim.createdAt)}`}
+                            </span>
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  {user.isAdmin && (
+                    <Button asChild size="sm" variant="default" className="h-9 text-xs font-bold whitespace-nowrap">
+                      <Link href="/admin/verifications">
+                        <ShieldCheck className="w-3.5 h-3.5 mr-1.5" />
+                        Open Admin Queue
+                      </Link>
+                    </Button>
+                  )}
+                  <Button asChild size="sm" variant="outline" className="h-9 text-xs font-semibold whitespace-nowrap">
+                    <Link href="/directory">Claim Another School</Link>
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* Main Stats KPI Cards & Profile Strength Meter */}
       <section className="py-8">
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -881,6 +1054,112 @@ function DashboardContent() {
                   </div>
                 </button>
               ))}
+            </div>
+          </div>
+
+          {/* ECD Funding & Grant Pipeline (Funding OS Widget) */}
+          <div className="mb-8 p-5 bg-card border-2 border-emerald-500/25 rounded-xl space-y-4 shadow-sm">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Coins className="w-4 h-4 text-emerald-600" />
+                  <h2 className="font-heading text-base font-bold text-foreground">
+                    South African ECD Funding &amp; DBE R24/Day Subsidy Pipeline
+                  </h2>
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
+                    Synced with Funding OS
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Live DBE Equitable Share R{CURRENT_DBE_DAILY_SUBSIDY_ZAR.toFixed(2)}/child/day allocation, tracked NLC &amp; CSI grant applications, and 10-point PED audit readiness.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button asChild size="sm" className="h-8 text-xs font-bold whitespace-nowrap">
+                  <Link href="/funding">
+                    Open ECD Funding OS <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" size="sm" className="h-8 text-xs font-semibold whitespace-nowrap">
+                  <Link href="/funding?tab=ai-drafter">
+                    <Sparkles className="w-3.5 h-3.5 mr-1.5 text-primary" />
+                    Draft AI Grant Proposal
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" size="sm" className="h-8 text-xs font-semibold whitespace-nowrap">
+                  <Link href="/funding?tab=compliance">
+                    <Download className="w-3.5 h-3.5 mr-1.5" />
+                    DBE Audit Pack
+                  </Link>
+                </Button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="p-3.5 rounded-xl bg-background border border-border">
+                <div className="flex items-center justify-between text-[11px] font-semibold text-muted-foreground">
+                  <span>Tracked Grant Pipeline</span>
+                  <FolderKanban className="w-3.5 h-3.5 text-emerald-600" />
+                </div>
+                <div className="mt-1 font-heading text-xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono tabular-nums">
+                  R{fundingWorkspace.estimatedPipelineZAR.toLocaleString()}
+                </div>
+                <div className="text-[11px] text-muted-foreground mt-0.5 font-mono">
+                  {fundingWorkspace.pipelineGrants.length} active grant application{fundingWorkspace.pipelineGrants.length === 1 ? '' : 's'}
+                </div>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-background border border-border">
+                <div className="flex items-center justify-between text-[11px] font-semibold text-muted-foreground">
+                  <span>DBE R24/Day Annual Estimate</span>
+                  <Coins className="w-3.5 h-3.5 text-primary" />
+                </div>
+                <div className="mt-1 font-heading text-xl font-extrabold text-foreground font-mono tabular-nums">
+                  R
+                  {Math.round(
+                    fundingWorkspace.qualifyingChildren *
+                      CURRENT_DBE_DAILY_SUBSIDY_ZAR *
+                      Math.min(264, fundingWorkspace.daysPerMonth * 12)
+                  ).toLocaleString()}
+                </div>
+                <div className="text-[11px] text-muted-foreground mt-0.5 font-mono">
+                  {fundingWorkspace.qualifyingChildren} qualifying children · {fundingWorkspace.daysPerMonth}d/mo
+                </div>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-background border border-border">
+                <div className="flex items-center justify-between text-[11px] font-semibold text-muted-foreground">
+                  <span>DBE Compliance Readiness</span>
+                  <ClipboardCheck className="w-3.5 h-3.5 text-primary" />
+                </div>
+                <div className="mt-1 font-heading text-xl font-extrabold text-foreground font-mono tabular-nums">
+                  {Math.round(
+                    ((fundingWorkspace.complianceChecks?.length || 0) /
+                      Math.max(1, DBE_COMPLIANCE_CHECKLIST.length)) *
+                      100
+                  )}
+                  %
+                </div>
+                <div className="text-[11px] text-muted-foreground mt-0.5 font-mono">
+                  {fundingWorkspace.complianceChecks?.length || 0} of {DBE_COMPLIANCE_CHECKLIST.length} statutory items verified
+                </div>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-background border border-border flex flex-col justify-between">
+                <div className="text-[11px] font-semibold text-muted-foreground">
+                  Next Tracked Funding Window
+                </div>
+                <div className="text-xs font-bold text-foreground truncate mt-1">
+                  {fundingWorkspace.pipelineGrants[0]?.title || 'DBE R24/Day Equitable Share Subsidy'}
+                </div>
+                <Link
+                  href="/funding?tab=pipeline"
+                  className="text-[11px] font-bold text-primary hover:underline inline-flex items-center gap-1 mt-1"
+                >
+                  <span>Manage Pipeline Stages</span>
+                  <ArrowRight className="w-3 h-3" />
+                </Link>
+              </div>
             </div>
           </div>
 
@@ -2036,13 +2315,13 @@ function DashboardContent() {
               {/* Tuition ROI Breakdown */}
               <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 space-y-2 text-xs">
                 <div className="flex items-center justify-between font-semibold text-foreground">
-                  <span>Your School&apos;s Enrollment ROI Math</span>
+                  <span>Your School&apos;s Enrollment &amp; Grant Pipeline ROI Math</span>
                   <span className="font-mono tabular-nums text-primary">
-                    {applications.length} Applications · {bookings.length} Leads
+                    {applications.length} Applications · R{fundingWorkspace.estimatedPipelineZAR.toLocaleString()} Grant Pipeline
                   </span>
                 </div>
                 <p className="text-muted-foreground leading-relaxed">
-                  At your current tuition of <strong className="text-foreground font-mono">R{numericMonthlyFee.toLocaleString()}/mo</strong>, enrolling just <strong>1 child</strong> from your NurseryNet directory leads generates <strong className="text-foreground font-mono">R{annualTuitionPerChild.toLocaleString()}</strong> in annual tuition—covering your subscription more than <strong className="text-primary font-mono">{roiMultiple} times over</strong>.
+                  At your current tuition of <strong className="text-foreground font-mono">R{numericMonthlyFee.toLocaleString()}/mo</strong>, enrolling just <strong>1 child</strong> generates <strong className="text-foreground font-mono">R{annualTuitionPerChild.toLocaleString()}/yr</strong> in tuition ({roiMultiple}x your plan cost) — while your active ECD Funding OS pipeline protects <strong className="text-emerald-600 font-mono">R{fundingWorkspace.estimatedPipelineZAR.toLocaleString()}</strong> in tracked DBE subsidies and CSI grants.
                 </p>
               </div>
 
@@ -2082,22 +2361,30 @@ function DashboardContent() {
               Flexible Subscription Options for {schoolName}
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground mt-1">
-              Before cancelling your verified placement, choose a flexible option below to protect your school&apos;s search ranking and parent lead inbox.
+              Before cancelling your verified placement, choose a flexible option below to protect your school&apos;s search ranking, parent lead inbox, and tracked ECD grant pipeline.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3 py-2">
-            {/* ROI Reminder Banner */}
-            <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs space-y-1">
+            {/* ROI & Grant Pipeline Protection Reminder Banner */}
+            <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs space-y-1.5">
               <div className="font-bold text-emerald-800 dark:text-emerald-300 flex items-center justify-between">
-                <span>Live Activity on Your Listing</span>
+                <span>Live Enrollment &amp; Grant Pipeline Protection</span>
                 <span className="font-mono tabular-nums">
-                  {applications.length} Applications · {bookings.length} Tours
+                  {applications.length} Apps · {fundingWorkspace.pipelineGrants.length} Tracked Grants
                 </span>
               </div>
               <p className="text-muted-foreground">
                 1 enrolled learner at R{numericMonthlyFee.toLocaleString()}/mo equals{' '}
                 <strong className="text-foreground font-mono">R{annualTuitionPerChild.toLocaleString()}/year</strong> in tuition ({roiMultiple}x your plan cost).
+              </p>
+              <p className="text-emerald-900 dark:text-emerald-200 font-medium pt-1 border-t border-emerald-500/20">
+                <strong>Funding OS Alert:</strong> You currently have{' '}
+                <strong className="font-mono">R{fundingWorkspace.estimatedPipelineZAR.toLocaleString()} ZAR</strong> in tracked DBE R24/day subsidies &amp; CSI grants plus{' '}
+                <strong className="font-mono">
+                  {Math.round(((fundingWorkspace.complianceChecks?.length || 0) / Math.max(1, DBE_COMPLIANCE_CHECKLIST.length)) * 100)}%
+                </strong>{' '}
+                audit readiness saved in your Funding Vault.
               </p>
             </div>
 

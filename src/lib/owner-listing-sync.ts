@@ -1,4 +1,5 @@
 import type { Preschool } from '@/data/preschools';
+import { auth } from '@/lib/firebase';
 import {
   hasOnlyStockPlaceholderImages,
   MAX_PRESCHOOL_PROFILE_PHOTOS,
@@ -25,6 +26,22 @@ export interface OwnerProfileUpdateInput {
   role?: string;
   tierName?: string;
   websitePreviewed?: boolean;
+  ownerUid?: string;
+  verificationMethod?: string;
+  verificationProofHash?: string;
+}
+
+async function getAuthHeaders(): Promise<Record<string, string> | null> {
+  if (!auth.currentUser) return null;
+  try {
+    const token = await auth.currentUser.getIdToken();
+    return {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    };
+  } catch {
+    return null;
+  }
 }
 
 const DEFAULT_IMAGES = [
@@ -89,19 +106,6 @@ export async function reconcileOwnerProfileWithDirectory(): Promise<{
       ) {
         photosUpgraded = true;
         const upgraded = { ...cs, images: resolved };
-        fetch('/api/claim', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            nurserySlug: upgraded.slug || upgraded.id,
-            nurseryName: upgraded.name,
-            ownerName: 'Verified Principal',
-            ownerPhone: upgraded.phone,
-            ownerEmail: upgraded.email,
-            replaceAllForOwner: true,
-            preschoolData: upgraded,
-          }),
-        }).catch(() => {});
         return upgraded;
       }
       return cs;
@@ -268,22 +272,24 @@ export async function reconcileOwnerProfileWithDirectory(): Promise<{
           // ignore
         }
 
-        // Push corrected school to server directory pool (/api/claim)
-        fetch('/api/claim', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            nurserySlug: newSlug,
-            previousSlug: oldSlug,
-            previousName: oldName,
-            nurseryName: correctedName,
-            ownerName: 'Verified Principal',
-            ownerPhone: updatedSchool.phone,
-            ownerEmail: updatedSchool.email,
-            replaceAllForOwner: true,
-            preschoolData: updatedSchool,
-          }),
-        }).catch(() => {});
+        // Push corrected school to server directory pool (/api/claim) only when signed in
+        const headers = await getAuthHeaders();
+        if (headers) {
+          fetch('/api/claim', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({
+              nurserySlug: newSlug,
+              previousSlug: oldSlug,
+              previousName: oldName,
+              nurseryName: correctedName,
+              ownerName: auth.currentUser?.displayName || 'Verified Principal',
+              ownerPhone: updatedSchool.phone,
+              ownerEmail: updatedSchool.email,
+              preschoolData: updatedSchool,
+            }),
+          }).catch(() => {});
+        }
 
         if (oldName !== correctedName) {
           reconciled = true;
@@ -361,16 +367,19 @@ export async function reconcileOwnerProfileWithDirectory(): Promise<{
         JSON.stringify({ ...activePlan, schoolSlug: newSlug })
       );
 
-      fetch('/api/claim', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nurserySlug: newSlug,
-          nurseryName: correctedName,
-          ownerName: 'Verified Principal',
-          preschoolData: createdSchool,
-        }),
-      }).catch(() => {});
+      const headers = await getAuthHeaders();
+      if (headers) {
+        fetch('/api/claim', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            nurserySlug: newSlug,
+            nurseryName: correctedName,
+            ownerName: auth.currentUser?.displayName || 'Verified Principal',
+            preschoolData: createdSchool,
+          }),
+        }).catch(() => {});
+      }
 
       reconciled = true;
     }
@@ -585,24 +594,33 @@ export async function syncOwnerProfileToDirectory(
     }
   }
 
-  // Push update to server directory pool (/api/claim)
+  // Push update to server directory pool (/api/claim) with verified Firebase ID token
   try {
-    await fetch('/api/claim', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        nurserySlug: newSlug,
-        previousSlug: prevSlug,
-        previousName: oldName,
-        nurseryName: cleanName,
-        ownerName: input.ownerName || 'Verified Principal',
-        ownerEmail: updatedSchool.email,
-        ownerPhone: updatedSchool.phone,
-        role: input.role || 'Owner / Principal',
-        replaceAllForOwner: true,
-        preschoolData: updatedSchool,
-      }),
-    });
+    const headers = await getAuthHeaders();
+    if (headers) {
+      await fetch('/api/claim', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          nurserySlug: newSlug,
+          previousSlug: prevSlug,
+          previousName: oldName,
+          nurseryName: cleanName,
+          ownerName: input.ownerName || auth.currentUser?.displayName || 'Verified Principal',
+          ownerEmail: updatedSchool.email,
+          ownerPhone: updatedSchool.phone,
+          role: input.role || 'Owner / Principal',
+          verificationMethod: input.verificationMethod,
+          verificationProofHash: input.verificationProofHash,
+          preschoolData: {
+            ...updatedSchool,
+            ownerUid: input.ownerUid || auth.currentUser?.uid,
+            verificationMethod: input.verificationMethod,
+            lockStatus: 'locked',
+          },
+        }),
+      });
+    }
   } catch {
     // ignore network error
   }
@@ -611,7 +629,7 @@ export async function syncOwnerProfileToDirectory(
 }
 
 /**
- * Allows an owner to remove an accidentally claimed or misspelled duplicate listing from the Directory.
+ * Allows a verified owner or admin to remove an accidentally claimed duplicate listing.
  */
 export async function removeClaimedPreschoolListing(slugToRemove: string): Promise<void> {
   if (typeof window !== 'undefined') {
@@ -641,9 +659,13 @@ export async function removeClaimedPreschoolListing(slugToRemove: string): Promi
   }
 
   try {
-    await fetch(`/api/claim?slug=${encodeURIComponent(slugToRemove)}`, {
-      method: 'DELETE',
-    });
+    const headers = await getAuthHeaders();
+    if (headers) {
+      await fetch(`/api/claim?slug=${encodeURIComponent(slugToRemove)}`, {
+        method: 'DELETE',
+        headers,
+      });
+    }
   } catch {
     // ignore
   }

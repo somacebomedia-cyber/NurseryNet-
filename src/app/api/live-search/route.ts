@@ -439,52 +439,52 @@ function findMatchingLocalPreschools(
 
 const SA_ECD_GRANTS_CATALOG = [
   {
-    title: 'Department of Social Development (DSD) ECD Per-Child Daily Subsidy',
-    subtitle: 'Provincial Departments of Social Development & DBE',
-    feeOrAmount: 'R17.00 per qualifying child / day (~R357/mo per child)',
-    hoursOrDeadline: 'Annual Provincial Intake Windows (April – June 2026)',
-    websiteUrl: 'https://www.dsd.gov.za',
+    title: 'Department of Basic Education (DBE) ECD Per-Child Daily Subsidy',
+    subtitle: 'Provincial Education Departments (PEDs) & DBE',
+    feeOrAmount: 'R24.00 per qualifying child / day (~R6,336/yr per child across 264 days)',
+    hoursOrDeadline: 'Annual Provincial PED Contracting Windows (Jan – March & Mid-Year Review)',
+    websiteUrl: 'https://www.education.gov.za/Programmes/EarlyChildhoodDevelopment.aspx',
     reviewsSummary:
-      'Open to Conditionally or Fully Registered NPO/ECD centres serving households below the means-test threshold.',
+      'Open to Conditionally or Fully Registered NPO/ECD centres serving households below the income means-test threshold or receiving SASSA Child Support Grants.',
     details:
-      'Covers nutrition (50%), practitioner stipends (30%), and learning stimulation materials (20%) across all 9 provinces.',
-    keywords: ['dsd', 'subsidy', 'subsidies', 'provincial', 'government', 'daily', 'per child', 'gauteng', 'western cape', 'kzn'],
+      'Following the ECD function shift to DBE and the tariff increase from R17.00 to R24.00/child/day, funds are ring-fenced for nutrition (50%), practitioner stipends (30%), and learning stimulation/admin (20%).',
+    keywords: ['dbe', 'dsd', 'subsidy', 'subsidies', 'provincial', 'government', 'daily', 'per child', 'r24', 'r17', 'gauteng', 'western cape', 'kzn'],
   },
   {
-    title: 'DBE & Ilifa Labantwana ECD Infrastructure & Compliance Grant',
+    title: 'DBE Vangasali & Ilifa Labantwana ECD Infrastructure & Compliance Grant',
     subtitle: 'Ilifa Labantwana & Department of Basic Education',
-    feeOrAmount: 'R25,000 – R150,000 per qualifying centre',
-    hoursOrDeadline: 'Rolling Provincial Municipal Assessments (2026)',
-    websiteUrl: 'https://ilifalabantwana.co.za',
+    feeOrAmount: 'R35,000 – R150,000 per qualifying centre',
+    hoursOrDeadline: 'Rolling Provincial Municipal Assessments (2026/2027)',
+    websiteUrl: 'https://ilifalabantwana.co.za/what-we-do/',
     reviewsSummary:
-      'Targeted at community crèches and informal educares requiring sanitation, fencing, or fire safety upgrades to unlock Full DSD Registration.',
+      'Targeted at community crèches and informal educares requiring sanitation, perimeter fencing, or fire safety upgrades to unlock Silver/Gold DBE Registration.',
     details:
-      'Provides direct infrastructure contractors and compliance support aligned with the 2021 ECD Census municipal audit benchmarks.',
-    keywords: ['infrastructure', 'upgrade', 'building', 'fencing', 'sanitation', 'safety', 'ilifa', 'compliance', 'creche'],
+      'Provides direct infrastructure contractors, Vangasali registration support, and nutritional stimulus aligned with municipal environmental health standards.',
+    keywords: ['infrastructure', 'upgrade', 'building', 'fencing', 'sanitation', 'safety', 'ilifa', 'vangasali', 'compliance', 'creche'],
   },
   {
     title: 'National Lotteries Commission (NLC) Charities & ECD Sector Funding',
     subtitle: 'National Lotteries Commission South Africa',
     feeOrAmount: 'Up to R250,000 (Small Grants) / R500,000+ (Medium)',
-    hoursOrDeadline: 'Quarterly Provincial Calls for Applications',
-    websiteUrl: 'https://www.nlcsa.org.za',
+    hoursOrDeadline: 'Provincial Call Windows (Q2 & Q4)',
+    websiteUrl: 'https://www.nlcsa.org.za/charities/',
     reviewsSummary:
-      'Requires an active NPO registration certificate, 2+ years of audited financial statements or accounting officer reports, and tax compliance.',
+      'Requires an active NPO registration certificate, 12–24+ months of signed financial statements or accounting officer reports, and valid SARS tax compliance.',
     details:
-      'Funds playground equipment, classroom furniture, educational toys, and practitioner capacity building for registered NPO preschools.',
+      'Funds outdoor playground equipment, classroom furniture, educational stimulation kits, and practitioner capacity building for registered NPO preschools.',
     keywords: ['nlc', 'lottery', 'lotteries', 'equipment', 'charities', 'npo', 'capital', 'toys'],
   },
   {
-    title: 'FirstRand Foundation & DG Murray Trust Early Learning Innovation Funds',
-    subtitle: 'FirstRand CSI & DG Murray Trust (DGMT)',
-    feeOrAmount: 'R50,000 – R200,000 project grants',
+    title: 'FirstRand Foundation (Tshikululu) & DG Murray Trust Early Learning Funds',
+    subtitle: 'FirstRand CSI / Tshikululu & DG Murray Trust (DGMT)',
+    feeOrAmount: 'R50,000 – R300,000 project grants',
     hoursOrDeadline: 'Bi-annual Proposal Windows (March & September)',
-    websiteUrl: 'https://dgmt.co.za',
+    websiteUrl: 'https://tshikululu.org.za/apply-for-funding/',
     reviewsSummary:
-      'Prioritises township and rural ECD hubs implementing structured early literacy, numeracy, nutrition security, and teacher NQF Level 4/5 bursaries.',
+      'Prioritises township and rural ECD hubs implementing structured early literacy, numeracy, stunting prevention nutrition, and practitioner NQF Level 4/5 bursaries.',
     details:
-      'Supports social-enterprise preschool networks, parent engagement programs, and Grade R readiness initiatives across South Africa.',
-    keywords: ['csi', 'corporate', 'firstrand', 'dgmt', 'murray', 'trust', 'training', 'bursary', 'literacy', 'nutrition'],
+      'Supports registered NPO preschools, toy libraries, and Grade R readiness initiatives across all 9 South African provinces.',
+    keywords: ['csi', 'corporate', 'firstrand', 'tshikululu', 'dgmt', 'murray', 'trust', 'training', 'bursary', 'literacy', 'nutrition'],
   },
 ];
 
@@ -605,7 +605,7 @@ async function runLiveWebFallback(body: LiveSearchRequestBody): Promise<LiveSear
   }
 
   if (mode === 'funding') {
-    const cleanQuery = query.trim() || 'South Africa ECD preschool grants DSD subsidy 2026';
+    const cleanQuery = query.trim() || 'South Africa DBE ECD preschool grants R24 daily subsidy 2026';
     const webItems = await fetchDirectWebResults(`${cleanQuery} South Africa ECD grant`);
 
     const queryLower = cleanQuery.toLowerCase();
@@ -631,7 +631,7 @@ async function runLiveWebFallback(body: LiveSearchRequestBody): Promise<LiveSear
         title: w.title,
         subtitle: 'Live Web Grant & Policy Reference',
         feeOrAmount: 'See official notice',
-        hoursOrDeadline: '2026 Active Window',
+        hoursOrDeadline: '2026/2027 Active Window',
         websiteUrl: w.url,
         reviewsSummary: w.snippet,
         details: 'Verified live web search result matching your South African ECD funding query.',
@@ -640,16 +640,16 @@ async function runLiveWebFallback(body: LiveSearchRequestBody): Promise<LiveSear
 
     const sources: LiveSearchSource[] = [
       ...webItems.slice(0, 3).map((w) => ({ title: w.title, uri: w.url })),
-      { title: 'Department of Social Development (DSD)', uri: 'https://www.dsd.gov.za' },
-      { title: 'Ilifa Labantwana ECD Programme', uri: 'https://ilifalabantwana.co.za' },
-      { title: 'National Lotteries Commission (NLC)', uri: 'https://www.nlcsa.org.za' },
-      { title: 'DG Murray Trust (DGMT)', uri: 'https://dgmt.co.za' },
+      { title: 'Department of Basic Education (DBE) ECD Portal', uri: 'https://www.education.gov.za/Programmes/EarlyChildhoodDevelopment.aspx' },
+      { title: 'Ilifa Labantwana ECD Programme', uri: 'https://ilifalabantwana.co.za/what-we-do/' },
+      { title: 'National Lotteries Commission (NLC Charities)', uri: 'https://www.nlcsa.org.za/charities/' },
+      { title: 'Tshikululu / FirstRand Foundation Grants', uri: 'https://tshikululu.org.za/apply-for-funding/' },
     ];
 
     return {
       mode: 'funding',
       query: cleanQuery,
-      summary: `Found ${highlights.length} active South African ECD funding programmes, DSD per-child subsidy windows (R17.00/child/day baseline), and capital grant portals matching "${cleanQuery}".`,
+      summary: `Found ${highlights.length} active South African ECD funding programmes, DBE per-child subsidy windows (gazetted R24.00/child/day across 264 days), and capital grant portals matching "${cleanQuery}".`,
       highlights: highlights.slice(0, 5),
       sources: sources.slice(0, 5),
       searchedAt: nowIso,
