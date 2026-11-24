@@ -1,0 +1,21 @@
+# Firebase App Hosting configuration for NurseryNet (Next.js App Router)
+# Docs: https://firebase.google.com/docs/app-hosting/configure
+
+runConfig:
+  minInstances: 0
+  maxInstances: 4
+  concurrency: 80
+  cpu: 1
+  memoryMiB: 1024
+
+# Note: Do not uncomment secret references below until you have created them in
+# Cloud Secret Manager via `firebase apphosting:secrets:set <SECRET_NAME>`,
+# otherwise Firebase App Hosting will fail the rollout looking for a missing secret.
+#
+# env:
+#   - variable: GEMINI_API_KEY
+#     secret: GEMINI_API_KEY
+#   - variable: RESEND_API_KEY
+#     secret: RESEND_API_KEY
+#   - variable: ADMIN_ALERT_EMAIL
+#     value: Somacebomedia@gmail.com

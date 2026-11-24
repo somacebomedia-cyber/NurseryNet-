@@ -67,7 +67,7 @@ export default function VoiceAssistantDock() {
       id: 'welcome-voice',
       role: 'assistant',
       text: "Sawubona! I'm your NurseryNet Live Voice Assistant. Tap the microphone and ask me to find any South African preschool (even unlisted ones like Nawi Learn Toddler Centre), claim your school listing, or explain DSD subsidies.",
-      timestamp: new Date().toISOString(),
+      timestamp: '2026-01-01T08:00:00.000Z',
     },
   ]);
 

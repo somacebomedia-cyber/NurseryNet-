@@ -59,7 +59,7 @@ export default function Footer() {
               <span className="font-heading text-xl font-extrabold text-primary">{brand}</span>
             </Link>
             <div className="text-sm text-muted-foreground">
-              <span>&copy; {currentYear} {brand}. All rights reserved.</span>
+              <span suppressHydrationWarning>&copy; {currentYear} {brand}. All rights reserved.</span>
               <a href="https://nurserynet.app" target="_blank" rel="noopener noreferrer" className="ml-2 hover:text-primary hover:underline">
                 nurserynet.app
               </a>

@@ -18,6 +18,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { useAuth } from '@/context/AuthContext';
 import { useBrand, Brand } from '@/context/BrandContext';
 import { NurseryNetLogo } from '@/components/ui/logo';
+import { PWAInstallButton } from '@/components/layout/PWAInstallButton';
 
 export const navContent = {
   NurseryNet: {
@@ -270,6 +271,7 @@ export default function Navbar() {
         </nav>
         
         <div className="hidden md:flex items-center space-x-2">
+          <PWAInstallButton />
           {user ? (
             <Button variant="outline" onClick={logout}>
               <LogOut className="mr-2 h-5 w-5" />
@@ -342,7 +344,8 @@ export default function Navbar() {
                         </Fragment>
                     </Accordion>
                 </div>
-                <div className="p-4 border-t">
+                <div className="p-4 border-t space-y-2">
+                  <PWAInstallButton className="w-full justify-center" />
                   {user ? (
                     <SheetClose asChild>
                        <AuthButtonItem label="Logout" icon={LogOut} onClick={() => { logout(); closeMobileMenu(); }} />
