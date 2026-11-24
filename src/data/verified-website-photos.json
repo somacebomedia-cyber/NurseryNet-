@@ -20,11 +20,12 @@
       "Junior Primary Aftercare — Individual reading and guided learning support",
       "Aftercare Programme — Supervised afternoon activities for Grades R–3"
     ],
-    "coverPhoto": "/images/preschools/dphs-grade-r-hero.png"
+    "coverPhoto": "/images/preschools/dphs-grade-r-hero.png",
+    "logoUrl": "/images/preschools/dphs-logo.png"
   },
   {
     "domain": "nawilearn.co.za",
-    "namePattern": "nawi\\\\s*learn",
+    "namePattern": "nawi\\s*learn",
     "websiteUrl": "https://www.nawilearn.co.za",
     "sourceType": "website",
     "images": [
@@ -43,7 +44,8 @@
       "Outdoor Play — Safe outdoor play in all seasons",
       "Building Friendships — Sharing moments, snacks, and smiles"
     ],
-    "coverPhoto": "/images/preschools/nawi-learn-cover-1.jpg"
+    "coverPhoto": "/images/preschools/nawi-learn-cover-1.jpg",
+    "logoUrl": "/images/preschools/nawi-learn-logo.png"
   },
   {
     "domain": "littleashford.co.za",
@@ -162,7 +164,8 @@
       "https://www.littleearth.co.za/wp-content/themes/Little%20Earth/img/mom_family.jpg",
       "https://www.littleearth.co.za/wp-content/themes/Little%20Earth/img/logo_overlay.png"
     ],
-    "coverPhoto": "https://www.littleearth.co.za/wp-content/themes/Little%20Earth/img/the_boy.jpg"
+    "coverPhoto": "https://www.littleearth.co.za/wp-content/themes/Little%20Earth/img/the_boy.jpg",
+    "logoUrl": "https://www.littleearth.co.za/wp-content/themes/Little%20Earth/img/logo_overlay.png"
   },
   {
     "domain": "kaydee.co.za",
@@ -192,7 +195,8 @@
       "https://shereensmontessori.co.za/wp-content/uploads/2023/03/feat02-1024x967.jpg",
       "https://shereensmontessori.co.za/wp-content/uploads/2023/03/feat03-1024x967.jpg"
     ],
-    "coverPhoto": "https://shereensmontessori.co.za/wp-content/uploads/2023/06/upright-scaled.jpg"
+    "coverPhoto": "https://shereensmontessori.co.za/wp-content/uploads/2023/06/upright-scaled.jpg",
+    "logoUrl": "https://shereensmontessori.co.za/wp-content/uploads/2025/01/shereensmontessori-1024x967.png"
   },
   {
     "domain": "rooha.org",
@@ -249,7 +253,8 @@
       "http://www.littlelights.co.za/wp-content/uploads/2024/06/2-Sports-Day-e1718627840654.jpg",
       "http://www.littlelights.co.za/wp-content/uploads/2024/06/Little-Lights-Pre-School-2024.png"
     ],
-    "coverPhoto": "http://www.littlelights.co.za/wp-content/uploads/2024/06/2-Grade-R-scaled-e1718627000420.jpg"
+    "coverPhoto": "http://www.littlelights.co.za/wp-content/uploads/2024/06/2-Grade-R-scaled-e1718627000420.jpg",
+    "logoUrl": "http://www.littlelights.co.za/wp-content/uploads/2024/06/Little-Lights-Pre-School-2024.png"
   },
   {
     "domain": "noagsearkie.co.za",
@@ -428,7 +433,8 @@
       "https://eduzone.biz/wp-content/uploads/2020/11/EDZ-17.jpg",
       "https://eduzone.biz/wp-content/uploads/2026/03/5a2aef28db68181c8f184dcb.png"
     ],
-    "coverPhoto": "https://eduzone.biz/wp-content/uploads/2020/11/eduzone-4.jpg"
+    "coverPhoto": "https://eduzone.biz/wp-content/uploads/2020/11/eduzone-4.jpg",
+    "logoUrl": "https://eduzone.biz/wp-content/uploads/2026/03/5a2aef28db68181c8f184dcb.png"
   },
   {
     "domain": "cambridgemontessori.co.za",
@@ -476,7 +482,8 @@
       "http://steppingstoneschildrenscentre.org.za/wp/wp-content/uploads/2019/09/stepping-stones-play.jpg",
       "https://steppingstoneschildrenscentre.org.za/wp/wp-content/uploads/2019/09/stepping-stones-logo.jpg"
     ],
-    "coverPhoto": "http://steppingstoneschildrenscentre.org.za/wp/wp-content/uploads/2019/09/stepping-stones-play-1.jpg"
+    "coverPhoto": "http://steppingstoneschildrenscentre.org.za/wp/wp-content/uploads/2019/09/stepping-stones-play-1.jpg",
+    "logoUrl": "https://steppingstoneschildrenscentre.org.za/wp/wp-content/uploads/2019/09/stepping-stones-logo.jpg"
   },
   {
     "domain": "villamariaeducare.co.za",
@@ -524,7 +531,8 @@
       "https://www.newberryhouse.com/assets/newberry-environment2-800x255.jpg",
       "https://www.newberryhouse.com/assets/Newberry-House-Montessori-Logo-Transparent-338x100.png"
     ],
-    "coverPhoto": "https://www.newberryhouse.com/assets/newberry-environment2-800x255.jpg"
+    "coverPhoto": "https://www.newberryhouse.com/assets/newberry-environment2-800x255.jpg",
+    "logoUrl": "https://www.newberryhouse.com/assets/Newberry-House-Montessori-Logo-Transparent-338x100.png"
   },
   {
     "domain": "peakchild.co.za",
@@ -611,7 +619,8 @@
     "images": [
       "http://bambikleuters.co.za/wp-content/uploads/2025/03/Bambi-Kids-Academy-01-1024x629-1.png"
     ],
-    "coverPhoto": "http://bambikleuters.co.za/wp-content/uploads/2025/03/Bambi-Kids-Academy-01-1024x629-1.png"
+    "coverPhoto": "http://bambikleuters.co.za/wp-content/uploads/2025/03/Bambi-Kids-Academy-01-1024x629-1.png",
+    "logoUrl": "http://bambikleuters.co.za/wp-content/uploads/2025/03/Bambi-Kids-Academy-01-1024x629-1.png"
   },
   {
     "domain": "kidstown.co.za",
@@ -716,7 +725,8 @@
       "https://www.saheti.co.za/wp-content/uploads/2026/06/Sport-Centre-2026-2.jpg",
       "https://i0.wp.com/www.saheti.co.za/wp-content/uploads/2023/02/SAHETI-School-Logo.png?fit=300%2C300&ssl=1"
     ],
-    "coverPhoto": "https://www.saheti.co.za/wp-content/uploads/2026/06/Sport-Centre-2026-2.jpg"
+    "coverPhoto": "https://www.saheti.co.za/wp-content/uploads/2026/06/Sport-Centre-2026-2.jpg",
+    "logoUrl": "https://i0.wp.com/www.saheti.co.za/wp-content/uploads/2023/02/SAHETI-School-Logo.png?fit=300%2C300&ssl=1"
   },
   {
     "domain": "riebie.co.za",
@@ -750,7 +760,8 @@
       "https://standrews.co.za/wp-content/uploads/2022/04/174857.png",
       "https://www.standrews.co.za/wp-content/uploads/2019/07/St-Andrews-School-for-Girls-landscape-logo-01.png"
     ],
-    "coverPhoto": "https://standrews.co.za/wp-content/uploads/2022/04/174857.png"
+    "coverPhoto": "https://standrews.co.za/wp-content/uploads/2022/04/174857.png",
+    "logoUrl": "https://www.standrews.co.za/wp-content/uploads/2019/07/St-Andrews-School-for-Girls-landscape-logo-01.png"
   },
   {
     "domain": "curro.co.za",
@@ -761,7 +772,8 @@
       "https://www.curro.co.za/media/kgphifpk/untitled-design.png",
       "https://www.curro.co.za/media/curro-logo-1.png"
     ],
-    "coverPhoto": "https://www.curro.co.za/media/kgphifpk/untitled-design.png"
+    "coverPhoto": "https://www.curro.co.za/media/kgphifpk/untitled-design.png",
+    "logoUrl": "https://www.curro.co.za/media/curro-logo-1.png"
   },
   {
     "domain": "amangwe.org.za",
@@ -771,7 +783,8 @@
     "images": [
       "https://www.amangwe.org.za/images/logo1.png"
     ],
-    "coverPhoto": "https://www.amangwe.org.za/images/logo1.png"
+    "coverPhoto": "https://www.amangwe.org.za/images/logo1.png",
+    "logoUrl": "https://www.amangwe.org.za/images/logo1.png"
   },
   {
     "domain": "ikhayalethemba.org.za",
@@ -782,7 +795,8 @@
       "https://images.squarespace-cdn.com/content/v1/5ce4d8abcb86580001f610b5/f4acde34-9c9c-4471-a4b3-76f665eff6d7/Cycle+Tour+Web+Banner+2027.B.png",
       "https://images.squarespace-cdn.com/content/v1/5ce4d8abcb86580001f610b5/b7948120-8e95-43c9-aeda-910ed64a8af6/ikhaya+logo_New.jpg"
     ],
-    "coverPhoto": "https://images.squarespace-cdn.com/content/v1/5ce4d8abcb86580001f610b5/f4acde34-9c9c-4471-a4b3-76f665eff6d7/Cycle+Tour+Web+Banner+2027.B.png"
+    "coverPhoto": "https://images.squarespace-cdn.com/content/v1/5ce4d8abcb86580001f610b5/f4acde34-9c9c-4471-a4b3-76f665eff6d7/Cycle+Tour+Web+Banner+2027.B.png",
+    "logoUrl": "https://images.squarespace-cdn.com/content/v1/5ce4d8abcb86580001f610b5/b7948120-8e95-43c9-aeda-910ed64a8af6/ikhaya+logo_New.jpg"
   },
   {
     "domain": "sinaiacademy.co.za",
@@ -794,7 +808,8 @@
       "https://static.wixstatic.com/media/0a9133_fd07db9eb100417b9dee8112f84b1990~mv2.jpg",
       "https://static.wixstatic.com/media/0a9133_b10dae781d4343768b5848ccebab05df~mv2.png"
     ],
-    "coverPhoto": "https://static.wixstatic.com/media/bf74d5_7f4cb860e6b44780a63cbb2e45241511%7Emv2.png/v1/fit/w_2500,h_1330,al_c/bf74d5_7f4cb860e6b44780a63cbb2e45241511%7Emv2.png"
+    "coverPhoto": "https://static.wixstatic.com/media/bf74d5_7f4cb860e6b44780a63cbb2e45241511%7Emv2.png/v1/fit/w_2500,h_1330,al_c/bf74d5_7f4cb860e6b44780a63cbb2e45241511%7Emv2.png",
+    "logoUrl": "https://static.wixstatic.com/media/0a9133_b10dae781d4343768b5848ccebab05df~mv2.png"
   },
   {
     "domain": "capitalparkpreschool.co.za",
@@ -817,7 +832,8 @@
     "images": [
       "https://static.wixstatic.com/media/5978d0_4aaf1c16919747c294dc4617cec29e71~mv2.png"
     ],
-    "coverPhoto": "https://static.wixstatic.com/media/5978d0_4aaf1c16919747c294dc4617cec29e71~mv2.png"
+    "coverPhoto": "https://static.wixstatic.com/media/5978d0_4aaf1c16919747c294dc4617cec29e71~mv2.png",
+    "logoUrl": "https://static.wixstatic.com/media/5978d0_4aaf1c16919747c294dc4617cec29e71~mv2.png"
   },
   {
     "domain": "babin.netlify.app",
@@ -829,7 +845,8 @@
       "https://babin.netlify.app/assets/img/BabinMap.png",
       "https://babin.netlify.app/assets/img/babinHead.PNG"
     ],
-    "coverPhoto": "https://babin.netlify.app/assets/img/8.png"
+    "coverPhoto": "https://babin.netlify.app/assets/img/8.png",
+    "logoUrl": "https://babin.netlify.app/assets/img/babinHead.PNG"
   },
   {
     "domain": "cleverkidsaftercare.co.za",
@@ -851,7 +868,8 @@
     "images": [
       "https://kidskingdom.co.za/wp-content/uploads/2022/07/Kids-Kingdom-Logo.png"
     ],
-    "coverPhoto": "https://kidskingdom.co.za/wp-content/uploads/2022/07/Kids-Kingdom-Logo.png"
+    "coverPhoto": "https://kidskingdom.co.za/wp-content/uploads/2022/07/Kids-Kingdom-Logo.png",
+    "logoUrl": "https://kidskingdom.co.za/wp-content/uploads/2022/07/Kids-Kingdom-Logo.png"
   },
   {
     "domain": "devrijezee.co.za",
@@ -861,7 +879,8 @@
     "images": [
       "https://devrijezee.co.za/wp-content/uploads/2019/03/cropped-logo-header-2.png"
     ],
-    "coverPhoto": "https://devrijezee.co.za/wp-content/uploads/2019/03/cropped-logo-header-2.png"
+    "coverPhoto": "https://devrijezee.co.za/wp-content/uploads/2019/03/cropped-logo-header-2.png",
+    "logoUrl": "https://devrijezee.co.za/wp-content/uploads/2019/03/cropped-logo-header-2.png"
   },
   {
     "domain": "thokozani.com",
@@ -882,7 +901,8 @@
       "https://akkerdoppies.co.za/wp-content/uploads/2021/10/logo-menu.png",
       "https://akkerdoppies.co.za/wp-content/uploads/2021/10/reading-eggs.png"
     ],
-    "coverPhoto": "https://akkerdoppies.co.za/wp-content/uploads/2021/10/logo-menu.png"
+    "coverPhoto": "https://akkerdoppies.co.za/wp-content/uploads/2021/10/logo-menu.png",
+    "logoUrl": "https://akkerdoppies.co.za/wp-content/uploads/2021/10/logo-menu.png"
   },
   {
     "domain": "amathole.co.za",
@@ -893,6 +913,7 @@
       "https://www.amathole.co.za/images/sibo2.jpg",
       "https://www.amathole.co.za/images/DAM.png"
     ],
-    "coverPhoto": "https://www.amathole.co.za/images/sibo2.jpg"
+    "coverPhoto": "https://www.amathole.co.za/images/sibo2.jpg",
+    "logoUrl": "https://www.amathole.co.za/images/DAM.png"
   }
 ]

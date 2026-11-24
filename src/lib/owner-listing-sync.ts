@@ -4,6 +4,7 @@ import {
   hasOnlyStockPlaceholderImages,
   MAX_PRESCHOOL_PROFILE_PHOTOS,
   resolveRealPreschoolImages,
+  resolveRealPreschoolLogo,
 } from '@/lib/real-website-photos';
 
 export interface OwnerProfileUpdateInput {
@@ -99,14 +100,26 @@ export async function reconcileOwnerProfileWithDirectory(): Promise<{
         websiteUrl: cs.websiteUrl,
         images: cs.images,
       });
-      if (
+      const resolvedLogoUrl = resolveRealPreschoolLogo({
+        name: cs.name,
+        slug: cs.slug || cs.id,
+        websiteUrl: cs.websiteUrl,
+        logoUrl: cs.logoUrl,
+        images: resolved.length > 0 ? resolved : cs.images,
+      });
+      const shouldUpgradeImages =
         resolved.length > 0 &&
         hasOnlyStockPlaceholderImages(cs.images) &&
-        !hasOnlyStockPlaceholderImages(resolved)
-      ) {
+        !hasOnlyStockPlaceholderImages(resolved);
+      const shouldUpgradeLogo = Boolean(resolvedLogoUrl && cs.logoUrl !== resolvedLogoUrl);
+
+      if (shouldUpgradeImages || shouldUpgradeLogo) {
         photosUpgraded = true;
-        const upgraded = { ...cs, images: resolved };
-        return upgraded;
+        return {
+          ...cs,
+          images: shouldUpgradeImages ? resolved : cs.images,
+          logoUrl: resolvedLogoUrl || cs.logoUrl,
+        };
       }
       return cs;
     });
@@ -196,6 +209,14 @@ export async function reconcileOwnerProfileWithDirectory(): Promise<{
           npoNumber: npo || targetSchool.npoNumber || null,
           websiteUrl: activePlan.websiteUrl ?? targetSchool.websiteUrl,
           images: desiredImages.length > 0 ? desiredImages : targetSchool.images,
+          logoUrl:
+            resolveRealPreschoolLogo({
+              name: correctedName,
+              slug: newSlug,
+              websiteUrl: activePlan.websiteUrl ?? targetSchool.websiteUrl,
+              logoUrl: targetSchool.logoUrl,
+              images: desiredImages.length > 0 ? desiredImages : targetSchool.images,
+            }) || targetSchool.logoUrl,
           tagline: `Early childhood development centre in ${city}, ${province}`,
           description:
             targetSchool.description && oldName && oldName !== correctedName
@@ -349,6 +370,12 @@ export async function reconcileOwnerProfileWithDirectory(): Promise<{
           });
           return resolved.length > 0 ? resolved : DEFAULT_IMAGES;
         })(),
+        logoUrl: resolveRealPreschoolLogo({
+          name: correctedName,
+          slug: newSlug,
+          websiteUrl: activePlan.websiteUrl,
+          images: activePlan.images,
+        }),
         phone: activePlan.whatsappPhone || '082 555 1829',
         email: activePlan.email || '',
         websiteUrl: activePlan.websiteUrl || '',
@@ -516,6 +543,14 @@ export async function syncOwnerProfileToDirectory(
         : existingSchool?.npoNumber || null,
     websiteUrl: resolvedWebsiteUrl,
     images: resolvedImages,
+    logoUrl:
+      resolveRealPreschoolLogo({
+        name: cleanName,
+        slug: newSlug,
+        websiteUrl: resolvedWebsiteUrl,
+        logoUrl: existingSchool?.logoUrl,
+        images: resolvedImages,
+      }) || existingSchool?.logoUrl,
     principal: input.ownerName
       ? `${input.ownerName} (${input.role || 'Owner / Principal'})`
       : existingSchool?.principal || 'Owner / Principal',

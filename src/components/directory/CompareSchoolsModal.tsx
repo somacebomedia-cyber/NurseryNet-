@@ -3,7 +3,10 @@
 import Image from 'next/image';
 import { Preschool, getMunicipalityBenchmark } from '@/data/preschools';
 import { isPrimarySchoolGradeR } from '@/data/primary-grade-r-schools';
-import { resolveRealPreschoolImages } from '@/lib/real-website-photos';
+import {
+  resolveRealPreschoolImages,
+  resolveRealPreschoolLogo,
+} from '@/lib/real-website-photos';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -118,6 +121,13 @@ export default function CompareSchoolsModal({
                       resolved.length > 0
                         ? resolved[0]
                         : 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=800&q=80';
+                    const resolvedLogoUrl = resolveRealPreschoolLogo({
+                      name: school.name,
+                      slug: school.slug || school.id,
+                      websiteUrl: school.websiteUrl,
+                      logoUrl: school.logoUrl,
+                      images: resolved,
+                    });
                     return (
                       <th key={school.id} className="p-3 align-top min-w-[190px] max-w-[240px]">
                         <div className="space-y-2.5">
@@ -138,18 +148,32 @@ export default function CompareSchoolsModal({
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           </div>
-                          <div>
-                            <button
-                              type="button"
-                              onClick={() => onSelectDetail(school)}
-                              className="font-heading text-sm font-bold text-foreground hover:text-primary text-left line-clamp-1"
-                            >
-                              {school.name}
-                            </button>
-                            <p className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5 truncate">
-                              <MapPin className="w-3 h-3 text-accent shrink-0" />
-                              <span className="truncate">{school.suburb || school.city}, {school.province}</span>
-                            </p>
+                          <div className="flex items-start gap-2">
+                            {resolvedLogoUrl && (
+                              <div className="relative w-8 h-8 rounded-lg bg-white border border-border/80 p-0.5 shrink-0 overflow-hidden mt-0.5">
+                                <Image
+                                  src={resolvedLogoUrl}
+                                  alt={`${school.name} official logo`}
+                                  fill
+                                  sizes="32px"
+                                  className="object-contain p-0.5"
+                                  referrerPolicy="no-referrer"
+                                />
+                              </div>
+                            )}
+                            <div className="min-w-0 flex-1">
+                              <button
+                                type="button"
+                                onClick={() => onSelectDetail(school)}
+                                className="font-heading text-sm font-bold text-foreground hover:text-primary text-left line-clamp-1"
+                              >
+                                {school.name}
+                              </button>
+                              <p className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5 truncate">
+                                <MapPin className="w-3 h-3 text-accent shrink-0" />
+                                <span className="truncate">{school.suburb || school.city}, {school.province}</span>
+                              </p>
+                            </div>
                           </div>
                           <div className="flex items-center gap-1.5">
                             {onApplySchool && (

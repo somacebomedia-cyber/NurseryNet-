@@ -10,6 +10,7 @@ export interface WebsitePhotoSet {
   coverPhoto: string;
   images: string[];
   captions?: string[];
+  logoUrl?: string;
   sourceType?: 'website' | 'social';
 }
 
@@ -28,10 +29,16 @@ export const VERIFIED_WEBSITE_PHOTO_SETS: WebsitePhotoSet[] = (
     coverPhoto?: string;
     images: string[];
     captions?: string[];
+    logoUrl?: string;
     sourceType?: 'website' | 'social';
   }>
 ).map((entry) => {
   const cappedImages = (entry.images || []).filter(Boolean).slice(0, MAX_PRESCHOOL_PROFILE_PHOTOS);
+  const inferredLogo =
+    entry.logoUrl ||
+    cappedImages.find((img) =>
+      /logo|crest|emblem|babinhead|cropped-logo|logo_overlay/i.test(img)
+    );
   return {
     domain: entry.domain.toLowerCase(),
     schoolNamePattern: new RegExp(entry.namePattern, 'i'),
@@ -39,6 +46,7 @@ export const VERIFIED_WEBSITE_PHOTO_SETS: WebsitePhotoSet[] = (
     coverPhoto: cappedImages[0] || entry.coverPhoto || '',
     images: cappedImages,
     captions: entry.captions ? entry.captions.slice(0, MAX_PRESCHOOL_PROFILE_PHOTOS) : undefined,
+    logoUrl: inferredLogo,
     sourceType: entry.sourceType || (isSocialMediaUrl(entry.websiteUrl) ? 'social' : 'website'),
   };
 });
@@ -179,3 +187,38 @@ export function resolveRealPreschoolImages(input: {
 
   return existing.slice(0, MAX_PRESCHOOL_PROFILE_PHOTOS);
 }
+
+/**
+ * Resolves the real official logo URL for a preschool if available (from an explicit logoUrl,
+ * verified website photo set, or verified logo asset in the school's image list).
+ */
+export function resolveRealPreschoolLogo(input: {
+  name?: string | null;
+  slug?: string | null;
+  websiteUrl?: string | null;
+  logoUrl?: string | null;
+  images?: string[] | null;
+}): string | undefined {
+  if (input.logoUrl && typeof input.logoUrl === 'string' && input.logoUrl.trim()) {
+    return input.logoUrl.trim();
+  }
+
+  const verifiedSet = findVerifiedWebsitePhotoSet(input);
+  if (verifiedSet?.logoUrl) {
+    return verifiedSet.logoUrl;
+  }
+
+  const candidateImages = [
+    ...(Array.isArray(input.images) ? input.images : []),
+    ...(verifiedSet?.images || []),
+  ].filter(Boolean);
+
+  const matchedLogo = candidateImages.find(
+    (img) =>
+      !isStockPlaceholderImage(img) &&
+      /logo|crest|emblem|babinhead|cropped-logo|logo_overlay/i.test(img)
+  );
+
+  return matchedLogo || undefined;
+}
+

@@ -8,6 +8,7 @@ import {
   isSocialMediaUrl,
   MAX_PRESCHOOL_PROFILE_PHOTOS,
   resolveRealPreschoolImages,
+  resolveRealPreschoolLogo,
 } from '@/lib/real-website-photos';
 import { Button } from '@/components/ui/button';
 import { Star, MapPin, ShieldCheck, BadgeCheck, Users, Calendar, Languages, Heart, FileText, GraduationCap, Building2, Trophy, Lock, Clock, ShieldAlert } from 'lucide-react';
@@ -58,6 +59,13 @@ export default function PreschoolCard({
   const isRealWebsitePhoto = hasRealWebsitePhoto(resolvedImages);
   const isSocialPage = isSocialMediaUrl(preschool.websiteUrl);
   const isPrimaryGradeR = isPrimarySchoolGradeR(preschool);
+  const resolvedLogoUrl = resolveRealPreschoolLogo({
+    name: preschool.name,
+    slug: preschool.slug || preschool.id,
+    websiteUrl: preschool.websiteUrl,
+    logoUrl: preschool.logoUrl,
+    images: resolvedImages,
+  });
 
   return (
     <div className="group flex flex-col bg-card rounded-2xl border border-border/80 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden hover:border-primary/40">
@@ -177,11 +185,11 @@ export default function PreschoolCard({
             </div>
           )}
           <div className="flex items-start gap-2.5">
-            {preschool.logoUrl && (
+            {resolvedLogoUrl && (
               <div className="relative w-10 h-10 rounded-lg bg-white border border-border/80 shadow-xs p-1 shrink-0 overflow-hidden mt-0.5">
                 <Image
-                  src={preschool.logoUrl}
-                  alt={`${preschool.name} official crest`}
+                  src={resolvedLogoUrl}
+                  alt={`${preschool.name} official logo`}
                   fill
                   sizes="40px"
                   className="object-contain p-0.5"

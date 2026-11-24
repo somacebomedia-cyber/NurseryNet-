@@ -11,6 +11,7 @@ import {
   isSocialMediaUrl,
   MAX_PRESCHOOL_PROFILE_PHOTOS,
   resolveRealPreschoolImages,
+  resolveRealPreschoolLogo,
 } from '@/lib/real-website-photos';
 import {
   buildLiveCacheKey,
@@ -229,6 +230,13 @@ export default function SchoolDetailModal({
 
   const muniStats = getMunicipalityBenchmark(preschool.municipality || preschool.city || preschool.district);
   const isPrimaryGradeR = isPrimarySchoolGradeR(preschool);
+  const resolvedLogoUrl = resolveRealPreschoolLogo({
+    name: preschool.name,
+    slug: preschool.slug || preschool.id,
+    websiteUrl: effectiveWebsiteUrl,
+    logoUrl: preschool.logoUrl,
+    images,
+  });
 
   return (
     <Dialog open={isOpen} onOpenChange={(open: boolean) => !open && onClose()}>
@@ -317,10 +325,10 @@ export default function SchoolDetailModal({
               </div>
             )}
             <div className="flex items-center gap-3">
-              {preschool.logoUrl && (
+              {resolvedLogoUrl && (
                 <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-white/95 border border-white/40 shadow-lg shrink-0 overflow-hidden">
                   <Image
-                    src={preschool.logoUrl}
+                    src={resolvedLogoUrl}
                     alt={`${preschool.name} official logo`}
                     fill
                     sizes="56px"
@@ -486,10 +494,10 @@ export default function SchoolDetailModal({
             <div className="p-5 rounded-xl bg-indigo-500/5 border border-indigo-500/25 space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div className="flex items-center gap-2.5">
-                  {preschool.logoUrl ? (
+                  {resolvedLogoUrl ? (
                     <div className="relative w-9 h-9 rounded-lg bg-white border border-border/80 shrink-0 overflow-hidden">
                       <Image
-                        src={preschool.logoUrl}
+                        src={resolvedLogoUrl}
                         alt={`${preschool.name} crest`}
                         fill
                         sizes="36px"
@@ -579,14 +587,34 @@ export default function SchoolDetailModal({
 
           {/* Department of Social Development (DSD) Registration & NPO Accreditation Card */}
           <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-primary" />
-                <h4 className="font-heading text-sm font-bold text-foreground">
-                  Department of Social Development (DSD) & NPO Accreditation
-                </h4>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2.5">
+                {resolvedLogoUrl ? (
+                  <div className="relative w-9 h-9 rounded-lg bg-white border border-border/80 shrink-0 overflow-hidden">
+                    <Image
+                      src={resolvedLogoUrl}
+                      alt={`${preschool.name} official logo`}
+                      fill
+                      sizes="36px"
+                      className="object-contain p-0.5"
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
+                ) : (
+                  <ShieldCheck className="w-5 h-5 text-primary shrink-0" />
+                )}
+                <div>
+                  <h4 className="font-heading text-sm font-bold text-foreground">
+                    Department of Social Development (DSD) & NPO Accreditation
+                  </h4>
+                  {resolvedLogoUrl && (
+                    <span className="text-[11px] text-muted-foreground block">
+                      {preschool.name} · Official Verified Profile
+                    </span>
+                  )}
+                </div>
               </div>
-              <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
+              <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full shrink-0 ${
                 preschool.dsdRegistration === 'Full'
                   ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
                   : preschool.dsdRegistration === 'Conditional'

@@ -5,6 +5,7 @@ import {
   MAX_PRESCHOOL_PROFILE_PHOTOS,
   normalizeSchoolWebsiteOrSocialUrl,
   resolveRealPreschoolImages,
+  resolveRealPreschoolLogo,
 } from '@/lib/real-website-photos';
 
 export type Province =
@@ -178,6 +179,7 @@ export const FEATURED_PRESCHOOLS: Preschool[] = [
     id: 'nawi-learn-toddler-centre-umzimkhulu',
     slug: 'nawi-learn-toddler-centre-umzimkhulu',
     name: 'Nawi Learn Toddler Centre',
+    logoUrl: '/images/preschools/nawi-learn-logo.png',
     tagline: 'Nurturing early childhood learning, joyful outdoor play, and school readiness in Umzimkhulu.',
     description:
       'Nawi Learn Toddler Centre is a dedicated early childhood development centre in Umzimkhulu, KwaZulu-Natal, offering a warm, safe, and stimulating play-based curriculum where toddlers and young learners build foundational literacy, numeracy, and social confidence.',
@@ -583,9 +585,17 @@ export const REAL_PRESCHOOLS: Preschool[] = ((realPreschoolsData as any[]) as Pr
       websiteUrl: cleanWebUrl,
       images: rp.images,
     });
+    const resolvedLogoUrl = resolveRealPreschoolLogo({
+      name: rp.name,
+      slug: rp.slug || rp.id,
+      websiteUrl: cleanWebUrl,
+      logoUrl: rp.logoUrl,
+      images: resolvedImages.length > 0 ? resolvedImages : rp.images,
+    });
     return {
       ...rp,
       websiteUrl: cleanWebUrl,
+      logoUrl: resolvedLogoUrl,
       images: (resolvedImages.length > 0 ? resolvedImages : rp.images || []).slice(
         0,
         MAX_PRESCHOOL_PROFILE_PHOTOS
