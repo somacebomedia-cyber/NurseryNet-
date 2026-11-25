@@ -161,11 +161,9 @@
       "https://www.littleearth.co.za/wp-content/uploads/2024/10/entrance.jpg",
       "https://www.littleearth.co.za/wp-content/uploads/2024/10/contact.jpg",
       "https://www.littleearth.co.za/wp-content/themes/Little%20Earth/img/mom_and_me.jpeg",
-      "https://www.littleearth.co.za/wp-content/themes/Little%20Earth/img/mom_family.jpg",
-      "https://www.littleearth.co.za/wp-content/themes/Little%20Earth/img/logo_overlay.png"
+      "https://www.littleearth.co.za/wp-content/themes/Little%20Earth/img/mom_family.jpg"
     ],
-    "coverPhoto": "https://www.littleearth.co.za/wp-content/themes/Little%20Earth/img/the_boy.jpg",
-    "logoUrl": "https://www.littleearth.co.za/wp-content/themes/Little%20Earth/img/logo_overlay.png"
+    "coverPhoto": "https://www.littleearth.co.za/wp-content/themes/Little%20Earth/img/the_boy.jpg"
   },
   {
     "domain": "kaydee.co.za",
@@ -694,29 +692,6 @@
     "coverPhoto": "https://static.wixstatic.com/media/fc9d19_5bdaf761348b421ab257ac3029857a0f~mv2.png"
   },
   {
-    "domain": "academia.org.za",
-    "namePattern": "kiddies\\\\s*academy",
-    "websiteUrl": "https://academia.org.za",
-    "sourceType": "website",
-    "images": [
-      "https://lh7-us.googleusercontent.com/sitesv-images-rt/APXyLQeobag13qfy-e_Ai4bd134ZCua4lI6_RZ2YNMOd_9u8J9rKUgNDt-m00N6JVGQlS26W4VvG3CcPlROcDNkMs4rU4zvSZMLqcfYPbrwcn3b7xfnzsNP0qW4AHyVzjM9od9fINvbH3c7uRk3ydFLWyXg5m2O9bdRyzOxGrlkOdlrVqx6PmYNIob_ixA=w16383",
-      "https://lh7-us.googleusercontent.com/sitesv-images-rt/APXyLQfRUzx0K7ZkFv7-SF76geRDoYaUI2WR2jlzYI5dxmGlj1k2iVQ4y_i-1vR2ioOoZzV-6H43504HZlJuwh7ARqh2IuObJPheGAokLYAXNLrHiHrRs1DzvZUYSOUpPHPq3Hl-Lk79s2UL-6fMqVKN9NnNn4JnlFlBa4-IpgOJA5jmPqa2XnO2CiE38zCyn4Cu7XLu0fr5U1xxHCKTAKBixSAMuNTUFsPVBDLblXRpxKo=w1280",
-      "https://lh7-us.googleusercontent.com/sitesv-images-rt/APXyLQew6wkw2jobFmqfIIfdBiaXr65icjnZlR5cUV3jFDNbJdN7EY4ESBOmkcrI8F9bU0SXx9l_Z3HjpQNCPKzgXyHiVPYZaNT1WMwQVjrrcaoa7WzR_etdpBGYDptViePcStn3hGDlqViVVKvABh2U1NKJ4bYHO49cyXUdRhXJJcDZRCWhngp4Jf8FNJQqjha4-vqQLpGmyldAsfUtkcHcbO6daglo00A0YHiVPqO6_MA=w1280",
-      "https://lh7-us.googleusercontent.com/sitesv-images-rt/APXyLQejaemJnwo6bosuJr924ruzNMSm8U5gJxuE3dTbSMVm4Ad_an90awIU3OzADO30iUDLo1iTVJCoTxov-Eop64dsQ2E7b8OgieVHb3BT-f9lCz9_fjhURJmEMEGEDJdEFXBrV2EezRMqsJYUcz5WWX8MsWTHBZtPHFL7JQWKB4sJeLlDFGe7Qeu4R4vZBEK4Lu4m6LuLR3I3hbBdhUHpJSeQO01ezCQyRrZGCCnQc6U=w1280"
-    ],
-    "coverPhoto": "https://lh7-us.googleusercontent.com/sitesv-images-rt/APXyLQeobag13qfy-e_Ai4bd134ZCua4lI6_RZ2YNMOd_9u8J9rKUgNDt-m00N6JVGQlS26W4VvG3CcPlROcDNkMs4rU4zvSZMLqcfYPbrwcn3b7xfnzsNP0qW4AHyVzjM9od9fINvbH3c7uRk3ydFLWyXg5m2O9bdRyzOxGrlkOdlrVqx6PmYNIob_ixA=w16383"
-  },
-  {
-    "domain": "nomzamo.co.za",
-    "namePattern": "nomzamo\\\\s*educare",
-    "websiteUrl": "https://www.nomzamo.co.za",
-    "sourceType": "website",
-    "images": [
-      "https://www.nomzamo.co.za/img/chilling-cafe-01.jpg"
-    ],
-    "coverPhoto": "https://www.nomzamo.co.za/img/chilling-cafe-01.jpg"
-  },
-  {
     "domain": "saheti.co.za",
     "namePattern": "saheti\\\\s*nursery",
     "websiteUrl": "https://www.saheti.co.za",
@@ -854,11 +829,9 @@
     "websiteUrl": "https://cleverkidsaftercare.co.za",
     "sourceType": "website",
     "images": [
-      "https://cleverkidsaftercare.co.za/img/Aftercare-left.png",
-      "https://cleverkidsaftercare.co.za/img/Aftercare-right.png",
       "https://cleverkidsaftercare.co.za/downloads/Map.jpg"
     ],
-    "coverPhoto": "https://cleverkidsaftercare.co.za/img/Aftercare-left.png"
+    "coverPhoto": "https://cleverkidsaftercare.co.za/downloads/Map.jpg"
   },
   {
     "domain": "kidskingdom.co.za",
